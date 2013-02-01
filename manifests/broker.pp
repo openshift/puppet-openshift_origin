@@ -1,5 +1,5 @@
 class openshift_origin::broker {
-  if $named_tsig_priv_key == '' {
+  if $::openshift_origin::named_tsig_priv_key == '' {
     warning "Generate the Key file with '/usr/sbin/dnssec-keygen -a HMAC-MD5 -b 512 -n USER -r /dev/urandom -K /var/named ${cloud_domain}'"
     warning "Use the last field in the generated key file /var/named/K${cloud_domain}*.key"
     fail 'named_tsig_priv_key is required.'
@@ -25,16 +25,6 @@ class openshift_origin::broker {
     require => Yumrepo[openshift-origin]
   })
 
-  ensure_resource( 'package', 'rubygem-openshift-origin-console', {
-    ensure  => present,
-    require => Yumrepo[openshift-origin]
-  })
-
-  ensure_resource( 'package', 'openshift-console', {
-    ensure  => present,
-    require => Yumrepo[openshift-origin]
-  })
-
   ensure_resource( 'package', 'openshift-origin-broker-util', {
     ensure  => present,
     require => Yumrepo[openshift-origin]
@@ -56,7 +46,7 @@ class openshift_origin::broker {
 
   if $::openshift_origin::development_mode {
     file { '/etc/openshift/development':
-      content => ''
+      content => '',
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
@@ -64,16 +54,17 @@ class openshift_origin::broker {
     }
   }
 
-  file { '/etc/openshift/express.conf':
-    content => template('openshift_origin/express.conf.erb'),
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
-    require => Package['rhc']
-  }
-
   file { 'openshift broker.conf':
     path    => '/etc/openshift/broker.conf',
+    content => template('openshift_origin/broker/broker.conf.erb'),
+    owner   => 'apache',
+    group   => 'apache',
+    mode    => '0644',
+    require => Package['openshift-origin-broker']
+  }
+
+  file { 'openshift broker-dev.conf':
+    path    => '/etc/openshift/broker-dev.conf',
     content => template('openshift_origin/broker/broker.conf.erb'),
     owner   => 'apache',
     group   => 'apache',
@@ -252,7 +243,8 @@ class openshift_origin::broker {
     cwd         => '/var/www/openshift/broker/',
     command     => '/usr/bin/rm -f Gemfile.lock && \
     /usr/bin/bundle install && \
-    /usr/bin/chown apache:apache Gemfile.lock',
+    /usr/bin/chown apache:apache Gemfile.lock && \
+    /usr/bin/rm -rf tmp/cache/*',
     subscribe   => [
       Package['openshift-origin-broker'],
       Package['rubygem-openshift-origin-controller'],
