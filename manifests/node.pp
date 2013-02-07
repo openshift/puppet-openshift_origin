@@ -81,10 +81,18 @@ class openshift_origin::node{
 
   if $::openshift_origin::configure_firewall == true {
     exec { 'Open HTTP port for Node-webproxy':
-      command => "/usr/sbin/lokkit --port=8000:tcp"
+      command => $use_firewalld ? {
+        "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=8000/tcp",
+        default => "/usr/sbin/lokkit --port=8000:tcp",
+      },
+      require => Package['firewall-package']
     }
     exec { 'Open HTTPS port for Node-webproxy':
-      command => "/usr/sbin/lokkit --port=8443:tcp"
+      command => $use_firewalld ? {
+        "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=8443/tcp",
+        default => "/usr/sbin/lokkit --port=8443:tcp",
+      },
+      require => Package['firewall-package']
     }
   }else{
     warning 'Please ensure that ports 80, 443, 8000, 8443 are open for web requests'
@@ -137,51 +145,31 @@ class openshift_origin::node{
   }
 
   if $::openshift_origin::configure_fs_quotas == true {
-    mount { '/var/lib/openshift':
-      ensure    => present,
-      device    => $::openshift_origin::oo_device,
-      fstype    => 'ext4',
-      options   => 'defaults,usrjquota=aquota.user,jqfmt=vfsv0',
-      remounts  => true,
-      dump      => 1,
-      pass      => 1,
-      name      => $::openshift_origin::oo_mount,
-      require   => [
-        Yumrepo['openshift-origin'],
-        Package['rubygem-openshift-origin-node']
-      ]
+    exec { 'Initialize quota DB':
+      command => "/usr/sbin/oo-init-quota",
+      creates => "${gear_root_mount}/aquota.user",
     }
-
-    exec { 'quota on':
-      creates     => '/aquota.user',
-      command     =>
-        "/sbin/quotaoff ${::openshift_origin::oo_mount} ; \
-         /sbin/quotacheck -cmug ${::openshift_origin::oo_mount} && \
-         /sbin/restorecon -rv ${::openshift_origin::oo_mount}/aquota.user && \
-         /sbin/quotaon ${::openshift_origin::oo_mount}",
-      refreshonly => true,
-      subscribe   => Mount['/var/lib/openshift']
-    }
-
-    Mount['/var/lib/openshift'] -> Exec['quota on']
   }else{
     warning 'Please ensure that quotas are enabled for /var/lib/openshift'
   }
 
   if $::openshift_origin::configure_cgroups == true {
-    case $::operatingsystem {
-      'Fedora' : {
-        file { 'fedora cgroups config':
-          ensure  => present,
-          path    => '/etc/systemd/system.conf',
-          content => template('openshift_origin/node/system.conf.erb'),
-          owner   => 'root',
-          group   => 'root',
-          mode    => '0644',
-        }
+    if $::operatingsystem == "Fedora" {
+      file { 'fedora cgroups config':
+        ensure  => present,
+        path    => '/etc/systemd/system.conf',
+        content => template('openshift_origin/node/system.conf.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
       }
-      default: {
-        #no changes required
+      if $::operatingsystemrelease == "18" {
+        exec { 'Rebuild initrd to include system.conf':
+          command     => "/usr/sbin/dracut --include /etc/systemd/system.conf /etc/systemd/system.conf --force",
+          require     => File['fedora cgroups config'],
+          refreshonly => true,
+          subscribe   => File['fedora cgroups config'],
+        }
       }
     }
 
@@ -218,6 +206,17 @@ class openshift_origin::node{
       }
     }else{
       warning 'Please ensure that cgconfig, cgred, openshift-cgroups, openshift-port-proxy are running on all nodes'
+    }
+
+    exec { 'Restoring cgroups SELinux contexts':
+      command =>
+        '/sbin/restorecon -rv /etc/cgconfig.* \
+            /cgroup',
+      require => [
+        File['/cgroup'],
+        File['cgroups config'],
+        Package['rubygem-openshift-origin-node']
+      ],
     }
   }else{
     warning 'Please enable that cgroups are enabled with the following mount points:'
@@ -383,13 +382,9 @@ class openshift_origin::node{
 
   exec { 'Restoring SELinux contexts':
     command =>
-      '/sbin/restorecon -rv /etc/cgconfig.* \
-          /cgroup \
-          /var/lib/openshift \
+      '/sbin/restorecon -rv /var/lib/openshift \
           /var/lib/openshift/.httpd.d/',
     require => [
-      File['/cgroup'],
-      File['cgroups config'],
       Package['rubygem-openshift-origin-node']
     ],
   }
@@ -424,15 +419,15 @@ class openshift_origin::node{
       'openshift-origin-cartridge-cron-1.4',
       'openshift-origin-cartridge-diy-0.1',
       'openshift-origin-cartridge-haproxy-1.4',
-      'openshift-origin-cartridge-jenkins-1.4',
-      'openshift-origin-cartridge-jenkins-client-1.4',
       'openshift-origin-cartridge-mongodb-2.2',
       'openshift-origin-cartridge-mysql-5.1',
       'openshift-origin-cartridge-nodejs-0.6',
-      'openshift-origin-cartridge-perl-5.10',
-      'openshift-origin-cartridge-php-5.3',
-      'openshift-origin-cartridge-phpmyadmin-3.4',
-      'openshift-origin-cartridge-python-2.6',
+
+      'openshift-origin-cartridge-jenkins-1.4',
+      'openshift-origin-cartridge-jenkins-client-1.4',
+
+      'openshift-origin-cartridge-community-python-2.7',
+      'openshift-origin-cartridge-community-python-3.3',
     ]:
     ensure  => present,
     require => [
@@ -445,8 +440,11 @@ class openshift_origin::node{
     'Fedora' : {
       package {
         [
-          'openshift-origin-cartridge-postgresql-9.1',
+          'openshift-origin-cartridge-postgresql-9.2',
           'openshift-origin-cartridge-ruby-1.9',
+	  'openshift-origin-cartridge-php-5.4',
+	  'openshift-origin-cartridge-perl-5.16',
+	  'openshift-origin-cartridge-phpmyadmin-3.5',
         ]:
         ensure  => present,
         require => [
@@ -460,6 +458,10 @@ class openshift_origin::node{
         [
           'openshift-origin-cartridge-postgresql-8.4',
           'openshift-origin-cartridge-ruby-1.9-scl',
+	  'openshift-origin-cartridge-php-5.3',
+	  'openshift-origin-cartridge-perl-5.10',
+	  'openshift-origin-cartridge-python-2.6',
+	  'openshift-origin-cartridge-phpmyadmin-3.4',
         ]:
         ensure  => present,
         require => [

@@ -1,5 +1,5 @@
 class openshift_origin::named{
-  if $named_tsig_priv_key == '' {
+  if $::openshift_origin::named_tsig_priv_key == '' {
     warning "Generate the Key file with '/usr/sbin/dnssec-keygen -a HMAC-MD5 -b 512 -n USER -r /dev/urandom -K /var/named ${cloud_domain}'"
     warning "Use the last field in the generated key file /var/named/K${cloud_domain}*.key"
     fail 'named_tsig_priv_key is required.'
@@ -73,10 +73,18 @@ class openshift_origin::named{
 
   if $::openshift_origin::configure_firewall == true {
     exec { 'Open TCP port for BIND':
-      command => "/usr/sbin/lokkit --port=53:tcp"
+      command => $use_firewalld ? {
+        "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=53/tcp",
+        default => "/usr/sbin/lokkit --port=53:tcp",
+      },
+      require => Package['firewall-package']
     }
     exec { 'Open UDP port for BIND':
-      command => "/usr/sbin/lokkit --port=53:udp"
+      command => $use_firewalld ? {
+        "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=53/udp",
+        default => "/usr/sbin/lokkit --port=53/udp",
+      },
+      require => Package['firewall-package']
     }
   }
   

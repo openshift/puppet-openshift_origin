@@ -19,7 +19,11 @@ class openshift_origin::qpidd {
 
   if $::openshift_origin::configure_firewall == true {
     exec { 'Open port for Qpid':
-      command => "/usr/sbin/lokkit --port=5672:tcp"
+      command => $use_firewalld ? {
+        "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=5672/tcp",
+        default => "/usr/sbin/lokkit --port=5672:tcp",
+      },
+      require => Package['firewall-package']
     }
   }
 }

@@ -170,6 +170,7 @@ class openshift_origin(
   $configure_mongodb          = true,
   $configure_named            = true,
   $configure_broker           = true,
+  $configure_console          = true,
   $configure_node             = true,
   $install_repo               = "http://www.krishnaraman.net/downloads/origin-rpms/",
 
@@ -257,13 +258,6 @@ class openshift_origin(
   ensure_resource( 'package', 'httpd', {} )
   ensure_resource( 'package', 'openssh-server', {} )
 
-  if $install_client_tools == true {
-    ensure_resource( 'package', 'rhc', {
-      ensure  => present,
-      require => Yumrepo[openshift-origin],
-    } )
-  }
-
   if $enable_network_services == true {
     service { [httpd, network, sshd]:
       enable  => true,
@@ -307,15 +301,56 @@ class openshift_origin(
     include openshift_origin::broker
   }
 
+  if( $configure_console == true ) {
+    include openshift_origin::console
+  }
+
+  if $install_client_tools == true {
+    ensure_resource( 'package', 'rhc', {
+      ensure  => present,
+      require => Yumrepo[openshift-origin],
+    } )
+
+    file { '/etc/openshift/express.conf':
+      content => template('openshift_origin/express.conf.erb'),
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      require => Package['rhc']
+    }
+  }
+
   if $configure_firewall == true {
+    $firewall_package = $use_firewalld ? {
+      "true"  => "firewalld",
+      default => "system-config-firewall-base",
+    }
+    
+    ensure_resource( 'package', $firewall_package , {
+      ensure => present,
+      alias  => 'firewall-package',
+    })
+    
     exec { 'Open port for SSH':
-      command => "/usr/sbin/lokkit --service=ssh"
+      command => $use_firewalld ? {
+        "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-service=ssh",
+        default => "/usr/sbin/lokkit --service=ssh",
+      },
+      require => Package['firewall-package']
     }
     exec { 'Open port for HTTP':
-      command => "/usr/sbin/lokkit --service=http"
+      command => $use_firewalld ? {
+        "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-service=http",
+        default => "/usr/sbin/lokkit --service=http",
+      },
+      require => Package['firewall-package']
     }
     exec { 'Open port for HTTPS':
-      command => "/usr/sbin/lokkit --service=https"
+      command => $use_firewalld ? {
+        "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-service=https",
+        default => "/usr/sbin/lokkit --service=https",
+      },
+      require => Package['firewall-package']
     }
   }
 
@@ -323,7 +358,6 @@ class openshift_origin(
     augeas{ 'network setup' :
       context => '/files/etc/sysconfig/network-scripts/ifcfg-eth0',
       changes => [
-        'set PEERDNS no',
         "set DNS1 ${ipaddress}",
         "set HWADDR ${macaddress_eth0}",
       ]

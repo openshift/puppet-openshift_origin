@@ -12,6 +12,7 @@ CLOUD_DOMAIN="<%= scope.lookupvar('::openshift_origin::cloud_domain') %>"       
 # INTERNAL_ETH_DEV='eth1'                                 # Specify the internal cluster facing ethernet device
 
 # Generally the following should not be changed:
+ENABLE_CGROUPS=<%= scope.lookupvar('::openshift_origin::configure_cgroups') ? '1':'0' %>                                          # Enable cgroups for gears (0=off, 1=on)
 GEAR_BASE_DIR="/var/lib/openshift"                        # gear root directory
 GEAR_SKEL_DIR="/etc/openshift/skel"                       # skel files to use when building a gear
 GEAR_SHELL="/usr/bin/oo-trap-user"                        # shell to use for the gear

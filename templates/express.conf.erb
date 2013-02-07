@@ -1,5 +1,5 @@
 # Remote API server
-libra_server = '<%= scope.lookupvar('::openshift_origin::node_fqdn') %>'
+libra_server = '<%= scope.lookupvar('::openshift_origin::broker_fqdn') %>'
 
 # Logging
 debug = 'false'
