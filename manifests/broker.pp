@@ -533,7 +533,8 @@ class openshift_origin::broker {
     /usr/bin/bundle show && \
     /usr/bin/chown apache:apache Gemfile.lock && \
     /usr/bin/rm -rf tmp/cache/*',
-    subscribe   => [
+    unless      => "/usr/bin/bundle show",
+    require     => [
       Package['openshift-origin-broker'],
       Package['rubygem-openshift-origin-controller'],
       File['openshift broker.conf'],
@@ -596,9 +597,18 @@ class openshift_origin::broker {
       Package['treetop'],
       Package['tzinfo'],
       Package['xml-simple'],
-    ],
-    refreshonly => true
+    ]
   }
+
+  ensure_resource( 'package', 'webmock', {
+    ensure   => '1.9.0',
+    provider => 'gem',
+  })
+
+  ensure_resource( 'package', 'fakefs', {
+    ensure   => '0.4.2',
+    provider => 'gem',
+  })
 
   exec { 'fixfiles rubygem-passenger':
     command     => '/sbin/fixfiles -R rubygem-passenger restore && \
