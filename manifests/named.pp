@@ -21,6 +21,7 @@ class openshift_origin::named{
   exec { 'create rndc.key':
     command => '/usr/sbin/rndc-confgen -a -r /dev/urandom',
     unless  => '/usr/bin/[ -f /etc/rndc.key ]',
+    require => Package['bind']
   }
 
   file { '/etc/rndc.key':
@@ -82,7 +83,7 @@ class openshift_origin::named{
     exec { 'Open UDP port for BIND':
       command => $use_firewalld ? {
         "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=53/udp",
-        default => "/usr/sbin/lokkit --port=53/udp",
+        default => "/usr/sbin/lokkit --port=53:udp",
       },
       require => Package['firewall-package']
     }
