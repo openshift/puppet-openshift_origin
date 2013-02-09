@@ -357,6 +357,7 @@ class openshift_origin::node{
 
     $openshift_init_provider = $::operatingsystem ? {
       'Fedora' => 'systemd',
+      'Centos' => 'systemd',
       default  => ''
     }
 

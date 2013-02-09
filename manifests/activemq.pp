@@ -34,7 +34,7 @@ class openshift_origin::activemq{
     default : {
       file { 'activemq init script':
         path    => '/etc/init.d/activemq',
-        content => template('openshift_origin/activemq.init.erb'),
+        content => template('openshift_origin/activemq/activemq.init.erb'),
         owner   => 'root',
         group   => 'root',
         mode    => '0755',

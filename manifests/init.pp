@@ -237,10 +237,14 @@ class openshift_origin(
   }
 
   if $create_origin_yum_repos == true {
-    $os=downcase($::operatingsystem)
+    # TODO How to include os version here?
+    $os_part = $::operatingsystem ? {
+      'Fedora' => 'fedora-17',
+      'Centos' => 'fedora-17'
+    }
     yumrepo { 'openshift-origin-deps':
       name     => 'openshift-origin-deps',
-      baseurl  => "https://mirror.openshift.com/pub/openshift-origin/${os}-${::operatingsystemrelease}/${::architecture}/",
+      baseurl  => "https://mirror.openshift.com/pub/openshift-origin/${os_part}/${::architecture}/",
       enabled  => 1,
       gpgcheck => 0,
     }
@@ -254,7 +258,7 @@ class openshift_origin(
   }
 
   ensure_resource( 'package', 'policycoreutils', {} )
-  ensure_resource( 'package', 'mcollective', {} )
+  ensure_resource( 'package', 'mcollective', { require => Yumrepo['openshift-origin-deps'], } )
   ensure_resource( 'package', 'httpd', {} )
   ensure_resource( 'package', 'openssh-server', {} )
 
