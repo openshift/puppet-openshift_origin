@@ -237,9 +237,8 @@ class openshift_origin(
   }
 
   if $create_origin_yum_repos == true {
-    # TODO How to include os version here?
     $os_part = $::operatingsystem ? {
-      'Fedora' => 'fedora-17',
+      'Fedora' => 'fedora--${::operatingsystemrelease}',
       'Centos' => 'fedora-17'
     }
     yumrepo { 'openshift-origin-deps':
