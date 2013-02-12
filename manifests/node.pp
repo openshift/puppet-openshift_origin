@@ -155,44 +155,8 @@ class openshift_origin::node{
   }
 
   if $::openshift_origin::configure_cgroups == true {
-    if $::operatingsystem == "Fedora" {
-      file { 'fedora cgroups config':
-        ensure  => present,
-        path    => '/etc/systemd/system.conf',
-        content => template('openshift_origin/node/system.conf.erb'),
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0644',
-      }
-      if $::operatingsystemrelease == "18" {
-        exec { 'Rebuild initrd to include system.conf':
-          command     => "/usr/sbin/dracut --include /etc/systemd/system.conf /etc/systemd/system.conf --force",
-          require     => File['fedora cgroups config'],
-          refreshonly => true,
-          subscribe   => File['fedora cgroups config'],
-        }
-      }
-    }
-
-    file { '/cgroup':
-      ensure => directory,
-      owner  => 'root',
-      group  => 'root',
-      mode   => '0755',
-    }
-
-    file { 'cgroups config':
-      ensure  => present,
-      path    => '/etc/cgconfig.conf',
-      content => template('openshift_origin/node/cgconfig.conf.erb'),
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-    }
-
     if $::openshift_origin::enable_network_services == true {
       service { [
-        'cgconfig',
         'cgred',
         'openshift-cgroups',
         'openshift-port-proxy',
@@ -205,30 +169,27 @@ class openshift_origin::node{
         ],
         enable  => true,
       }
+      
+      if $::operatingsystem == "Fedora" {
+        
+      } else {
+        service { [
+          'cgconfig',
+        ]:
+          require => [
+            Package['rubygem-openshift-origin-node'],
+            Package['openshift-origin-node-util'],
+            Package['openshift-origin-node-proxy'],
+            Package['openshift-origin-port-proxy']
+          ],
+          enable  => true,
+        }        
+      }
     }else{
       warning 'Please ensure that cgconfig, cgred, openshift-cgroups, openshift-port-proxy are running on all nodes'
     }
-
-    exec { 'Restoring cgroups SELinux contexts':
-      command =>
-        '/sbin/restorecon -rv /etc/cgconfig.* \
-            /cgroup',
-      require => [
-        File['/cgroup'],
-        File['cgroups config'],
-        Package['rubygem-openshift-origin-node']
-      ],
-    }
   }else{
-    warning 'Please enable that cgroups are enabled with the following mount points:'
-    warning 'cpuset  = /cgroup/cpuset;'
-    warning 'cpu     = /cgroup/all;'
-    warning 'cpuacct = /cgroup/all;'
-    warning 'memory  = /cgroup/all;'
-    warning 'devices = /cgroup/devices;'
-    warning 'freezer = /cgroup/all;'
-    warning 'net_cls = /cgroup/all;'
-    warning 'blkio   = /cgroup/blkio;'
+    warning 'CGroups disabled'
   }
 
   if $::openshift_origin::configure_pam == true {
