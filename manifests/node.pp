@@ -148,6 +148,7 @@ class openshift_origin::node{
     exec { 'Initialize quota DB':
       command => "/usr/sbin/oo-init-quota",
       creates => "${gear_root_mount}/aquota.user",
+      require => Package['openshift-origin-node-util'],
     }
   }else{
     warning 'Please ensure that quotas are enabled for /var/lib/openshift'
@@ -348,7 +349,7 @@ class openshift_origin::node{
   }
 
   exec { 'Update sshd configs':
-    command => '/bin/echo \'AcceptEnv GIT_SSH\' >> \'/etc/ssh/sshd_config\'',
+    command => '/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"',
     unless  => '/bin/grep -qFx \'AcceptEnv GIT_SSH\' \'/etc/ssh/sshd_config\''
   }
 
