@@ -159,7 +159,7 @@
 # for application name resolution.
 
 class openshift_origin(
-  $node_fqdn                  = "${hostname}.${domain}",
+  $node_fqdn                  = ${hostname}.${domain},
   $create_origin_yum_repos    = true,
   $install_client_tools       = true,
   $enable_network_services    = true,
