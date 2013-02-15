@@ -22,25 +22,17 @@ class openshift_origin::activemq{
         mode    => '0444',
         require => Package['activemq'],
       }
-      
-      file { '/var/run/activemq/':
-        ensure => 'directory',
-        owner   => 'activemq',
-        group   => 'activemq',
-        mode    => '0750',
-        require => Package['activemq'],
-      }
     }
     default : {
-      file { 'activemq init script':
-        path    => '/etc/init.d/activemq',
-        content => template('openshift_origin/activemq.init.erb'),
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0755',
-        require => Package['activemq'],
-      }
     }
+  }
+  
+  file { '/var/run/activemq/':
+    ensure => 'directory',
+    owner   => 'activemq',
+    group   => 'activemq',
+    mode    => '0750',
+    require => Package['activemq'],
   }
 
   file { 'activemq.xml config':

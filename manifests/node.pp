@@ -143,6 +143,20 @@ class openshift_origin::node{
       require => Package['mcollective'],
     }
   }
+  
+  if $::operatingsystem == "Redhat" {
+    if ! defined(File['mcollective env']) {
+      file { 'mcollective env':
+        ensure  => present,
+        path    => '/etc/sysconfig/mcollective',
+        content => template('openshift_origin/rhel-scl-ruby193-env.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => Package['mcollective'],
+      }
+    }
+  }
 
   if $::openshift_origin::configure_fs_quotas == true {
     exec { 'Initialize quota DB':
@@ -170,9 +184,7 @@ class openshift_origin::node{
         enable  => true,
       }
       
-      if $::operatingsystem == "Fedora" {
-        
-      } else {
+      if $::operatingsystem == "Redhat" {
         service { [
           'cgconfig',
         ]:
@@ -309,8 +321,12 @@ class openshift_origin::node{
     mode    => '0644',
   }
 
+  $printf = $::operatingsystem ? {
+    'Fedora' => '/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"',
+    default  => '/usr/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"'
+  }
   exec { 'Update sshd configs':
-    command => '/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"',
+    command => $printf,
     unless  => '/bin/grep -qFx \'AcceptEnv GIT_SSH\' \'/etc/ssh/sshd_config\''
   }
 
@@ -319,7 +335,7 @@ class openshift_origin::node{
 
     $openshift_init_provider = $::operatingsystem ? {
       'Fedora' => 'systemd',
-      default  => ''
+      default  => 'redhat'
     }
 
     service { ['openshift-gears', 'openshift-node-web-proxy']:

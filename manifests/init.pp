@@ -172,7 +172,7 @@ class openshift_origin(
   $configure_broker           = true,
   $configure_console          = true,
   $configure_node             = true,
-  $install_repo               = "http://www.krishnaraman.net/downloads/origin-rpms/",
+  $install_repo               = "nightlies",
 
   $named_ipaddress            = $ipaddress,
   $mongodb_fqdn               = $node_fqdn,
@@ -211,6 +211,31 @@ class openshift_origin(
   if $::facterversion == '1.6.16' {
     fail 'Factor version needs to be updated to atleast 1.6.17'
   }
+  
+  $service = $::operatingsystem  ? {
+    "Fedora"  => '/usr/sbin/service',
+    default   => '/sbin/service',
+  }
+  
+  $rm = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/rm',
+    default   => '/bin/rm',
+  }
+  
+  $touch = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/touch',
+    default   => '/bin/touch',
+  }
+  
+  $chown = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/chown',
+    default   => '/bin/chown',
+  }
+  
+  $echo = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/echo',
+    default   => '/bin/echo',
+  }
 
   if $configure_ntp == true {
     include openshift_origin::ntpd
@@ -237,17 +262,41 @@ class openshift_origin(
   }
 
   if $create_origin_yum_repos == true {
-    $os=downcase($::operatingsystem)
+    case $::operatingsystem {
+      'Fedora' : {
+        $mirror_base_url = "https://mirror.openshift.com/pub/openshift-origin/fedora-${::operatingsystemrelease}/${::architecture}/"
+      }
+      default  : {
+        $mirror_base_url = "https://mirror.openshift.com/pub/openshift-origin/rhel-6/${::architecture}/"
+      }
+    }
+    
     yumrepo { 'openshift-origin-deps':
       name     => 'openshift-origin-deps',
-      baseurl  => "https://mirror.openshift.com/pub/openshift-origin/${os}-${::operatingsystemrelease}/${::architecture}/",
+      baseurl  => $mirror_base_url,
       enabled  => 1,
       gpgcheck => 0,
     }
 
+    case $install_repo {
+      'nightlies' : {
+        case $::operatingsystem {
+          'Fedora' : {
+            $install_repo_path = "https://mirror.openshift.com/pub/openshift-origin/nightly/fedora-${::operatingsystemrelease}/latest/${::architecture}/"
+          }
+          default  : {
+            $install_repo_path = "https://mirror.openshift.com/pub/openshift-origin/nightly/rhel-6/latest/${::architecture}/"
+          }
+        }
+      }
+      default     : {
+        $install_repo_path = $install_repo
+      }
+    }
+
     yumrepo { 'openshift-origin-packages':
       name     => 'openshift-origin',
-      baseurl  => $install_repo,
+      baseurl  => $install_repo_path,
       enabled  => 1,
       gpgcheck => 0,
     }
@@ -306,6 +355,7 @@ class openshift_origin(
   }
 
   if $install_client_tools == true {
+    #Install rhc tools. On RHEL/CentOS, this will install under ruby 1.8 environment
     ensure_resource( 'package', 'rhc', {
       ensure  => present,
       require => Yumrepo[openshift-origin],
@@ -317,6 +367,19 @@ class openshift_origin(
       group   => 'root',
       mode    => '0644',
       require => Package['rhc']
+    }
+    
+    if $::operatingsystem == "Redhat" {
+      #Support gems and packages to allow rhc tools to run within SCL environment
+      ensure_resource( 'package', 'ruby193-rubygem-net-ssh' , { ensure => present })
+      ensure_resource( 'package', 'ruby193-rubygem-archive-tar-minitar' , { ensure => present })
+      ensure_resource( 'package', 'ruby193-rubygem-commander' , { ensure => present })
+          
+      exec { 'gems to enable rhc in scl-193':
+        command => '/usr/bin/scl enable ruby193 "gem install rspec --version 1.3.0 --no-rdoc --no-ri" ; \
+          /usr/bin/scl enable ruby193 "gem install fakefs --no-rdoc --no-ri" ; \
+          /usr/bin/scl enable ruby193 "gem install httpclient --version 2.3.2 --no-rdoc --no-ri" ;'
+      }
     }
   }
 
@@ -361,6 +424,19 @@ class openshift_origin(
         "set DNS1 ${ipaddress}",
         "set HWADDR ${macaddress_eth0}",
       ]
+    }
+  }
+  
+  if $::operatingsystem == "Redhat" {
+    if ! defined(File['/etc/profile.d/scl193.sh']) {
+      file { '/etc/profile.d/scl193.sh':
+        ensure  => present,
+        path    => '/etc/profile.d/scl193.sh',
+        content => template('openshift_origin/rhel-scl-ruby193-env.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644'
+      }
     }
   }
 }
