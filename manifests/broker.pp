@@ -230,81 +230,8 @@ class openshift_origin::broker {
         ]
       }
     }
-    # TODO: configure IPA/Kerberos Auth
-    # TODO: separately, install ipa-client?
     'ipa': {
-      package { ['freeipa-client']:
-        ensure  => present, # or installed?
-        require => Yumrepo[freeipa-client]
-      }
-      package { ['rubygem-openshift-origin-auth-remote-user']:
-        ensure  => present,
-        require => Yumrepo[openshift-origin]
-      }
-      if ! $::openshift_origin::ipa_client_install { 
-      # TODO: must turn off NetworkManager (is this already done?)
-      # and config dhcp correctly for nameserver to resolve to IPA Server
-      # use full paths to commands, eg /usr/bin/
-        exec { 'install ipa-client'
-          command =>
-          'service NetworkManager stop && service NetworkManager disable &&
-          ipa-client-install --setup-dns --domain=${IPA_DOMAIN} --server=${IPA_SERVER} -U \
-          && kinit admin -p ${IPA_PASSWORD}'
-        }
-        exec { 'enroll ipa-client host'
-          command =>
-            'ipa service-add HTTP/${FQDN}@${REALM} &&\
-            ipa-getkeytab -s ${IPA_SERVER} -p HTTP/${FQDN} \
-            -k /var/www/openshift/broker/httpd/conf.d/httpd.keytab',
-          creates => '/var/www/openshift/broker/httpd/conf.d/httpd.keytab'
-
-        }
-      }else{
-        file { 'ipa service keytab':
-          ensure  => present,
-          path    => '/var/www/openshift/httpd/conf.d/httpd.keytab'
-          content => source($::openshift_origin::ipa_service_keytab),
-          owner   => 'root',
-          group   => 'root',
-          mode    => '0644',
-          require => Package['freeipa-client']
-
-        }
-      }
-      # TODO: is this needed with the above?
-      file {'kerberos keytab':
-        path    => '/var/www/openshift/broker/httpd/conf.d/httpd.keytab', # TODO: make sure correct location
-        content => source($::openshift_origin::ipa_service_keytab), # TODO: probably have to exec ipa service-add
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0644',
-        require => Package['freeipa-client']
-    }
-      file {'openshift kerberos':
-        path    => 
-          '/var/www/openshift/broker/httpd/conf.d/openshift-origin-auth-remote-user-kerberos.conf',
-        content => 
-          template('openshift_origin/broker/plugin/auth/kerberos/kerberos.conf.plugin.erb'),
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0644',
-        require => [
-          Package['rubygem-openshift-origin-auth-remote-user'], # do I need this?
-          File['kerberos keytab']
-        ]
-    }
-      file {'Auth plugin config':
-        path    => '/etc/openshift/plugins.d/openshift-origin-auth-remote-user.conf',
-        content => 
-          template('openshift_origin/broker/plugin/auth/basic/remote-user.conf.plugin.erb'),
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0644',
-        require => [
-          Package['rubygem-openshift-origin-auth-remote-user'],
-          File['openshift kerberos']
-        ]
-    }
+      include openshift_origin::ipa
     }
     default: {
       fail "Unknown Auth plugin ${::openshift_origin::broker_auth_plugin}"
