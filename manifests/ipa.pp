@@ -70,11 +70,13 @@ class openshift_origin::ipa{
 
 	exec { 'ipa-client-install-check':
 		command => "/usr/sbin/ipa-client-install --installed | grep 'True'",
-		# somehow catch
+		# somehow catch return value?
 		creates => '/etc/ipa/default.conf',
 		require => Package["${ipa}-client" ],
 	}
 
+
+	if ! 
 	# add service if it's not already enrolled in IPA server
 	exec { 'ipa-service-add':
 		command => "/bin/ipa service-add puppet/$(/bin/hostname)",
