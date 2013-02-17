@@ -13,14 +13,14 @@ class openshift_origin::mongo{
   }
 
   exec { 'start mongodb':
-    command     => "/bin/rm -rf /var/log/mongodb/mongodb.log && \
-     /usr/sbin/service mongod restart ; \
-     /usr/bin/touch /var/log/mongodb/mongodb.log && \
-     /usr/bin/chown mongodb:mongodb /var/log/mongodb/mongodb.log ; \
+    command     => "${::openshift_origin::rm} -rf /var/log/mongodb/mongodb.log && \
+     ${::openshift_origin::service} mongod restart ; \
+     ${::openshift_origin::touch} /var/log/mongodb/mongodb.log && \
+     ${::openshift_origin::chown} mongodb:mongodb /var/log/mongodb/mongodb.log ; \
      /bin/fgrep '[initandlisten] waiting for connections' /var/log/mongodb/mongodb.log ; \
      while [ ! $? -eq 0 ] ; \
        do sleep 2 ; \
-       /usr/bin/echo '.' ; \
+       ${::openshift_origin::echo} '.' ; \
        /bin/fgrep '[initandlisten] waiting for connections' /var/log/mongodb/mongodb.log ; \
      done",
     refreshonly => true,
@@ -51,8 +51,8 @@ class openshift_origin::mongo{
 
   exec { 're-enable mongo':
     command     =>
-      "/usr/bin/echo 'auth = true' >> /etc/mongodb.conf && \
-      /usr/sbin/service mongod restart",
+      "${::openshift_origin::echo} 'auth = true' >> /etc/mongodb.conf && \
+      ${::openshift_origin::service} mongod restart",
     refreshonly => true,
     require => [Package['mongodb'],Package['mongodb-server']],
   }

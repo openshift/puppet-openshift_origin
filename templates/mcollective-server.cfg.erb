@@ -1,8 +1,12 @@
 topicprefix = /topic/
 main_collective = mcollective
 collectives = mcollective
+<%if scope.lookupvar('::operatingsystem') == "Fedora"%>
 libdir = /usr/libexec/mcollective
-logfile = /var/log/mcollective.log
+<%end%>
+<%if scope.lookupvar('::operatingsystem') == "RedHat"%>
+libdir = /opt/rh/ruby193/root/usr/libexec/mcollective
+<%end%>logfile = /var/log/mcollective.log
 loglevel = debug
 daemonize = 1
 direct_addressing = 1
