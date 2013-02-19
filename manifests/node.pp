@@ -78,6 +78,7 @@ class openshift_origin::node{
 
   ensure_resource( 'package', 'git', { ensure  => present } )
   ensure_resource( 'package', 'make', { ensure  => present } )
+  ensure_resource( 'package', 'cronie', { ensure => present } )
 
   if $::openshift_origin::configure_firewall == true {
     exec { 'Open HTTP port for Node-webproxy':
@@ -331,10 +332,14 @@ class openshift_origin::node{
   }
 
   if $::openshift_origin::enable_network_services == true {
-    service { 'crond': enable  => true }
+    service { 'crond': 
+      enable  => true,
+      require => Package['cronie']
+    }
 
     $openshift_init_provider = $::operatingsystem ? {
       'Fedora' => 'systemd',
+      'Centos' => 'systemd',
       default  => 'redhat'
     }
 

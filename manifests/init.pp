@@ -266,6 +266,9 @@ class openshift_origin(
       'Fedora' : {
         $mirror_base_url = "https://mirror.openshift.com/pub/openshift-origin/fedora-${::operatingsystemrelease}/${::architecture}/"
       }
+      'Centos' : {
+        $mirror_base_url = "https://mirror.openshift.com/pub/openshift-origin/fedora-17/${::architecture}/"
+      }
       default  : {
         $mirror_base_url = "https://mirror.openshift.com/pub/openshift-origin/rhel-6/${::architecture}/"
       }
@@ -303,7 +306,7 @@ class openshift_origin(
   }
 
   ensure_resource( 'package', 'policycoreutils', {} )
-  ensure_resource( 'package', 'mcollective', {} )
+  ensure_resource( 'package', 'mcollective', { require => Yumrepo['openshift-origin-deps'], } )
   ensure_resource( 'package', 'httpd', {} )
   ensure_resource( 'package', 'openssh-server', {} )
 

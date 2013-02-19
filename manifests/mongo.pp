@@ -1,6 +1,6 @@
 class openshift_origin::mongo{
-  ensure_resource( 'package', 'mongodb', { ensure  => present })
-  ensure_resource( 'package', 'mongodb-server', { ensure  => present })
+  ensure_resource( 'package', 'mongodb', { ensure  => present, require => Yumrepo['openshift-origin-deps'], })
+  ensure_resource( 'package', 'mongodb-server', { ensure  => present, require => Yumrepo['openshift-origin-deps'], })
 
   file { 'Temporarily Disable mongo auth':
     ensure  => present,
