@@ -5,6 +5,18 @@ class openshift_origin::broker {
     fail 'named_tsig_priv_key is required.'
   }
 
+  ensure_resource( 'package', 'ruby-devel', {
+    ensure   => 'latest',
+  })
+
+  ensure_resource( 'package', 'mysql-devel', {
+    ensure   => 'latest',
+  })
+
+  ensure_resource( 'package', 'mongodb-devel', {
+    ensure   => 'latest',
+  })
+
   ensure_resource( 'package', 'openshift-origin-broker', {
     ensure  => present,
     require => Yumrepo[openshift-origin]
@@ -16,6 +28,11 @@ class openshift_origin::broker {
   })
 
   ensure_resource( 'package', 'rubygem-openshift-origin-dns-nsupdate', {
+    ensure  => present,
+    require => Yumrepo[openshift-origin]
+  })
+
+  ensure_resource( 'package', 'rubygem-openshift-origin-dns-bind', {
     ensure  => present,
     require => Yumrepo[openshift-origin]
   })
@@ -87,11 +104,13 @@ class openshift_origin::broker {
     ensure_resource( 'package', 'bson', {
       ensure   => '1.8.2',
       provider => 'gem',
+      require  => [Package['ruby-devel'],Package['mongodb-devel']]
     })
   
     ensure_resource( 'package', 'bson_ext', {
       ensure   => '1.8.2',
       provider => 'gem',
+      require  => [Package['ruby-devel'],Package['mongodb-devel']]
     })
   
     ensure_resource( 'package', 'builder', {
@@ -127,6 +146,7 @@ class openshift_origin::broker {
     ensure_resource( 'package', 'gherkin', {
       ensure   => '2.9.3',
       provider => 'gem',
+      require  => [Package['ruby-devel']]
     })
   
     ensure_resource( 'package', 'hike', {
@@ -147,6 +167,7 @@ class openshift_origin::broker {
     ensure_resource( 'package', 'json', {
       ensure   => '1.7.6',
       provider => 'gem',
+      require  => [Package['ruby-devel']]
     })
   
     ensure_resource( 'package', 'mail', {
@@ -261,6 +282,7 @@ class openshift_origin::broker {
     
     ensure_resource( 'package', 'mysql', {
       provider => 'gem',
+      require  => [Package['ruby-devel'],Package['mysql-devel']]
     })
   
     ensure_resource( 'package', 'regin', {
@@ -388,11 +410,13 @@ class openshift_origin::broker {
     ensure_resource( 'package', 'ruby193-rubygem-bson', {
       ensure   => 'latest',
       alias    => 'bson',
+      require  => [Package['ruby-devel'],Package['mongodb-devel']]
     })
   
     ensure_resource( 'package', 'ruby193-rubygem-bson_ext', {
       ensure   => 'latest',
       alias    => 'bson_ext',
+      require  => [Package['ruby-devel'],Package['mongodb-devel']]
     })
   
     ensure_resource( 'package', 'ruby193-rubygem-builder', {
@@ -428,6 +452,7 @@ class openshift_origin::broker {
     ensure_resource( 'package', 'ruby193-rubygem-gherkin', {
       ensure   => 'latest',
       alias    => 'gherkin',
+      require  => [Package['ruby-devel']]
     })
   
     ensure_resource( 'package', 'ruby193-rubygem-hike', {
