@@ -231,6 +231,31 @@ class openshift_origin(
     "Fedora"  => '/usr/bin/chown',
     default   => '/bin/chown',
   }
+
+  $httxt2dbm = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/httxt2dbm',
+    default   => '/usr/sbin/httxt2dbm',
+  }
+
+  $chmod = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/chmod',
+    default   => '/bin/chmod',
+  }
+
+  $grep = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/grep',
+    default   => '/bin/grep',
+  }
+
+  $cat = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/cat',
+    default   => '/bin/cat',
+  }
+
+  $mv = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/mv',
+    default   => '/bin/mv',
+  }
   
   $echo = $::operatingsystem  ? {
     "Fedora"  => '/usr/bin/echo',
@@ -262,15 +287,12 @@ class openshift_origin(
   }
 
   if $create_origin_yum_repos == true {
-    case $::operatingsystem {
-      'Fedora' : {
-        $mirror_base_url = "https://mirror.openshift.com/pub/openshift-origin/fedora-${::operatingsystemrelease}/${::architecture}/"
-      }
-      default  : {
-        $mirror_base_url = "https://mirror.openshift.com/pub/openshift-origin/rhel-6/${::architecture}/"
-      }
+    $mirror_base_url = $::operatingsystem ? {
+      'Fedora' => "https://mirror.openshift.com/pub/openshift-origin/fedora-${::operatingsystemrelease}/${::architecture}/",
+      'Centos' => "https://mirror.openshift.com/pub/openshift-origin/rhel-6/${::architecture}/",
+      default  => "https://mirror.openshift.com/pub/openshift-origin/rhel-6/${::architecture}/",
     }
-    
+
     yumrepo { 'openshift-origin-deps':
       name     => 'openshift-origin-deps',
       baseurl  => $mirror_base_url,
@@ -303,7 +325,7 @@ class openshift_origin(
   }
 
   ensure_resource( 'package', 'policycoreutils', {} )
-  ensure_resource( 'package', 'mcollective', {} )
+  ensure_resource( 'package', 'mcollective', { require => Yumrepo['openshift-origin-deps'], } )
   ensure_resource( 'package', 'httpd', {} )
   ensure_resource( 'package', 'openssh-server', {} )
 

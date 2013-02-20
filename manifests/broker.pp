@@ -969,4 +969,12 @@ class openshift_origin::broker {
   }else{
     warning 'Please ensure that openshift-broker service is enable on broker machines'
   }
+
+  file { '/var/log/passenger-analytics':
+    ensure  => directory,
+    owner   => 'apache',
+    group   => 'apache',
+    mode    => '0750',
+    require => Package['rubygem-passenger'],
+  }
 }

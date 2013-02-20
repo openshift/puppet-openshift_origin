@@ -21,6 +21,7 @@ class openshift_origin::named{
   exec { 'create rndc.key':
     command => '/usr/sbin/rndc-confgen -a -r /dev/urandom',
     unless  => '/usr/bin/[ -f /etc/rndc.key ]',
+    require => Package['bind']
   }
 
   file { '/etc/rndc.key':
