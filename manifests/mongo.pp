@@ -71,11 +71,7 @@ class openshift_origin::mongo{
         "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=27017/tcp",
         default => "/usr/sbin/lokkit --port=27017:tcp",
       },
-<<<<<<< HEAD
-      require => [Package['mongodb'],Package['mongodb-server']],
-=======
       require => [Package['mongodb'],Package['mongodb-server'],Package['firewall-package']],
->>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
   }
 }

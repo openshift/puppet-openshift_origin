@@ -377,10 +377,7 @@ class openshift_origin(
   }
 
   if $install_client_tools == true {
-<<<<<<< HEAD
-=======
     #Install rhc tools. On RHEL/CentOS, this will install under ruby 1.8 environment
->>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     ensure_resource( 'package', 'rhc', {
       ensure  => present,
       require => Yumrepo[openshift-origin],
@@ -393,8 +390,6 @@ class openshift_origin(
       mode    => '0644',
       require => Package['rhc']
     }
-<<<<<<< HEAD
-=======
     
     if $::operatingsystem == "Redhat" {
       #Support gems and packages to allow rhc tools to run within SCL environment
@@ -408,7 +403,6 @@ class openshift_origin(
           /usr/bin/scl enable ruby193 "gem install httpclient --version 2.3.2 --no-rdoc --no-ri" ;'
       }
     }
->>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
   }
 
   if $configure_firewall == true {
@@ -426,34 +420,22 @@ class openshift_origin(
       command => $use_firewalld ? {
         "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-service=ssh",
         default => "/usr/sbin/lokkit --service=ssh",
-<<<<<<< HEAD
-      }
-=======
       },
       require => Package['firewall-package']
->>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
     exec { 'Open port for HTTP':
       command => $use_firewalld ? {
         "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-service=http",
         default => "/usr/sbin/lokkit --service=http",
-<<<<<<< HEAD
-      }
-=======
       },
       require => Package['firewall-package']
->>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
     exec { 'Open port for HTTPS':
       command => $use_firewalld ? {
         "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-service=https",
         default => "/usr/sbin/lokkit --service=https",
-<<<<<<< HEAD
-      }
-=======
       },
       require => Package['firewall-package']
->>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
   }
 

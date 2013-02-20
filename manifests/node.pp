@@ -85,23 +85,15 @@ class openshift_origin::node{
       command => $use_firewalld ? {
         "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=8000/tcp",
         default => "/usr/sbin/lokkit --port=8000:tcp",
-<<<<<<< HEAD
-      }
-=======
       },
       require => Package['firewall-package']
->>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
     exec { 'Open HTTPS port for Node-webproxy':
       command => $use_firewalld ? {
         "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=8443/tcp",
         default => "/usr/sbin/lokkit --port=8443:tcp",
-<<<<<<< HEAD
-      }
-=======
       },
       require => Package['firewall-package']
->>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
   }else{
     warning 'Please ensure that ports 80, 443, 8000, 8443 are open for web requests'
@@ -171,54 +163,13 @@ class openshift_origin::node{
     exec { 'Initialize quota DB':
       command => "/usr/sbin/oo-init-quota",
       creates => "${gear_root_mount}/aquota.user",
-<<<<<<< HEAD
-=======
       require => Package['openshift-origin-node-util'],
->>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
   }else{
     warning 'Please ensure that quotas are enabled for /var/lib/openshift'
   }
 
   if $::openshift_origin::configure_cgroups == true {
-<<<<<<< HEAD
-    if $::operatingsystem == "Fedora" {
-      file { 'fedora cgroups config':
-        ensure  => present,
-        path    => '/etc/systemd/system.conf',
-        content => template('openshift_origin/node/system.conf.erb'),
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0644',
-      }
-      if $::operatingsystemrelease == "18" {
-        exec { 'Rebuild initrd to include system.conf':
-          command     => "/usr/sbin/dracut --include /etc/systemd/system.conf /etc/systemd/system.conf --force",
-          require     => File['fedora cgroups config'],
-          refreshonly => true,
-          subscribe   => File['fedora cgroups config'],
-        }
-      }
-    }
-
-    file { '/cgroup':
-      ensure => directory,
-      owner  => 'root',
-      group  => 'root',
-      mode   => '0755',
-    }
-
-    file { 'cgroups config':
-      ensure  => present,
-      path    => '/etc/cgconfig.conf',
-      content => template('openshift_origin/node/cgconfig.conf.erb'),
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-    }
-
-=======
->>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     if $::openshift_origin::enable_network_services == true {
       service { [
         'cgred',
