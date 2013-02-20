@@ -1,6 +1,6 @@
 class openshift_origin::activemq{
   ensure_resource( 'package', 'activemq', {
-      ensure  => present,
+      ensure  => latest,
       require => Yumrepo[openshift-origin-deps],
     }
   )
@@ -24,15 +24,15 @@ class openshift_origin::activemq{
       }
     }
     default : {
-      file { 'activemq init script':
-        path    => '/etc/init.d/activemq',
-        content => template('openshift_origin/activemq.init.erb'),
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0755',
-        require => Package['activemq'],
-      }
     }
+  }
+  
+  file { '/var/run/activemq/':
+    ensure => 'directory',
+    owner   => 'activemq',
+    group   => 'activemq',
+    mode    => '0750',
+    require => Package['activemq'],
   }
 
   file { 'activemq.xml config':
@@ -78,9 +78,16 @@ class openshift_origin::activemq{
   if $::openshift_origin::configure_firewall == true {
     exec { 'Open port for ActiveMQ':
       command => $use_firewalld ? {
+<<<<<<< HEAD
         "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=61616/tcp",
         default => "/usr/sbin/lokkit --port=61616:tcp",
       }
+=======
+        "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=61613/tcp",
+        default => "/usr/sbin/lokkit --port=61613:tcp",
+      },
+      require => Package['firewall-package']
+>>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
   }
 }

@@ -172,7 +172,7 @@ class openshift_origin(
   $configure_broker           = true,
   $configure_console          = true,
   $configure_node             = true,
-  $install_repo               = "http://www.krishnaraman.net/downloads/origin-rpms/",
+  $install_repo               = "nightlies",
 
   $named_ipaddress            = $ipaddress,
   $mongodb_fqdn               = $node_fqdn,
@@ -211,6 +211,56 @@ class openshift_origin(
   if $::facterversion == '1.6.16' {
     fail 'Factor version needs to be updated to atleast 1.6.17'
   }
+  
+  $service = $::operatingsystem  ? {
+    "Fedora"  => '/usr/sbin/service',
+    default   => '/sbin/service',
+  }
+  
+  $rm = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/rm',
+    default   => '/bin/rm',
+  }
+  
+  $touch = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/touch',
+    default   => '/bin/touch',
+  }
+  
+  $chown = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/chown',
+    default   => '/bin/chown',
+  }
+
+  $httxt2dbm = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/httxt2dbm',
+    default   => '/usr/sbin/httxt2dbm',
+  }
+
+  $chmod = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/chmod',
+    default   => '/bin/chmod',
+  }
+
+  $grep = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/grep',
+    default   => '/bin/grep',
+  }
+
+  $cat = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/cat',
+    default   => '/bin/cat',
+  }
+
+  $mv = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/mv',
+    default   => '/bin/mv',
+  }
+  
+  $echo = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/echo',
+    default   => '/bin/echo',
+  }
 
   if $configure_ntp == true {
     include openshift_origin::ntpd
@@ -237,24 +287,45 @@ class openshift_origin(
   }
 
   if $create_origin_yum_repos == true {
-    $os=downcase($::operatingsystem)
+    $mirror_base_url = $::operatingsystem ? {
+      'Fedora' => "https://mirror.openshift.com/pub/openshift-origin/fedora-${::operatingsystemrelease}/${::architecture}/",
+      'Centos' => "https://mirror.openshift.com/pub/openshift-origin/rhel-6/${::architecture}/",
+      default  => "https://mirror.openshift.com/pub/openshift-origin/rhel-6/${::architecture}/",
+    }
+
     yumrepo { 'openshift-origin-deps':
       name     => 'openshift-origin-deps',
-      baseurl  => "https://mirror.openshift.com/pub/openshift-origin/${os}-${::operatingsystemrelease}/${::architecture}/",
+      baseurl  => $mirror_base_url,
       enabled  => 1,
       gpgcheck => 0,
     }
 
+    case $install_repo {
+      'nightlies' : {
+        case $::operatingsystem {
+          'Fedora' : {
+            $install_repo_path = "https://mirror.openshift.com/pub/openshift-origin/nightly/fedora-${::operatingsystemrelease}/latest/${::architecture}/"
+          }
+          default  : {
+            $install_repo_path = "https://mirror.openshift.com/pub/openshift-origin/nightly/rhel-6/latest/${::architecture}/"
+          }
+        }
+      }
+      default     : {
+        $install_repo_path = $install_repo
+      }
+    }
+
     yumrepo { 'openshift-origin-packages':
       name     => 'openshift-origin',
-      baseurl  => $install_repo,
+      baseurl  => $install_repo_path,
       enabled  => 1,
       gpgcheck => 0,
     }
   }
 
   ensure_resource( 'package', 'policycoreutils', {} )
-  ensure_resource( 'package', 'mcollective', {} )
+  ensure_resource( 'package', 'mcollective', { require => Yumrepo['openshift-origin-deps'], } )
   ensure_resource( 'package', 'httpd', {} )
   ensure_resource( 'package', 'openssh-server', {} )
 
@@ -306,6 +377,10 @@ class openshift_origin(
   }
 
   if $install_client_tools == true {
+<<<<<<< HEAD
+=======
+    #Install rhc tools. On RHEL/CentOS, this will install under ruby 1.8 environment
+>>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     ensure_resource( 'package', 'rhc', {
       ensure  => present,
       require => Yumrepo[openshift-origin],
@@ -318,26 +393,67 @@ class openshift_origin(
       mode    => '0644',
       require => Package['rhc']
     }
+<<<<<<< HEAD
+=======
+    
+    if $::operatingsystem == "Redhat" {
+      #Support gems and packages to allow rhc tools to run within SCL environment
+      ensure_resource( 'package', 'ruby193-rubygem-net-ssh' , { ensure => present })
+      ensure_resource( 'package', 'ruby193-rubygem-archive-tar-minitar' , { ensure => present })
+      ensure_resource( 'package', 'ruby193-rubygem-commander' , { ensure => present })
+          
+      exec { 'gems to enable rhc in scl-193':
+        command => '/usr/bin/scl enable ruby193 "gem install rspec --version 1.3.0 --no-rdoc --no-ri" ; \
+          /usr/bin/scl enable ruby193 "gem install fakefs --no-rdoc --no-ri" ; \
+          /usr/bin/scl enable ruby193 "gem install httpclient --version 2.3.2 --no-rdoc --no-ri" ;'
+      }
+    }
+>>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
   }
 
   if $configure_firewall == true {
+    $firewall_package = $use_firewalld ? {
+      "true"  => "firewalld",
+      default => "system-config-firewall-base",
+    }
+    
+    ensure_resource( 'package', $firewall_package , {
+      ensure => present,
+      alias  => 'firewall-package',
+    })
+    
     exec { 'Open port for SSH':
       command => $use_firewalld ? {
         "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-service=ssh",
         default => "/usr/sbin/lokkit --service=ssh",
+<<<<<<< HEAD
       }
+=======
+      },
+      require => Package['firewall-package']
+>>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
     exec { 'Open port for HTTP':
       command => $use_firewalld ? {
         "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-service=http",
         default => "/usr/sbin/lokkit --service=http",
+<<<<<<< HEAD
       }
+=======
+      },
+      require => Package['firewall-package']
+>>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
     exec { 'Open port for HTTPS':
       command => $use_firewalld ? {
         "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-service=https",
         default => "/usr/sbin/lokkit --service=https",
+<<<<<<< HEAD
       }
+=======
+      },
+      require => Package['firewall-package']
+>>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
   }
 
@@ -345,10 +461,22 @@ class openshift_origin(
     augeas{ 'network setup' :
       context => '/files/etc/sysconfig/network-scripts/ifcfg-eth0',
       changes => [
-        'set PEERDNS no',
         "set DNS1 ${ipaddress}",
         "set HWADDR ${macaddress_eth0}",
       ]
+    }
+  }
+  
+  if $::operatingsystem == "Redhat" {
+    if ! defined(File['/etc/profile.d/scl193.sh']) {
+      file { '/etc/profile.d/scl193.sh':
+        ensure  => present,
+        path    => '/etc/profile.d/scl193.sh',
+        content => template('openshift_origin/rhel-scl-ruby193-env.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644'
+      }
     }
   }
 }

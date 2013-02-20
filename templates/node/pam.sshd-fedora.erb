@@ -14,3 +14,6 @@ session    optional     pam_keyinit.so force revoke
 session    include      password-auth
 session    include      postlogin
 session         required        pam_namespace.so no_unmount_on_close
+<%if scope.lookupvar('::openshift_origin::configure_cgroups') == true %>
+session     optional    pam_cgroup.so
+<%end%>

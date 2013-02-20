@@ -18,6 +18,7 @@ class openshift_origin::console {
     require => Package['openshift-origin-console']
   }
   
+<<<<<<< HEAD
   exec { 'Console gem dependencies' :
     cwd         => '/var/www/openshift/console/',
     command     => '/usr/bin/rm -f Gemfile.lock && \
@@ -26,6 +27,26 @@ class openshift_origin::console {
     /usr/bin/rm -rf tmp/cache/* && \
     /usr/bin/rake assets:precompile && \
     /usr/bin/chown -R apache:apache /var/www/openshift/console',
+=======
+  $console_asset_rake_cmd = $::operatingsystem ? {
+    'Fedora' => '/usr/bin/rake assets:precompile',
+    default  => '/usr/bin/scl enable ruby193 "rake assets:precompile"',
+  }
+  
+  $console_bundle_show = $::operatingsystem  ? {
+    "Fedora"  => '/usr/bin/bundle install',
+    default   => '/usr/bin/scl enable ruby193 "bundle show"',
+  }
+  
+  exec { 'Console gem dependencies' :
+    cwd         => '/var/www/openshift/console/',
+    command     => "${::openshift_origin::rm} -f Gemfile.lock && \
+    ${console_bundle_show} && \
+    ${::openshift_origin::chown} apache:apache Gemfile.lock && \
+    ${::openshift_origin::rm} -rf tmp/cache/* && \
+    ${console_asset_rake_cmd} && \
+    ${::openshift_origin::chown} -R apache:apache /var/www/openshift/console",
+>>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     subscribe   => [
       Package['openshift-origin-console'],
       Package['rubygem-openshift-origin-console'],

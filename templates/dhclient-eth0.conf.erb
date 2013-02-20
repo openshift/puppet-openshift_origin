@@ -1,3 +1,1 @@
-prepend domain-name-servers <%= broker_ipaddress %>;
-supersede host-name "<%= hostname %>";
-supersede domain-name "<%= domain %>";
+supersede domain-name-servers <%= scope.lookupvar('::openshift_origin::named_ipaddress') %>;

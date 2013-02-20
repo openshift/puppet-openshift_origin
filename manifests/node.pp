@@ -78,19 +78,30 @@ class openshift_origin::node{
 
   ensure_resource( 'package', 'git', { ensure  => present } )
   ensure_resource( 'package', 'make', { ensure  => present } )
+  ensure_resource( 'package', 'cronie', { ensure => present } )
 
   if $::openshift_origin::configure_firewall == true {
     exec { 'Open HTTP port for Node-webproxy':
       command => $use_firewalld ? {
         "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=8000/tcp",
         default => "/usr/sbin/lokkit --port=8000:tcp",
+<<<<<<< HEAD
       }
+=======
+      },
+      require => Package['firewall-package']
+>>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
     exec { 'Open HTTPS port for Node-webproxy':
       command => $use_firewalld ? {
         "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=8443/tcp",
         default => "/usr/sbin/lokkit --port=8443:tcp",
+<<<<<<< HEAD
       }
+=======
+      },
+      require => Package['firewall-package']
+>>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
   }else{
     warning 'Please ensure that ports 80, 443, 8000, 8443 are open for web requests'
@@ -141,17 +152,36 @@ class openshift_origin::node{
       require => Package['mcollective'],
     }
   }
+  
+  if $::operatingsystem == "Redhat" {
+    if ! defined(File['mcollective env']) {
+      file { 'mcollective env':
+        ensure  => present,
+        path    => '/etc/sysconfig/mcollective',
+        content => template('openshift_origin/rhel-scl-ruby193-env.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => Package['mcollective'],
+      }
+    }
+  }
 
   if $::openshift_origin::configure_fs_quotas == true {
     exec { 'Initialize quota DB':
       command => "/usr/sbin/oo-init-quota",
       creates => "${gear_root_mount}/aquota.user",
+<<<<<<< HEAD
+=======
+      require => Package['openshift-origin-node-util'],
+>>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
   }else{
     warning 'Please ensure that quotas are enabled for /var/lib/openshift'
   }
 
   if $::openshift_origin::configure_cgroups == true {
+<<<<<<< HEAD
     if $::operatingsystem == "Fedora" {
       file { 'fedora cgroups config':
         ensure  => present,
@@ -187,9 +217,10 @@ class openshift_origin::node{
       mode    => '0644',
     }
 
+=======
+>>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     if $::openshift_origin::enable_network_services == true {
       service { [
-        'cgconfig',
         'cgred',
         'openshift-cgroups',
         'openshift-port-proxy',
@@ -201,6 +232,20 @@ class openshift_origin::node{
           Package['openshift-origin-port-proxy']
         ],
         enable  => true,
+      }
+      
+      if $::operatingsystem == "Redhat" {
+        service { [
+          'cgconfig',
+        ]:
+          require => [
+            Package['rubygem-openshift-origin-node'],
+            Package['openshift-origin-node-util'],
+            Package['openshift-origin-node-proxy'],
+            Package['openshift-origin-port-proxy']
+          ],
+          enable  => true,
+        }        
       }
     }else{
       warning 'Please ensure that cgconfig, cgred, openshift-cgroups, openshift-port-proxy are running on all nodes'
@@ -217,15 +262,7 @@ class openshift_origin::node{
       ],
     }
   }else{
-    warning 'Please enable that cgroups are enabled with the following mount points:'
-    warning 'cpuset  = /cgroup/cpuset;'
-    warning 'cpu     = /cgroup/all;'
-    warning 'cpuacct = /cgroup/all;'
-    warning 'memory  = /cgroup/all;'
-    warning 'devices = /cgroup/devices;'
-    warning 'freezer = /cgroup/all;'
-    warning 'net_cls = /cgroup/all;'
-    warning 'blkio   = /cgroup/blkio;'
+    warning 'CGroups disabled'
   }
 
   if $::openshift_origin::configure_pam == true {
@@ -345,17 +382,25 @@ class openshift_origin::node{
     mode    => '0644',
   }
 
+  $printf = $::operatingsystem ? {
+    'Fedora' => '/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"',
+    default  => '/usr/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"'
+  }
   exec { 'Update sshd configs':
-    command => '/bin/echo \'AcceptEnv GIT_SSH\' >> \'/etc/ssh/sshd_config\'',
+    command => $printf,
     unless  => '/bin/grep -qFx \'AcceptEnv GIT_SSH\' \'/etc/ssh/sshd_config\''
   }
 
   if $::openshift_origin::enable_network_services == true {
-    service { 'crond': enable  => true }
+    service { 'crond': 
+      enable  => true,
+      require => Package['cronie']
+    }
 
     $openshift_init_provider = $::operatingsystem ? {
       'Fedora' => 'systemd',
-      default  => ''
+      'Centos' => 'systemd',
+      default  => 'redhat',
     }
 
     service { ['openshift-gears', 'openshift-node-web-proxy']:
@@ -406,6 +451,29 @@ class openshift_origin::node{
     }
     default: {
       #no changes required
+    }
+  }
+
+  if ($::openshift_origin::configure_broker == true and $::openshift_origin::configure_node == true) {
+    file { 'broker and console route for node':
+      ensure   => present,
+      path     => '/tmp/nodes.broker_routes.txt',
+      content  => template('openshift_origin/node/node_routes.txt.erb'),
+      owner    => 'root',
+      group    => 'apache',
+      mode     => '0640',
+      require  => Package['rubygem-openshift-origin-node'],
+    }
+
+    exec { 'regen node routes':
+      command     => "$::openshift_origin::cat /etc/httpd/conf.d/openshift/nodes.txt /tmp/nodes.broker_routes.txt > /etc/httpd/conf.d/openshift/nodes.txt.new && \
+                      $::openshift_origin::mv /etc/httpd/conf.d/openshift/nodes.txt.new /etc/httpd/conf.d/openshift/nodes.txt && \
+                      $::openshift_origin::httxt2dbm -f DB -i /etc/httpd/conf.d/openshift/nodes.txt -o /etc/httpd/conf.d/openshift/nodes.db.new && \
+                      $::openshift_origin::chown root:apache /etc/httpd/conf.d/openshift/nodes.txt /etc/httpd/conf.d/openshift/nodes.db.new && \
+                      $::openshift_origin::chmod 750 /etc/httpd/conf.d/openshift/nodes.txt /etc/httpd/conf.d/openshift/nodes.db.new && \
+                      $::openshift_origin::mv -f /etc/httpd/conf.d/openshift/nodes.db.new /etc/httpd/conf.d/openshift/nodes.db",
+      unless      => "$::openshift_origin::grep '__default__/broker' /etc/httpd/conf.d/openshift/nodes.txt 2>/dev/null",
+      require     => File['broker and console route for node'],
     }
   }
 

@@ -1,6 +1,6 @@
 name 'openshift-openshift_origin'
-version '0.1.0'
-source 'git://github.com/kraman/puppet-openshift_origin.git'
+version '0.1.1'
+source 'git://github.com/openshift/puppet-openshift_origin.git'
 author 'Mojo Lingo, Red Hat'
 license 'ASL'
 summary 'Module for installing Red Hat Openshift'

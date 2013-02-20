@@ -1,6 +1,6 @@
 class openshift_origin::mongo{
-  ensure_resource( 'package', 'mongodb', { ensure  => present })
-  ensure_resource( 'package', 'mongodb-server', { ensure  => present })
+  ensure_resource( 'package', 'mongodb', { ensure  => present, require => Yumrepo['openshift-origin-deps'], })
+  ensure_resource( 'package', 'mongodb-server', { ensure  => present, require => Yumrepo['openshift-origin-deps'], })
 
   file { 'Temporarily Disable mongo auth':
     ensure  => present,
@@ -13,14 +13,14 @@ class openshift_origin::mongo{
   }
 
   exec { 'start mongodb':
-    command     => "/bin/rm -rf /var/log/mongodb/mongodb.log && \
-     /usr/sbin/service mongod restart ; \
-     /usr/bin/touch /var/log/mongodb/mongodb.log && \
-     /usr/bin/chown mongodb:mongodb /var/log/mongodb/mongodb.log ; \
+    command     => "${::openshift_origin::rm} -rf /var/log/mongodb/mongodb.log && \
+     ${::openshift_origin::service} mongod restart ; \
+     ${::openshift_origin::touch} /var/log/mongodb/mongodb.log && \
+     ${::openshift_origin::chown} mongodb:mongodb /var/log/mongodb/mongodb.log ; \
      /bin/fgrep '[initandlisten] waiting for connections' /var/log/mongodb/mongodb.log ; \
      while [ ! $? -eq 0 ] ; \
        do sleep 2 ; \
-       /usr/bin/echo '.' ; \
+       ${::openshift_origin::echo} '.' ; \
        /bin/fgrep '[initandlisten] waiting for connections' /var/log/mongodb/mongodb.log ; \
      done",
     refreshonly => true,
@@ -51,8 +51,8 @@ class openshift_origin::mongo{
 
   exec { 're-enable mongo':
     command     =>
-      "/usr/bin/echo 'auth = true' >> /etc/mongodb.conf && \
-      /usr/sbin/service mongod restart",
+      "${::openshift_origin::echo} 'auth = true' >> /etc/mongodb.conf && \
+      ${::openshift_origin::service} mongod restart",
     refreshonly => true,
     require => [Package['mongodb'],Package['mongodb-server']],
   }
@@ -71,7 +71,11 @@ class openshift_origin::mongo{
         "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=27017/tcp",
         default => "/usr/sbin/lokkit --port=27017:tcp",
       },
+<<<<<<< HEAD
       require => [Package['mongodb'],Package['mongodb-server']],
+=======
+      require => [Package['mongodb'],Package['mongodb-server'],Package['firewall-package']],
+>>>>>>> ae20669af83baad7fc3709e475197e91006b45eb
     }
   }
 }
