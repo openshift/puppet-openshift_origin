@@ -296,7 +296,7 @@ class openshift_origin::broker {
     })
   
     ensure_resource( 'package', 'rest-client', {
-      ensure   => '1.6.7',
+      ensure   => '1.6.1',
       provider => 'gem',
     })
   

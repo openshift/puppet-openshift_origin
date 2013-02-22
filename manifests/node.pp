@@ -172,6 +172,7 @@ class openshift_origin::node{
   if $::openshift_origin::configure_cgroups == true {
     if $::openshift_origin::enable_network_services == true {
       service { [
+        'cgconfig',
         'cgred',
         'openshift-cgroups',
         'openshift-port-proxy',
@@ -183,20 +184,6 @@ class openshift_origin::node{
           Package['openshift-origin-port-proxy']
         ],
         enable  => true,
-      }
-      
-      if $::operatingsystem == "Redhat" {
-        service { [
-          'cgconfig',
-        ]:
-          require => [
-            Package['rubygem-openshift-origin-node'],
-            Package['openshift-origin-node-util'],
-            Package['openshift-origin-node-proxy'],
-            Package['openshift-origin-port-proxy']
-          ],
-          enable  => true,
-        }        
       }
     }else{
       warning 'Please ensure that cgconfig, cgred, openshift-cgroups, openshift-port-proxy are running on all nodes'
