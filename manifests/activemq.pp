@@ -1,12 +1,43 @@
-class openshift_origin::activemq{
-  ensure_resource( 'package', 'activemq', {
+# == Class: openshift_origin::activemq
+#
+# Install and configure ActiveMQ for OpenShift Origin.
+#
+# === Parameters
+#
+# None
+#
+# === Examples
+#
+#  include openshift_origin::activemq
+#
+# === Copyright
+#
+# Copyright 2013 Mojo Lingo LLC.
+# Copyright 2013 Red Hat, Inc.
+#
+# === License
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+class openshift_origin::activemq {
+  include openshift_origin::params
+  ensure_resource('package', 'activemq', {
       ensure  => latest,
       require => Yumrepo[openshift-origin-deps],
     }
   )
 
-  ensure_resource( 'package', 'activemq-client',
-    {
+  ensure_resource('package', 'activemq-client', {
       ensure  => present,
       require => Yumrepo[openshift-origin-deps],
     }
@@ -23,12 +54,11 @@ class openshift_origin::activemq{
         require => Package['activemq'],
       }
     }
-    default : {
-    }
+    default  : {}
   }
-  
+
   file { '/var/run/activemq/':
-    ensure => 'directory',
+    ensure  => 'directory',
     owner   => 'activemq',
     group   => 'activemq',
     mode    => '0750',
@@ -63,24 +93,27 @@ class openshift_origin::activemq{
   }
 
   if $::openshift_origin::enable_network_services == true {
-    ensure_resource( 'service', 'activemq', {
-      require    => [
-        File['activemq.xml config'],
-        File['jetty.xml config'],
-        File['jetty-realm.properties config'],
-      ],
-      hasstatus  => true,
-      hasrestart => true,
-      enable     => true,
-    })
+    ensure_resource('service', 'activemq', {
+        require    => [
+          File['activemq.xml config'],
+          File['jetty.xml config'],
+          File['jetty-realm.properties config'],
+        ],
+        hasstatus  => true,
+        hasrestart => true,
+        enable     => true,
+      }
+    )
   }
-  
+
   if $::openshift_origin::configure_firewall == true {
+    $activemq_port = $::use_firewalld ? {
+      true    => '61613/tcp',
+      default => '61613:tcp',
+    }
+
     exec { 'Open port for ActiveMQ':
-      command => $use_firewalld ? {
-        "true"    => "/usr/bin/firewall-cmd --permanent --zone=public --add-port=61613/tcp",
-        default => "/usr/sbin/lokkit --port=61613:tcp",
-      },
+      command => "${openshift_origin::params::firewall_port_cmd}${activemq_port}",
       require => Package['firewall-package']
     }
   }
