@@ -1,8 +1,8 @@
 $keyfile="/var/named/Kexample.com.*.key"
 $key=inline_template("<%=File.read(Dir.glob(keyfile)[0]).strip.split(' ')[7]%>")
 class { "openshift_origin" :
-  node_fqdn                  => "${hostname}.${domain}",
-  cloud_domain               => "example.com",
+  node_fqdn                  => "broker.roguecloud.com",
+  cloud_domain               => "roguecloud.com",
   named_tsig_priv_key        => $key,
   dns_servers                => ["8.8.8.8"],
   os_unmanaged_users         => ["vagrant"],

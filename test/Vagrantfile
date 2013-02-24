@@ -7,7 +7,8 @@ Vagrant::Config.run do |config|
   config.vm.forward_port 80, 80
   config.vm.forward_port 443, 443
   config.vm.forward_port 53, 53
-  config.vm.host_name = 'broker.example.com'
+  config.vm.network :hostonly, "192.168.50.13" 
+  config.vm.host_name = 'broker.rogue-cloud.com'
   
   config.vm.share_folder "manifests", "/home/vagrant/manifests", "manifests"
   config.vm.provision :shell, :inline => %{ \
