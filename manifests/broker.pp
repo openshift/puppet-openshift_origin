@@ -475,7 +475,7 @@ class openshift_origin::broker {
     )
   }
 
-  if $::operatingsystem == 'RedHat' {
+  if ($::operatingsystem == "RedHat" or $::operatingsystem == "CentOS") {
     ensure_resource('package', 'ruby193-rubygem-actionmailer', {
         ensure => 'latest',
         alias  => 'actionmailer',
