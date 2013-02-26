@@ -4,7 +4,7 @@ class { "openshift_origin" :
   node_fqdn                  => "broker.roguecloud.com",
   cloud_domain               => "roguecloud.com",
   named_tsig_priv_key        => $key,
-  dns_servers                => ["8.8.8.8"],
+  dns_servers                => ["192.168.50.13"],
   os_unmanaged_users         => ["vagrant"],
   enable_network_services    => true,
   configure_firewall         => true,
