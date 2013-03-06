@@ -98,61 +98,61 @@ class openshift_origin::broker {
     }
   )
 
-  ensure_resource( 'package', 'mod_passenger', {
-    ensure  => present,
-    require => Yumrepo[openshift-origin-deps]
+  ensure_resource('package', 'mod_passenger', {
+      ensure  => present,
+      require => Yumrepo[openshift-origin-deps],
     }
   )
 
-  if $::operatingsystem == "Fedora" {
-    ensure_resource( 'package', 'actionmailer', {
+  if $::operatingsystem == 'Fedora' {
+    ensure_resource('package', 'actionmailer', {
         ensure   => '3.2.11',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'actionpack', {
-        ensure   => '3.2.11',
-        provider => 'gem',
-      }
-    ) 
-  
-    ensure_resource( 'package', 'activemodel', {
+
+    ensure_resource('package', 'actionpack', {
         ensure   => '3.2.11',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'activerecord', {
+
+    ensure_resource('package', 'activemodel', {
         ensure   => '3.2.11',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'activeresource', {
+
+    ensure_resource('package', 'activerecord', {
         ensure   => '3.2.11',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'activesupport', {
+
+    ensure_resource('package', 'activeresource', {
         ensure   => '3.2.11',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'arel', {
+
+    ensure_resource('package', 'activesupport', {
+        ensure   => '3.2.11',
+        provider => 'gem',
+      }
+    )
+
+    ensure_resource('package', 'arel', {
         ensure   => '3.0.2',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'bigdecimal', {
+
+    ensure_resource('package', 'bigdecimal', {
         ensure   => '1.1.0',
         provider => 'gem',
       }
     )
-    ensure_resource( 'package', 'bson', {
+    ensure_resource('package', 'bson', {
         ensure   => '1.8.2',
         provider => 'gem',
         require  => [
@@ -161,314 +161,314 @@ class openshift_origin::broker {
         ],
       }
     )
-  
-    ensure_resource( 'package', 'bson_ext', {
+
+    ensure_resource('package', 'bson_ext', {
         ensure   => '1.8.2',
         provider => 'gem',
         require  => [
           Package['ruby-devel'],
           Package['mongodb-devel'],
-        ]
+        ],
       }
     )
-  
-    ensure_resource( 'package', 'builder', {
+
+    ensure_resource('package', 'builder', {
         ensure   => '3.0.4',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'bundler', {
+
+    ensure_resource('package', 'bundler', {
         ensure   => '1.1.4',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'cucumber', {
+
+    ensure_resource('package', 'cucumber', {
         ensure   => '1.1.9',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'diff-lcs', {
+
+    ensure_resource('package', 'diff-lcs', {
         ensure   => '1.1.2',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'dnsruby', {
+
+    ensure_resource('package', 'dnsruby', {
         ensure   => '1.53',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'erubis', {
+
+    ensure_resource('package', 'erubis', {
         ensure   => '2.7.0',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'gherkin', {
+
+    ensure_resource('package', 'gherkin', {
         ensure   => '2.9.3',
         provider => 'gem',
-        require  => Package['ruby-devel']
+        require  => Package['ruby-devel'],
       }
     )
-  
-    ensure_resource( 'package', 'hike', {
+
+    ensure_resource('package', 'hike', {
         ensure   => '1.2.1',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'i18n', {
+
+    ensure_resource('package', 'i18n', {
         ensure   => '0.6.1',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'journey', {
+
+    ensure_resource('package', 'journey', {
         ensure   => '1.0.4',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'json', {
+
+    ensure_resource('package', 'json', {
         ensure   => '1.7.6',
         provider => 'gem',
-        require  => Package['ruby-devel']
+        require  => Package['ruby-devel'],
       }
     )
-  
-    ensure_resource( 'package', 'mail', {
+
+    ensure_resource('package', 'mail', {
         ensure   => '2.4.4',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'metaclass', {
+
+    ensure_resource('package', 'metaclass', {
         ensure   => '0.0.1',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'mime-types', {
+
+    ensure_resource('package', 'mime-types', {
         ensure   => '1.20.1',
         provider => 'gem',
       }
     )
-    
-    ensure_resource( 'package', 'minitest', {
+
+    ensure_resource('package', 'minitest', {
         ensure   => '3.2.0',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'mocha', {
+
+    ensure_resource('package', 'mocha', {
         ensure   => '0.12.1',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'mongo', {
+
+    ensure_resource('package', 'mongo', {
         ensure   => '1.8.2',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'mongoid', {
+
+    ensure_resource('package', 'mongoid', {
         ensure   => '3.0.21',
         provider => 'gem',
       }
     )
-    
-    ensure_resource( 'package', 'moped', {
+
+    ensure_resource('package', 'moped', {
         ensure   => '1.3.2',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'multi_json', {
+
+    ensure_resource('package', 'multi_json', {
         ensure   => '1.5.0',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'netrc', {
+
+    ensure_resource('package', 'netrc', {
         ensure   => '0.7.1',
         provider => 'gem',
       }
     )
-    
-    ensure_resource( 'package', 'open4', {
+
+    ensure_resource('package', 'open4', {
         ensure   => '1.3.0',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'origin', {
+
+    ensure_resource('package', 'origin', {
         ensure   => '1.0.11',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'parseconfig', {
+
+    ensure_resource('package', 'parseconfig', {
         ensure   => '0.5.2',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'polyglot', {
+
+    ensure_resource('package', 'polyglot', {
         ensure   => '0.3.3',
         provider => 'gem',
       }
     )
-  
-      ensure_resource( 'package', 'rack', {
+
+    ensure_resource('package', 'rack', {
         ensure   => '1.4.4',
         provider => 'gem',
       }
     )
-  
-      ensure_resource( 'package', 'rack-cache', {
+
+    ensure_resource('package', 'rack-cache', {
         ensure   => '1.2',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'rack-ssl', {
+
+    ensure_resource('package', 'rack-ssl', {
         ensure   => '1.3.3',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'rack-test', {
+
+    ensure_resource('package', 'rack-test', {
         ensure   => '0.6.2',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'rails', {
+
+    ensure_resource('package', 'rails', {
         ensure   => '3.2.11',
         provider => 'gem',
       }
     )
-    
-    ensure_resource( 'package', 'railties', {
+
+    ensure_resource('package', 'railties', {
         ensure   => '3.2.11',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'rake', {
+
+    ensure_resource('package', 'rake', {
         ensure   => '0.9.2.2',
         provider => 'gem',
       }
     )
-    
-    ensure_resource( 'package', 'rdoc', {
+
+    ensure_resource('package', 'rdoc', {
         ensure   => '3.12',
         provider => 'gem',
       }
     )
-    
-    ensure_resource( 'package', 'mysql', {
+
+    ensure_resource('package', 'mysql', {
         provider => 'gem',
-        require  => [Package['ruby-devel'],Package['mysql-devel']]
+        require  => [Package['ruby-devel'], Package['mysql-devel']]
       }
     )
-  
-    ensure_resource( 'package', 'regin', {
+
+    ensure_resource('package', 'regin', {
         ensure   => '0.3.8',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'rest-client', {
+
+    ensure_resource('package', 'rest-client', {
         ensure   => '1.6.1',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'simplecov', {
+
+    ensure_resource('package', 'simplecov', {
         ensure   => '0.7.1',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'simplecov-html', {
+
+    ensure_resource('package', 'simplecov-html', {
         ensure   => '0.7.1',
         provider => 'gem',
       }
     )
-    
-    ensure_resource( 'package', 'sprockets', {
+
+    ensure_resource('package', 'sprockets', {
         ensure   => '2.2.2',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'state_machine', {
+
+    ensure_resource('package', 'state_machine', {
         ensure   => '1.1.2',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'stomp', {
+
+    ensure_resource('package', 'stomp', {
         ensure   => '1.2.2',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'systemu', {
+
+    ensure_resource('package', 'systemu', {
         ensure   => '2.5.2',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'term-ansicolor', {
+
+    ensure_resource('package', 'term-ansicolor', {
         ensure   => '1.0.7',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'thor', {
+
+    ensure_resource('package', 'thor', {
         ensure   => '0.17.0',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'tilt', {
+
+    ensure_resource('package', 'tilt', {
         ensure   => '1.3.3',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'treetop', {
+
+    ensure_resource('package', 'treetop', {
         ensure   => '1.4.12',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'tzinfo', {
+
+    ensure_resource('package', 'tzinfo', {
         ensure   => '0.3.35',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'xml-simple', {
+
+    ensure_resource('package', 'xml-simple', {
         ensure   => '1.1.2',
         provider => 'gem',
       }
     )
-    
-    ensure_resource( 'package', 'webmock', {
+
+    ensure_resource('package', 'webmock', {
         ensure   => '1.9.0',
         provider => 'gem',
       }
     )
-  
-    ensure_resource( 'package', 'fakefs', {
+
+    ensure_resource('package', 'fakefs', {
         ensure   => '0.4.2',
         provider => 'gem',
       }
@@ -521,7 +521,7 @@ class openshift_origin::broker {
     ensure_resource('package', 'ruby193-rubygem-bigdecimal', {
       ensure => 'latest',
       alias  => 'bigdecimal',
-      }
+    }
     )
 
     ensure_resource('package', 'ruby193-rubygem-bson', {
@@ -534,7 +534,7 @@ class openshift_origin::broker {
       }
     )
 
-   ensure_resource('package', 'ruby193-rubygem-bson_ext', {
+    ensure_resource('package', 'ruby193-rubygem-bson_ext', {
         ensure  => 'latest',
         alias   => 'bson_ext',
         require => [
@@ -982,7 +982,7 @@ class openshift_origin::broker {
       }
     }
     'basic-auth' : {
-      package { ['rubygem-openshift-origin-auth-remote-user']:
+      package { ['rubygem-openshift-origin-remote-user']:
         ensure  => present,
         require => Yumrepo[openshift-origin],
       }
@@ -993,7 +993,7 @@ class openshift_origin::broker {
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        require => Package['rubygem-openshift-origin-remote-user']
+        require => Package['rubygem-openshift-origin-auth-remote-user']
       }
 
       file { 'Auth plugin config':
