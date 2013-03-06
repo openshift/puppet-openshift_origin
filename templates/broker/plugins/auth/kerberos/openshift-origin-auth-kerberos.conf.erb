@@ -7,9 +7,9 @@ LoadModule authz_user_module modules/mod_authz_user.so
     AuthType Kerberos
     KrbMethodNegotiate On
     KrbMethodK5Passwd On
-    KrbServiceName HTTP
-    KrbAuthRealms <%= scope.lookupvar('::openshift_origin::ipa::realm') %>
-    Krb5KeyTab /<%= scope.lookupvar('::openshift_origin::ipa::keytab') %>
+    KrbServiceName HTTP/<%= scope.lookupvar('::openshift_origin::kerberos_service') %>
+    KrbAuthRealms <%= scope.lookupvar('::openshift_origin::kerberos_realm') %>
+    Krb5KeyTab <%= scope.lookupvar('::openshift_origin::kerberos_keytab') %>
     Require valid-user
 
     # The node->broker auth is handled in the Ruby code

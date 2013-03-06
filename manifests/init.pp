@@ -188,12 +188,16 @@ class openshift_origin(
   $configure_cgroups          = true,
   $configure_pam              = true,
 
-  $broker_auth_plugin         = 'mongo',
+  $broker_auth_plugin         = 'kerberos',
   $broker_auth_pub_key        = '',
   $broker_auth_priv_key       = '',
   $broker_auth_key_password   = '',
   $broker_auth_salt           = 'ClWqe5zKtEW4CJEMyjzQ',
   $broker_rsync_key           = '',
+  # for kerberos
+  $kerberos_keytab         = '/var/www/openshift/broker/httpd/conf.d/http.keytab',
+  $kerberos_realm          = 'EXAMPLE.COM',
+  $kerberos_service        = $node_fqdn,
 
   $mq_provider                = 'activemq',
   $mq_server_user             = 'mcollective',

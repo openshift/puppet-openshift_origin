@@ -851,8 +851,42 @@ class openshift_origin::broker {
         ]
       }
     }
-    'ipa': {
-      include openshift_origin::ipa
+    'kerberos': {
+      package { ['rubygem-openshift-origin-auth-remote-user']:
+        ensure => present,
+        require => Yumrepo[openshift-origin],
+      }
+      file {'${::openshift_origin::kerberos_keytab}':
+        ensure => file,
+        owner => 'apache',
+        group => 'apache',
+        mode => '0644',
+        require => Package['rubygem-openshift-origin-auth-remote-user']
+      }
+      file {'openshift broker kerberos':
+        path => '/var/www/openshift/broker/httpd/openshift-origin-auth-kerberos.conf',
+        content => 
+          template('openshift_origin/broker/plugins/auth/kerberos/openshift-origin-auth-kerberos.erb'),
+        owner => 'apache',
+        group => 'apache',
+        mode => '0644',
+        require => [
+          Package['rubygem-openshift-origin-auth-remote-user'],
+          File['${::openshift_origin::kerberos_keytab']
+        ]
+      }
+      file {'openshift console kerberos':
+        path => '/var/www/openshift/console/httpd/openshift-origin-auth-kerberos.conf',
+        content =>
+          template('openshift_orign/console/openshift-origin-auth-kerberos.conf'),
+        owner => 'apache',
+        group => 'apache',
+        mode => '0644',
+        require => [
+          Package['rubygem-openshift-origin-auth-remote-user'],
+          File['${::openshift_origin::kerberos_keytab']
+        ]
+      }
     }
     default: {
       fail "Unknown Auth plugin ${::openshift_origin::broker_auth_plugin}"
