@@ -29,7 +29,7 @@ The module can be obtained from the
 
 1. Download the [Zip file from github](https://github.com/kraman/puppet-openshift_origin/archive/master.zip)
 1. Upload the Zip file to your Puppet Master.
-1. Unzip the file.  This will create a new directory called puppet-openshift_origin-<commit hash>
+1. Unzip the file.  This will create a new directory called puppet-openshift_origin-{commit hash}
 1. Rename this directory to just `openshift_origin` and place it in your
 	   [modulepath](http://docs.puppetlabs.com/learning/modules1.html#modules).
 
@@ -43,23 +43,37 @@ this class.
 
 [Using Parameterized Classes](http://docs.puppetlabs.com/guides/parameterized_classes.html)
 
-Declaration example:
+Example: Single host (broker+console+node) which uses the Avahi MDNS and mongo Auth plugin:
 
 ```puppet
-  class { 'openshift_origin':
-	  configure_ntp              => true,
-	  configure_activemq         => true,
-	  configure_qpid             => false,
-	  configure_mongodb          => true,
-	  configure_named            => true,
-	  configure_broker           => true,
-	  configure_node             => true,
-  }
+class { 'openshift_origin' :
+  node_fqdn                  => "${hostname}.${domain}",
+  cloud_domain               => 'openshift.local',
+  dns_servers                => ['8.8.8.8'],
+  os_unmanaged_users         => [],
+  enable_network_services    => true,
+  configure_firewall         => true,
+  configure_ntp              => true,
+  configure_activemq         => true,
+  configure_mongodb          => true,
+  configure_named            => false,
+  configure_avahi            => true,
+  configure_broker           => true,
+  configure_node             => true,
+  development_mode           => true,
+  update_network_dns_servers => false,
+  avahi_ipaddress            => '127.0.0.1',
+  broker_dns_plugin          => 'avahi',
+}
 ```
 
 ## Parameters
 
 The following lists all the class parameters the `openshift_origin` class accepts.
+
+### node_fqdn
+
+The FQDN for this host
 
 ### create_origin_yum_repos
 
@@ -71,7 +85,7 @@ True if OpenShift Client tools be installed on this node.
 
 ### enable_network_services
 
-True if all support services be enabled. False if they are enabled by other classes in your recipe.
+True if all support services be enabled. False if they are enabled by other classes in your catalog.
 
 ### configure_firewall
 
@@ -79,7 +93,7 @@ True if firewall should be configured for this node (Will blow away any existing
 
 ### configure_ntp
 
-True if NTP should be configured on this node. False if ntp is configured by other classes in your recipe.
+True if NTP should be configured on this node. False if ntp is configured by other classes in your catalog.
 
 ### configure_activemq
 
@@ -97,17 +111,34 @@ True if Mongo DB should be installed and configured on this node.
 
 True if a Bind server should be configured and run on this node.
 
+### configure_avahi
+
+True if a Avahi server should be configured and run on this node. (This is an alternative to named. Only one should be enabled)
+
 ### configure_broker
 
 True if an OpenShift Origin broker should be installed and configured on this node.
 
+### configure_console
+
+True if an OpenShift Origin console should be installed and configured on this node.
+
 ### configure_node
 
 True if an OpenShift Origin node should be installed and configured on this node.
-                            
+
+### install_repo
+
+The YUM repository to use when installing OpenShift Origin packages. Specify `nightlies` to pull latest nightly
+build or provide a URL for another YUM repository.
+
 ### named_ipaddress
 
 IP Address of DNS Bind server (If running on a different node)
+
+### avahi_ipaddress
+
+IP Address of Avahi MDNS server (If running on a different node)
 
 ### mongodb_fqdn
 
@@ -123,50 +154,49 @@ FQDN of node running the OpenShift OpenShift broker server (If running on a diff
 
 ### cloud_domain
 
-DNS suffix for applications running on this PaaS. 
-Eg. cloud.example.com
-	Applications will be <app>-<namespace>.cloud.example.com
-       
+DNS suffix for applications running on this PaaS. Eg. `cloud.example.com` applications will be
+`<app>-<namespace>.cloud.example.com`
+  
+### dns_servers
+
+Array of DNS servers to use when configuring named forwarding. Defaults to `['8.8.8.8', '8.8.4.4']`
+
 ### configure_fs_quotas
 
-Enables quotas on the local node. Applicable only to OpenShift OpenShift Nodes.
-If this setting is set to false, it is expected that Quotas are configured elsewhere in the
-Puppet recipe
+Enables quotas on the local node. Applicable only to OpenShift OpenShift Nodes.  If this setting is set to false, it is expected
+that Quotas are configured elsewhere in the Puppet catalog
 
 ### oo_device
 
-Device on which gears are stored (/var/lib/openshift)
+Device on which gears are stored (`/var/lib/openshift`)
 
 ### oo_mount
 
-Base mount point for /var/lib/openshift directory
-                            
+Base mount point for `/var/lib/openshift directory`
+
 ### configure_cgroups
 
-Enables cgoups on the local node. Applicable only to OpenShift OpenShift Nodes.
-If this setting is set to false, it is expected that cgroups are configured elsewhere in the
-Puppet recipe
+Enables cgoups on the local node. Applicable only to OpenShift OpenShift Nodes. If this setting is set to false, it is expected
+that cgroups are configured elsewhere in the Puppet catalog
 
 ### configure_pam
 
-Updates PAM settings on the local node to secure gear logins. Applicable only to
-OpenShift OpenShift Nodes. If this setting is set to false, it is expected that 
-cgroups are configured elsewhere in the Puppet recipe
+Updates PAM settings on the local node to secure gear logins. Applicable only to OpenShift OpenShift Nodes. If this setting is
+set to false, it is expected that cgroups are configured elsewhere in the Puppet catalog
 
 ### broker_auth_plugin
 
-The authentication plugin to use with the OpenShift OpenShift Broker. Supported
-values are 'mongo' and 'basic-auth'
+The authentication plugin to use with the OpenShift OpenShift Broker. Supported values are `'mongo'` and
+`'basic-auth'`
 
 ### broker_auth_pub_key
 
-Public key used to authenticate communication between node and broker. If left blank,
-this file is auto generated.
+Public key used to authenticate communication between node and broker. If left blank, this file is auto generated.
 
 ### broker_auth_priv_key
 
-Private key used to authenticate communication between node and broker. If 
-`broker_auth_pub_key` is left blank, this file is auto generated.
+Private key used to authenticate communication between node and broker. If `broker_auth_pub_key` is left blank, this
+file is auto generated.
 
 ### broker_auth_key_password
 
@@ -178,12 +208,12 @@ Salt used to generate authentication tokens for communication between node and b
 
 ### broker_rsync_key
 
-TODO
+RSync Key used during move gear admin operations
 
 ### mq_provider
 
-Message queue plugin to configure for mcollecitve. Defaults to 'activemq'
-Acceptable values are 'activemq', 'stomp' and 'qpid'
+Message queue plugin to configure for mcollecitve. Defaults to `'activemq'` Acceptable values are
+`'activemq'`, `'stomp'` and `'qpid'`
 
 ### mq_server_user
 
@@ -197,36 +227,35 @@ Password to authenticate against message queue server
 
 User to authenticate against Mongo DB server
 
-### mongo_auth_password
-
-Password to authenticate against Mongo DB server
-
 ### mongo_db_name
 
 name of the MongoDB database
 
+### mongo_auth_password
+
+Password to authenticate against Mongo DB server
+
 ### named_tsig_priv_key
 
-TSIG signature to authenticate against the Bind DNS server.
-                            
+TSIG signature to authenticate against the Bind DNS server.  
+
+### os_unmanaged_users
+
+List of users with UID which should not be managed by OpenShift. (By default OpenShift Origin PAM will reserve all 
+UID's > 500 and prevent user logins)
+
 ### update_network_dns_servers
 
-True if Bind DNS server specified in `named_ipaddress` should be added as first DNS server
-for application name resolution.
+True if Bind DNS server specified in `named_ipaddress` should be added as first DNS server for application name.
+resolution. (This should be false if using Avahi for MDNS updates)
+
+### development_mode
+
+Set to true to enable development mode and detailed logging
+
 
 Known Issues
 ============
-
-## Ruby
-
-The ruby runtime currently distributed with Fedora 17 (1.9.3.362-24.fc17) has some issues which causes
-mcollective to arbitrarily disconnect from the message queue server.
-
-Please update the ruby runtime from `updates-testing` repository
-
-```
-yum update --enablerepo updates-testing ruby ruby-libs ruby-irb ruby-devel
-```
 
 ## Facter
 

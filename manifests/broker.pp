@@ -30,12 +30,6 @@
 # limitations under the License.
 #
 class openshift_origin::broker {
-  if $openshift_origin::named_tsig_priv_key == '' {
-    warning "Generate the Key file with '/usr/sbin/dnssec-keygen -a HMAC-MD5 -b 512 -n USER -r /dev/urandom -K /var/named ${openshift_origin::cloud_domain}'"
-    warning "Use the last field in the generated key file /var/named/K${openshift_origin::cloud_domain}*.key"
-    fail 'named_tsig_priv_key is required.'
-  }
-
   ensure_resource('package', 'ruby-devel', {
       ensure => 'latest',
     }
@@ -64,6 +58,12 @@ class openshift_origin::broker {
   )
 
   ensure_resource('package', 'rubygem-openshift-origin-dns-nsupdate', {
+      ensure  => present,
+      require => Yumrepo[openshift-origin],
+    }
+  )
+
+  ensure_resource('package', 'rubygem-openshift-origin-dns-avahi', {
       ensure  => present,
       require => Yumrepo[openshift-origin],
     }
@@ -1013,14 +1013,41 @@ class openshift_origin::broker {
     }
   }
 
-  file { 'plugin openshift-origin-dns-nsupdate.conf':
-    path    => '/etc/openshift/plugins.d/openshift-origin-dns-nsupdate.conf',
-    content => template('openshift_origin/broker/plugins/dns/nsupdate/nsupdate.conf.erb'),
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
-    require => Package['rubygem-openshift-origin-dns-nsupdate'],
+  case $::openshift_origin::broker_dns_plugin {  
+    'nsupdate'   : {
+      if $openshift_origin::named_tsig_priv_key == '' {
+        warning "Generate the Key file with '/usr/sbin/dnssec-keygen -a HMAC-MD5 -b 512 -n USER -r /dev/urandom -K /var/named ${openshift_origin::cloud_domain}'"
+        warning "Use the last field in the generated key file /var/named/K${openshift_origin::cloud_domain}*.key"
+        fail 'named_tsig_priv_key is required.'
+      }
+      
+      file { 'plugin openshift-origin-dns-nsupdate.conf':
+        path    => '/etc/openshift/plugins.d/openshift-origin-dns-nsupdate.conf',
+        content => template('openshift_origin/broker/plugins/dns/nsupdate/nsupdate.conf.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => Package['rubygem-openshift-origin-dns-nsupdate'],
+      }
+    }
+    'avahi'      : {
+      file { 'plugin openshift-origin-dns-avahi.conf':
+        path    => '/etc/openshift/plugins.d/openshift-origin-dns-avahi.conf',
+        content => template('openshift_origin/broker/plugins/dns/avahi/avahi.conf.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => Package['rubygem-openshift-origin-dns-avahi'],
+      }
+    }
+    default      : {
+      fail "Unknown DNS plugin ${::openshift_origin::broker_dns_plugin}"
+    }
   }
+  
+
+
+  
 
   $broker_bundle_show = $::operatingsystem ? {
     'Fedora' => '/usr/bin/bundle show',

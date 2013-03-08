@@ -4,7 +4,8 @@
 # infrastructure. This is the only class that needs to be declared.
 #
 # === Parameters:
-#
+# [*node_fqdn*]
+#   The FQDN for this host
 # [*create_origin_yum_repos*]
 #   True if OpenShift Origin dependencies and OpenShift Origin nightly yum repositories should be created on this node.
 # [*install_client_tools*]
@@ -24,12 +25,22 @@
 #   True if Mongo DB should be installed and configured on this node.
 # [*configure_named*]
 #   True if a Bind server should be configured and run on this node.
+# [*configure_avahi*]
+#   True if a Avahi server should be configured and run on this node. (This is an alternative to named. Only one should be
+#   enabled)
 # [*configure_broker*]
 #   True if an OpenShift Origin broker should be installed and configured on this node.
+# [*configure_console*]
+#   True if an OpenShift Origin console should be installed and configured on this node.
 # [*configure_node*]
 #   True if an OpenShift Origin node should be installed and configured on this node.
+# [*install_repo*]
+#   The YUM repository to use when installing OpenShift Origin packages. Specify <code>nightlies</code> to pull latest nightly
+#   build or provide a URL for another YUM repository.
 # [*named_ipaddress*]
 #   IP Address of DNS Bind server (If running on a different node)
+# [*avahi_ipaddress*]
+#   IP Address of Avahi MDNS server (If running on a different node)
 # [*mongodb_fqdn*]
 #   FQDN of node running the MongoDB server (If running on a different node)
 # [*mq_fqdn*]
@@ -39,6 +50,8 @@
 # [*cloud_domain*]
 #   DNS suffix for applications running on this PaaS. Eg. <code>cloud.example.com</code> applications will be
 #   <code><app>-<namespace>.cloud.example.com</code>
+# [*dns_servers*]
+#   Array of DNS servers to use when configuring named forwarding. Defaults to <code>['8.8.8.8', '8.8.4.4']</code>
 # [*configure_fs_quotas*]
 #   Enables quotas on the local node. Applicable only to OpenShift OpenShift Nodes.  If this setting is set to false, it is expected
 #   that Quotas are configured elsewhere in the Puppet catalog
@@ -65,7 +78,7 @@
 # [*broker_auth_salt*]
 #   Salt used to generate authentication tokens for communication between node and broker.
 # [*broker_rsync_key*]
-#   TODO
+#   RSync Key used during move gear admin operations
 # [*mq_provider*]
 #   Message queue plugin to configure for mcollecitve. Defaults to <code>'activemq'</code> Acceptable values are
 #   <code>'activemq'</code>, <code>'stomp'</code> and <code>'qpid'</code>
@@ -75,15 +88,20 @@
 #   Password to authenticate against message queue server
 # [*mongo_auth_user*]
 #   User to authenticate against Mongo DB server
-# [*mongo_auth_password*]
-#   Password to authenticate against Mongo DB server
 # [*mongo_db_name*]
 #   name of the MongoDB database
+# [*mongo_auth_password*]
+#   Password to authenticate against Mongo DB server
 # [*named_tsig_priv_key*]
-#   TSIG signature to authenticate against the Bind DNS server.
+#   TSIG signature to authenticate against the Bind DNS server.  
+# [*os_unmanaged_users*]
+#   List of users with UID which should not be managed by OpenShift. (By default OpenShift Origin PAM will reserve all 
+#   UID's > 500 and prevent user logins)
 # [*update_network_dns_servers*]
-#   True if Bind DNS server specified in <code>named_ipaddress</code> should be added as first DNS server for application name
-#   resolution.
+#   True if Bind DNS server specified in <code>named_ipaddress</code> should be added as first DNS server for application name.
+#   resolution. (This should be false if using Avahi for MDNS updates)
+# [*development_mode*]
+#   Set to true to enable development mode and detailed logging
 #
 # === Copyright
 #
@@ -115,11 +133,13 @@ class openshift_origin (
   $configure_qpid             = false,
   $configure_mongodb          = true,
   $configure_named            = true,
+  $configure_avahi            = false,  
   $configure_broker           = true,
   $configure_console          = true,
   $configure_node             = true,
   $install_repo               = 'nightlies',
   $named_ipaddress            = $::ipaddress,
+  $avahi_ipaddress            = $::ipaddress,  
   $mongodb_fqdn               = $::fqdn,
   $mq_fqdn                    = $::fqdn,
   $broker_fqdn                = $::fqdn,
@@ -136,6 +156,7 @@ class openshift_origin (
   $broker_auth_key_password   = '',
   $broker_auth_salt           = 'ClWqe5zKtEW4CJEMyjzQ',
   $broker_rsync_key           = '',
+  $broker_dns_plugin          = 'nsupdate',  
   $mq_provider                = 'activemq',
   $mq_server_user             = 'mcollective',
   $mq_server_password         = 'marionette',
@@ -230,6 +251,10 @@ class openshift_origin (
 
   if $configure_named == true {
     include openshift_origin::named
+  }
+
+  if $configure_avahi == true {
+    include openshift_origin::avahi
   }
 
   if $create_origin_yum_repos == true {

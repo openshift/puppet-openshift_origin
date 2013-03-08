@@ -1,0 +1,14 @@
+#MDNS management server IP
+MDNS_SERVER=<%= scope.lookupvar('::openshift_origin::avahi_ipaddress') %>
+
+#MDNS management server port
+MDNS_PORT=8053
+
+#MDNS management server key name
+MDNS_KEYNAME=<%= scope.lookupvar('::hostname') %>
+
+#MDNS management server key value
+MDNS_KEYVALUE=<%= scope.lookupvar('::domain') %>
+
+#MDNS management server zone
+MDNS_ZONE=<%= scope.lookupvar('::openshift_origin::cloud_domain') %>
