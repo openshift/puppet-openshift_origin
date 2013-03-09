@@ -54,72 +54,67 @@ class openshift_origin::mongo {
       Package['mongodb-server'],
     ],
   }
-
-  exec { 'start mongodb':
-    command     => "${::openshift_origin::rm} -rf /var/log/mongodb/mongodb.log && \
-     ${::openshift_origin::service} mongod restart ; \
-     ${::openshift_origin::touch} /var/log/mongodb/mongodb.log && \
-     ${::openshift_origin::chown} mongodb:mongodb /var/log/mongodb/mongodb.log ; \
-     /bin/fgrep '[initandlisten] waiting for connections' /var/log/mongodb/mongodb.log ; \
-     while [ ! $? -eq 0 ] ; \
-       do sleep 2 ; \
-       ${::openshift_origin::echo} '.' ; \
-       /bin/fgrep '[initandlisten] waiting for connections' /var/log/mongodb/mongodb.log ; \
-     done",
-    refreshonly => true,
-    subscribe   => File['Temporarily Disable mongo auth'],
-    require     => [
+  
+  file { 'mongo setup script':
+    ensure  => present,
+    path    => '/usr/sbin/oo-mongo-setup',
+    content => template('openshift_origin/mongodb/oo-mongo-setup'),
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0700',
+    require => [
       Package['mongodb'],
       Package['mongodb-server'],
     ],
   }
 
-  exec { 'set mongo admin password':
-    command     => "/usr/bin/mongo ${::ipaddress}/${::openshift_origin::mongo_db_name} --eval 'db.addUser(\"${::openshift_origin::mongo_auth_user}\", \"${::openshift_origin::mongo_auth_password}\")' && \
-       /usr/bin/mongo ${::ipaddress}/admin --eval 'db.addUser(\"${::openshift_origin::mongo_auth_user}\", \"${::openshift_origin::mongo_auth_password}\")'",
-    refreshonly => true,
-    subscribe   => Exec['start mongodb'],
-    notify      => Exec['re-enable mongo'],
-    require     => [
-      Package['mongodb'],
-      Package['mongodb-server'],
-    ],
-  }
-
-  if $::openshift_origin::broker_auth_plugin == 'mongo' {
-    exec { 'create mongo auth plugin admin user':
-      command     => "/usr/bin/mongo ${::ipaddress}/openshift_broker_dev --eval 'db.auth_user.update({\"_id\":\"admin\"}, {\"_id\":\"admin\",\"user\":\"admin\",\"password_hash\":\"2a8462d93a13e51387a5e607cbd1139f\"}, true)'",
-      refreshonly => true,
-      subscribe   => Exec['start mongodb'],
-      notify      => Exec['re-enable mongo'],
-      require     => [
-        Package['mongodb'],
-        Package['mongodb-server'],
-      ],
+  if $openshift_origin::configure_mongodb_delayed == true {
+    $openshift_init_provider = $::operatingsystem ? {
+      'Fedora' => 'systemd',
+      'CentOS' => 'redhat',
+      default  => 'redhat',
     }
-  }
+    
+    if $openshift_init_provider == 'systemd' {
+      file { 'mongo setup service':
+        ensure  => present,
+        path    => '/usr/lib/systemd/system/openshift-mongo-setup.service',
+        content => template('openshift_origin/mongodb/openshift-mongo-setup.service'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => [
+          File['mongo setup script']
+        ],
+      }      
+    } else {
+      fail "Delayed setup for RHEL not available"
+    }
 
-  exec { 're-enable mongo':
-    command     => "${::openshift_origin::echo} 'auth = true' >> /etc/mongodb.conf && \
-      ${::openshift_origin::service} mongod restart",
-    refreshonly => true,
-    require     => [
-      Package['mongodb'],
-      Package['mongodb-server'],
-    ],
+    service { ['openshift-mongo-setup']:
+      require  => [
+        File['mongo setup script'],
+        File['mongo setup service'],
+      ],
+      provider => $openshift_init_provider,
+      enable   => true,
+    }
+  } else {
+    exec { '/usr/sbin/oo-mongo-setup':
+      require => File['mongo setup script']
+    }
   }
 
   if $::openshift_origin::enable_network_services == true {
     service { 'mongod':
       require   => [Package['mongodb'], Package['mongodb-server']],
       enable    => true,
-      subscribe => Exec['re-enable mongo'],
     }
   }
 
   if $::openshift_origin::configure_firewall == true {
     $mongo_port = $::use_firewalld ? {
-      true    => '27017/tcp',
+      'true'  => '27017/tcp',
       default => '27017:tcp',
     }
 

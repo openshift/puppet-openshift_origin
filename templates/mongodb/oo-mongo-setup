@@ -1,0 +1,113 @@
+#!/usr/bin/env oo-ruby
+#--
+# Copyright 2010 Red Hat, Inc.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#    http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#++
+
+require 'rubygems'
+require 'parseconfig'
+require 'getoptlong'
+require 'fileutils'
+require 'logger'
+require 'open4'
+$log = Logger.new(STDOUT)
+$log.level = Logger::INFO
+
+def find_and_replace(file, find, replace)
+  $log.debug("Replacing #{find} with #{replace} in file #{file}")
+  data = File.open(file).read
+  File.open(file, "w") do |f|
+    data = data.gsub(find, replace)
+    f.write(data)
+  end
+end
+
+def insert_if_not_exist(file, find, to_insert)
+  $log.debug("Checking if #{find} exists in file #{file}")
+  data = File.open(file).read
+  return if data.match(find)
+  $log.debug("...inserting #{to_insert} in file #{file}")
+  File.open(file, "w") do |f|
+    f.write(data)
+    f.write(to_insert)
+  end
+end
+
+def run(cmd)
+  $log.debug("Running command:")
+  $log.debug(cmd)
+  error_str = ""
+  status = Open4.popen4(cmd) do |pid, stdin, stdout, stderr|
+    $log.debug(stdout.read)
+    error_str = stderr.read
+  end
+  $log.error(error_str) if (status.to_i != 0 and !error_str.empty?)
+  $log.debug("Exit: #{status}")
+  return status.to_i
+end
+
+def stop_mongo
+  run "/usr/bin/pkill -u mongodb"
+
+  $log.debug("Repair mongodb database if needed...")
+  run "/bin/rm -f /var/lib/mongodb/mongod.lock"
+  find_and_replace("/etc/mongodb.conf", /^journal = .*$/, "journal = false")
+  run "/bin/su -c 'mongod -f /etc/mongodb.conf --repair' --shell /bin/bash mongodb"
+  $log.debug("Waiting for repair to complete")  
+  while run('/bin/fgrep "dbexit: really exiting now" /var/log/mongodb/mongodb.log') != 0 do
+    $log.info("...")
+    sleep 2
+  end
+  run "/bin/rm -f /var/lib/mongodb/mongod.lock"
+  find_and_replace("/etc/mongodb.conf", /^journal = .*$/, "journal = true")
+end
+
+def start_mongo
+  $log.debug "Initializing mongodb database"
+  run "/bin/su -c 'mongod -f /etc/mongodb.conf' --shell /bin/bash mongodb"
+  while run('/bin/fgrep "[initandlisten] waiting for connections" /var/log/mongodb/mongodb.log') != 0 do
+    $log.info("...")
+    sleep 3
+  end
+end
+
+def restart_mongo
+  $log.info("Restarting mongo db")
+  stop_mongo
+  start_mongo
+end
+
+FileUtils.mkdir_p("/etc/openshift")
+if File.exist?("/etc/openshift/.mongo-setup-complete")
+  $log.info "Mongo has already been setup on this machine. Exiting"
+else
+  $log.info "Configuring Mongo DB"
+  $log.info "...setup mongo db admin users"
+  $log.info "......disable mongo auth"
+  insert_if_not_exist("/etc/mongodb.conf", /^smallfiles = .*$/, "smallfiles = true")
+  find_and_replace("/etc/mongodb.conf", /^#auth = .*$/, "auth = false")
+  restart_mongo
+  $log.info "......set db admin users"
+  run "/usr/bin/mongo localhost/openshift_broker_dev --eval 'db.addUser(\"openshift\", \"mooo\")'"
+  run "/usr/bin/mongo localhost/admin --eval 'db.addUser(\"openshift\", \"mooo\")'"
+  $log.info "......register mongo auth admin user"
+  run "/usr/bin/mongo openshift_broker_dev --username openshift --password mooo --eval 'db.auth_user.update({\"_id\":\"admin\"}, {\"_id\":\"admin\",\"user\":\"admin\",\"password\":\"2a8462d93a13e51387a5e607cbd1139f\"}, true)'"
+  stop_mongo
+  $log.info "......enable mongo auth"
+  find_and_replace("/etc/mongodb.conf", /^auth = .*$/, "auth = true")
+  run "service mongod restart"
+  File.open("/etc/openshift/.mongo-setup-complete", "w") do |f|
+    f.write("\n")
+  end
+end

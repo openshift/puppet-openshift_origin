@@ -23,6 +23,9 @@
 #   ActiveMQ)
 # [*configure_mongodb*]
 #   True if Mongo DB should be installed and configured on this node.
+# [*configure_mongodb_delayed*]
+#   True if Mongo DB should be installed and configured on this node. Delay the final setup of mongo till reboot of machine.
+#   This is useful for chroot environments where services are not allowed to be started.
 # [*configure_named*]
 #   True if a Bind server should be configured and run on this node.
 # [*configure_avahi*]
@@ -132,6 +135,7 @@ class openshift_origin (
   $configure_activemq         = true,
   $configure_qpid             = false,
   $configure_mongodb          = true,
+  $configure_mongodb_delayed  = false,
   $configure_named            = true,
   $configure_avahi            = false,  
   $configure_broker           = true,
@@ -245,7 +249,7 @@ class openshift_origin (
     include openshift_origin::qpidd
   }
 
-  if $configure_mongodb == true {
+  if $configure_mongodb == true or $configure_mongodb_delayed == true {
     include openshift_origin::mongo
   }
 

@@ -124,7 +124,7 @@ class openshift_origin::node {
 
   if $::openshift_origin::configure_firewall == true {
     $webproxy_http_port = $::use_firewalld ? {
-      true    => '8000/tcp',
+      'true'  => '8000/tcp',
       default => '8000:tcp',
     }
 
@@ -134,7 +134,7 @@ class openshift_origin::node {
     }
 
     $webproxy_https_port = $::use_firewalld ? {
-      true    => '8443/tcp',
+      'true'  => '8443/tcp',
       default => '8443:tcp',
     }
 

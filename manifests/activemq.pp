@@ -108,7 +108,7 @@ class openshift_origin::activemq {
 
   if $::openshift_origin::configure_firewall == true {
     $activemq_port = $::use_firewalld ? {
-      true    => '61613/tcp',
+      'true'  => '61613/tcp',
       default => '61613:tcp',
     }
 

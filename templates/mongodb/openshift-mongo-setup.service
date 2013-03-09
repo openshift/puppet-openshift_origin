@@ -1,0 +1,10 @@
+[Unit]
+Description=Delayed mongo initialization script for OpenShift Origin
+After=syslog.target network.target mongod.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/oo-mongo-setup
+
+[Install]
+WantedBy=multi-user.target
