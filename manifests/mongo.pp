@@ -68,7 +68,7 @@ class openshift_origin::mongo {
     ],
   }
 
-  if $openshift_origin::configure_mongodb_delayed == true {
+  if $openshift_origin::configure_mongodb == 'delayed' {
     $openshift_init_provider = $::operatingsystem ? {
       'Fedora' => 'systemd',
       'CentOS' => 'redhat',
@@ -88,7 +88,7 @@ class openshift_origin::mongo {
         ],
       }      
     } else {
-      fail "Delayed setup for RHEL not available"
+      fail "Delayed mongo setup for RHEL not available"
     }
 
     service { ['openshift-mongo-setup']:

@@ -22,10 +22,7 @@
 #   True if Qpid message broker should be installed and configured on this node. (Optionally, used by m-collective. Replaced
 #   ActiveMQ)
 # [*configure_mongodb*]
-#   True if Mongo DB should be installed and configured on this node.
-# [*configure_mongodb_delayed*]
-#   True if Mongo DB should be installed and configured on this node. Delay the final setup of mongo till reboot of machine.
-#   This is useful for chroot environments where services are not allowed to be started.
+#   Set to true to setup mongo (This will start mongod). Set to 'delayed' to setup mongo upon next boot.
 # [*configure_named*]
 #   True if a Bind server should be configured and run on this node.
 # [*configure_avahi*]
@@ -37,6 +34,8 @@
 #   True if an OpenShift Origin console should be installed and configured on this node.
 # [*configure_node*]
 #   True if an OpenShift Origin node should be installed and configured on this node.
+# [*set_sebooleans*]
+#   Set to true to setup selinux booleans. Set to 'delayed' to setup selinux booleans upon next boot.
 # [*install_repo*]
 #   The YUM repository to use when installing OpenShift Origin packages. Specify <code>nightlies</code> to pull latest nightly
 #   build or provide a URL for another YUM repository.
@@ -135,12 +134,12 @@ class openshift_origin (
   $configure_activemq         = true,
   $configure_qpid             = false,
   $configure_mongodb          = true,
-  $configure_mongodb_delayed  = false,
   $configure_named            = true,
   $configure_avahi            = false,  
   $configure_broker           = true,
   $configure_console          = true,
   $configure_node             = true,
+  $set_sebooleans             = true,
   $install_repo               = 'nightlies',
   $named_ipaddress            = $::ipaddress,
   $avahi_ipaddress            = $::ipaddress,  
@@ -249,7 +248,7 @@ class openshift_origin (
     include openshift_origin::qpidd
   }
 
-  if $configure_mongodb == true or $configure_mongodb_delayed == true {
+  if $configure_mongodb == true or $configure_mongodb == 'delayed' {
     include openshift_origin::mongo
   }
 
@@ -371,6 +370,10 @@ class openshift_origin (
 
   if ($configure_console == true) {
     include openshift_origin::console
+  }
+  
+  if ($set_sebooleans == true or $set_sebooleans == 'delayed') {
+    include openshift_origin::selinux
   }
 
   if $install_client_tools == true {

@@ -96,7 +96,7 @@ else
   $log.info "...setup mongo db admin users"
   $log.info "......disable mongo auth"
   insert_if_not_exist("/etc/mongodb.conf", /^smallfiles = .*$/, "smallfiles = true")
-  find_and_replace("/etc/mongodb.conf", /^#auth = .*$/, "auth = false")
+  find_and_replace("/etc/mongodb.conf", /^#?auth = .*$/, "auth = false")
   restart_mongo
   $log.info "......set db admin users"
   run "/usr/bin/mongo localhost/openshift_broker_dev --eval 'db.addUser(\"openshift\", \"mooo\")'"
@@ -106,8 +106,8 @@ else
   stop_mongo
   $log.info "......enable mongo auth"
   find_and_replace("/etc/mongodb.conf", /^auth = .*$/, "auth = true")
-  run "service mongod restart"
   File.open("/etc/openshift/.mongo-setup-complete", "w") do |f|
     f.write("\n")
   end
 end
+run "service mongod restart"

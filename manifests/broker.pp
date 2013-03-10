@@ -1045,10 +1045,6 @@ class openshift_origin::broker {
     }
   }
   
-
-
-  
-
   $broker_bundle_show = $::operatingsystem ? {
     'Fedora' => '/usr/bin/bundle show',
     'CentOS' => '/usr/bin/scl enable ruby193 "bundle show"',
@@ -1133,24 +1129,6 @@ class openshift_origin::broker {
     subscribe   => Package['rubygem-passenger'],
     refreshonly => true,
   }
-
-  ensure_resource('selboolean', 'httpd_run_stickshift', {
-    persistent => true,
-    value      => 'on',
-  }
-  )
-
-  ensure_resource('selboolean', 'httpd_verify_dns', {
-    persistent => true,
-    value      => 'on',
-  }
-  )
-
-  ensure_resource('selboolean', 'allow_ypbind', {
-    persistent => true,
-    value      => 'on',
-  }
-  )
 
   if $::openshift_origin::enable_network_services == true {
     service { 'openshift-broker':

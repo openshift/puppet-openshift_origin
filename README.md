@@ -105,7 +105,7 @@ True if Qpid message broker should be installed and configured on this node. (Op
 
 ### configure_mongodb
 
-True if Mongo DB should be installed and configured on this node.
+Set to true to setup mongo (This will start mongod). Set to 'delayed' to setup mongo upon next boot.
 
 ### configure_named
 
@@ -126,6 +126,10 @@ True if an OpenShift Origin console should be installed and configured on this n
 ### configure_node
 
 True if an OpenShift Origin node should be installed and configured on this node.
+
+### set_sebooleans
+
+Set to true to setup selinux booleans. Set to 'delayed' to setup selinux booleans upon next boot.
 
 ### install_repo
 

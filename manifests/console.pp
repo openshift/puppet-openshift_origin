@@ -77,36 +77,6 @@ class openshift_origin::console {
     refreshonly => true,
   }
 
-  ensure_resource('selboolean', 'httpd_can_network_connect', {
-      persistent => true,
-      value      => 'on',
-    }
-  )
-
-  ensure_resource('selboolean', 'httpd_can_network_relay', {
-      persistent => true,
-      value      => 'on',
-    }
-  )
-
-  ensure_resource('selboolean', 'httpd_read_user_content', {
-      persistent => true,
-      value      => 'on',
-    }
-  )
-
-  ensure_resource('selboolean', 'httpd_enable_homedirs', {
-      persistent => true,
-      value      => 'on',
-    }
-  )
-
-  ensure_resource('selboolean', 'httpd_execmem', {
-      persistent => true,
-      value      => 'on',
-    }
-  )
-
   if $::openshift_origin::enable_network_services == true {
     service { 'openshift-console':
       require => Package['openshift-origin-console'],

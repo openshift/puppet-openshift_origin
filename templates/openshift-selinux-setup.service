@@ -1,0 +1,10 @@
+[Unit]
+Description=Delayed selinux initialization script for OpenShift Origin
+After=syslog.target network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/oo-selinux-setup
+
+[Install]
+WantedBy=multi-user.target

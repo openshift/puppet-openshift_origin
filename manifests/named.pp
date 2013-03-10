@@ -112,11 +112,6 @@ class openshift_origin::named {
     }
   }
 
-  selboolean { ['named_write_master_zones']:
-    persistent => true,
-    value      => 'on',
-  }
-
   exec { 'named restorecon':
     command => '/sbin/restorecon -rv /etc/rndc.* /etc/named.* /var/named /var/named/forwarders.conf',
     require => [
