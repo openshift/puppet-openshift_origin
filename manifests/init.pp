@@ -173,8 +173,8 @@ class openshift_origin (
 ) {
   include openshift_origin::params
 
-  if $::facterversion == '1.6.16' {
-    fail 'Factor version needs to be updated to at least 1.6.17'
+  if $::facterversion <= '1.6.16' {
+    fail 'Facter version needs to be updated to at least 1.6.17'
   }
 
   $service   = $::operatingsystem ? {
