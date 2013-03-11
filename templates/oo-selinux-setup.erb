@@ -58,6 +58,8 @@ else
     <%= scope.lookupvar('::openshift_origin::selinux::node_booleans') %>,
     <%= scope.lookupvar('::openshift_origin::selinux::console_booleans') %>,
   ].flatten)
+  run "service openshift-broker restart"
+  run "service openshift-console restart"
   File.open("/etc/openshift/.selinux-setup-complete", "w") do |f|
     f.write("\n")
   end

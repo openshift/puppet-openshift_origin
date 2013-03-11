@@ -6,7 +6,9 @@ logpath=/var/log/mongodb/mongodb.log
 # fork and run in background
 fork = true
 
-bind_ip = 127.0.0.1,<%= ipaddress %>
+#Default binds to all interfaces
+#bind_ip = 127.0.0.1,<%= ipaddress %>
+
 #port = 27017
 
 dbpath=/var/lib/mongodb

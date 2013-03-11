@@ -1,6 +1,7 @@
 [Unit]
 Description=Delayed mongo initialization script for OpenShift Origin
 After=syslog.target network.target mongod.service
+Before=openshift-origin-broker.service openshift-origin-console.service
 
 [Service]
 Type=oneshot

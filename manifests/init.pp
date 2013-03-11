@@ -140,6 +140,7 @@ class openshift_origin (
   $configure_console          = true,
   $configure_node             = true,
   $set_sebooleans             = true,
+  $install_login_shell        = false,
   $install_repo               = 'nightlies',
   $named_ipaddress            = $::ipaddress,
   $avahi_ipaddress            = $::ipaddress,  
@@ -374,6 +375,10 @@ class openshift_origin (
   
   if ($set_sebooleans == true or $set_sebooleans == 'delayed') {
     include openshift_origin::selinux
+  }
+  
+  if ($install_login_shell == true) {
+    include openshift_origin::custom_shell
   }
 
   if $install_client_tools == true {
