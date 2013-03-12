@@ -77,16 +77,16 @@ class openshift_origin::selinux {
   }
 
   if $::openshift_origin::set_sebooleans == true {
-    ensure_resource('selboolean', [
+    $booleans = unique(flatten([ 
       $broker_booleans,
       $console_booleans,
       $named_booleans,
-      $node_booleans
-    ], {
-        persistent => true,
-        value      => 'on',
-      }
-    )
+      $node_booleans,
+    ]))
+    selboolean { $booleans:
+      persistent => true,
+      value => 'on'
+    }
   }
   
   if $openshift_origin::set_sebooleans == 'delayed' {

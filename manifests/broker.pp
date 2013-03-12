@@ -63,11 +63,13 @@ class openshift_origin::broker {
     }
   )
 
-  ensure_resource('package', 'rubygem-openshift-origin-dns-avahi', {
-      ensure  => present,
-      require => Yumrepo[openshift-origin],
-    }
-  )
+  if($::operatingsystem == 'Fedora') {
+    ensure_resource('package', 'rubygem-openshift-origin-dns-avahi', {
+        ensure  => present,
+        require => Yumrepo[openshift-origin],
+      }
+    )
+  }
 
   ensure_resource('package', 'rubygem-openshift-origin-dns-bind', {
       ensure  => present,
