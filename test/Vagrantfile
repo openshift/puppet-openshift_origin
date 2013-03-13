@@ -12,6 +12,7 @@ Vagrant::Config.run do |config|
   config.vm.share_folder "manifests", "/home/vagrant/manifests", "manifests"
   config.vm.provision :shell, :inline => %{ \
     touch /var/log/origin-setup.log; \
+    sudo yum update -y                                          | tee -a /var/log/origin-setup.log; \
     sudo /bin/puppet module uninstall openshift/openshift_origin          | tee -a /var/log/origin-setup.log; \
     sudo /bin/puppet module install openshift/openshift_origin            | tee -a /var/log/origin-setup.log; \
     sudo /bin/puppet apply --verbose /home/vagrant/manifests/init.pp      | tee -a /var/log/origin-setup.log; \

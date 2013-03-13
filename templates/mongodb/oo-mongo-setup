@@ -1,4 +1,4 @@
-#!/usr/bin/env oo-ruby
+#!/usr/bin/env ruby
 #--
 # Copyright 2010 Red Hat, Inc.
 # 
@@ -16,8 +16,6 @@
 #++
 
 require 'rubygems'
-require 'parseconfig'
-require 'getoptlong'
 require 'fileutils'
 require 'logger'
 require 'open4'
