@@ -144,7 +144,7 @@ class openshift_origin (
   $install_repo               = 'nightlies',
   $named_ipaddress            = $::ipaddress,
   $avahi_ipaddress            = $::ipaddress,  
-  $mongodb_fqdn               = $::fqdn,
+  $mongodb_fqdn               = 'localhost',
   $mq_fqdn                    = $::fqdn,
   $broker_fqdn                = $::fqdn,
   $cloud_domain               = 'example.com',
