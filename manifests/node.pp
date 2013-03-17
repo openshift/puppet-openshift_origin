@@ -437,6 +437,7 @@ class openshift_origin::node {
       package { [
         'openshift-origin-cartridge-postgresql-8.4',
         'openshift-origin-cartridge-ruby-1.9-scl',
+        'openshift-origin-cartridge-ruby-1.8',
         'openshift-origin-cartridge-php-5.3',
         'openshift-origin-cartridge-perl-5.10',
         'openshift-origin-cartridge-python-2.6',
