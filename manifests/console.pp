@@ -57,8 +57,136 @@ class openshift_origin::console {
   }
 
   $console_bundle_show    = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/bundle install',
+    'Fedora' => '/usr/bin/bundle show',
     default  => '/usr/bin/scl enable ruby193 "bundle show"',
+  }
+
+  if $::operatingsystem == 'Fedora' {
+    ensure_resource('package', 'rubygem-sass-rails', {
+        ensure   => 'latest',
+        alias    => 'rubygem-sass-rails',
+      }
+    )
+
+    ensure_resource('package', 'rubygem-jquery-rails', {
+        ensure   => 'latest',
+        alias    => 'rubygem-jquery-rails',
+      }
+    )
+
+    ensure_resource('package', 'rubygem-coffee-rails', {
+        ensure   => 'latest',
+        alias    => 'rubygem-coffee-rails',
+      }
+    )
+
+    ensure_resource('package', 'rubygem-compass-rails', {
+        ensure   => 'latest',
+        alias    => 'rubygem-compass-rails',
+      }
+    )
+
+    ensure_resource('package', 'rubygem-uglifier', {
+        ensure   => 'latest',
+        alias    => 'rubygem-uglifier',
+      }
+    )
+
+    ensure_resource('package', 'rubygem-therubyracer', {
+        ensure   => 'latest',
+        alias    => 'rubygem-therubyracer',
+      }
+    )
+
+    ensure_resource('package', 'rdiscount', {
+        ensure   => '1.6.8',
+        provider => 'gem',
+        alias    => 'rubygem-rdiscount'
+      }
+    )
+
+    ensure_resource('package', 'formtastic', {
+        ensure   => '1.2.4',
+        provider => 'gem',
+        alias    => 'rubygem-formtastic'
+      }
+    )
+
+    ensure_resource('package', 'net-http-persistent', {
+        ensure   => '2.7',
+        provider => 'gem',
+        alias    => 'rubygem-net-http-persistent'
+      }
+    )
+
+    ensure_resource('package', 'haml', {
+        ensure   => '3.1.7',
+        provider => 'gem',
+        alias    => 'rubygem-haml'
+      }
+    )
+  }
+
+  if ($::operatingsystem == "RedHat" or $::operatingsystem == "CentOS") {
+    ensure_resource('package', 'ruby193-rubygem-sass-rails', {
+        ensure   => 'latest',
+        alias    => 'rubygem-sass-rails',
+      }
+    )
+
+    ensure_resource('package', 'ruby193-rubygem-jquery-rails', {
+        ensure   => 'latest',
+        alias    => 'rubygem-jquery-rails',
+      }
+    )
+
+    ensure_resource('package', 'ruby193-rubygem-coffee-rails', {
+        ensure   => 'latest',
+        alias    => 'rubygem-coffee-rails',
+      }
+    )
+
+    ensure_resource('package', 'ruby193-rubygem-compass-rails', {
+        ensure   => 'latest',
+        alias    => 'rubygem-compass-rails',
+      }
+    )
+
+    ensure_resource('package', 'ruby193-rubygem-uglifier', {
+        ensure   => 'latest',
+        alias    => 'rubygem-uglifier',
+      }
+    )
+
+    ensure_resource('package', 'ruby193-rubygem-therubyracer', {
+        ensure   => 'latest',
+        alias    => 'rubygem-therubyracer',
+      }
+    )
+
+    ensure_resource('package', 'ruby193-rubygem-rdiscount', {
+        ensure   => 'latest',
+        alias    => 'rubygem-rdiscount',
+      }
+    )
+
+    ensure_resource('package', 'ruby193-rubygem-net-http-persistent', {
+        ensure   => 'latest',
+        alias    => 'rubygem-net-http-persistent',
+      }
+    )
+
+    ensure_resource('package', 'ruby193-rubygem-haml', {
+        ensure   => 'latest',
+        alias    => 'rubygem-haml',
+      }
+    )
+
+    ensure_resource('package', 'ruby193-rubygem-formtastic', {
+        ensure   => 'latest',
+        alias    => 'rubygem-formtastic',
+      }
+    )
   }
 
   exec { 'Console gem dependencies':
@@ -72,6 +200,16 @@ class openshift_origin::console {
     subscribe   => [
       Package['openshift-origin-console'],
       Package['rubygem-openshift-origin-console'],
+      Package['rubygem-sass-rails'],
+      Package['rubygem-jquery-rails'],
+      Package['rubygem-uglifier'],
+      Package['rubygem-coffee-rails'],
+      Package['rubygem-compass-rails'],
+      Package['rubygem-therubyracer'],
+      Package['rubygem-rdiscount'],
+      Package['rubygem-net-http-persistent'],
+      Package['rubygem-haml'],
+      Package['rubygem-formtastic'],
       File['openshift console.conf'],
     ],
     refreshonly => true,

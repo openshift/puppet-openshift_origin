@@ -107,177 +107,13 @@ class openshift_origin::broker {
   )
 
   if $::operatingsystem == 'Fedora' {
-    ensure_resource('package', 'actionmailer', {
-        ensure   => '3.2.11',
+  
+    ensure_resource('package', 'mysql', {
         provider => 'gem',
+        require  => [Package['ruby-devel'], Package['mysql-devel']]
       }
     )
-
-    ensure_resource('package', 'actionpack', {
-        ensure   => '3.2.11',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'activemodel', {
-        ensure   => '3.2.11',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'activerecord', {
-        ensure   => '3.2.11',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'activeresource', {
-        ensure   => '3.2.11',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'activesupport', {
-        ensure   => '3.2.11',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'arel', {
-        ensure   => '3.0.2',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'bigdecimal', {
-        ensure   => '1.1.0',
-        provider => 'gem',
-      }
-    )
-    ensure_resource('package', 'bson', {
-        ensure   => '1.8.2',
-        provider => 'gem',
-        require  => [
-          Package['ruby-devel'],
-          Package['mongodb-devel'],
-        ],
-      }
-    )
-
-    ensure_resource('package', 'bson_ext', {
-        ensure   => '1.8.2',
-        provider => 'gem',
-        require  => [
-          Package['ruby-devel'],
-          Package['mongodb-devel'],
-        ],
-      }
-    )
-
-    ensure_resource('package', 'builder', {
-        ensure   => '3.0.4',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'bundler', {
-        ensure   => '1.1.4',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'cucumber', {
-        ensure   => '1.1.9',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'diff-lcs', {
-        ensure   => '1.1.2',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'dnsruby', {
-        ensure   => '1.53',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'erubis', {
-        ensure   => '2.7.0',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'gherkin', {
-        ensure   => '2.9.3',
-        provider => 'gem',
-        require  => Package['ruby-devel'],
-      }
-    )
-
-    ensure_resource('package', 'hike', {
-        ensure   => '1.2.1',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'i18n', {
-        ensure   => '0.6.1',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'journey', {
-        ensure   => '1.0.4',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'json', {
-        ensure   => '1.7.6',
-        provider => 'gem',
-        require  => Package['ruby-devel'],
-      }
-    )
-
-    ensure_resource('package', 'mail', {
-        ensure   => '2.4.4',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'metaclass', {
-        ensure   => '0.0.1',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'mime-types', {
-        ensure   => '1.20.1',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'minitest', {
-        ensure   => '3.2.0',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'mocha', {
-        ensure   => '0.12.1',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'mongo', {
-        ensure   => '1.8.2',
-        provider => 'gem',
-      }
-    )
-
+    
     ensure_resource('package', 'mongoid', {
         ensure   => '3.0.21',
         provider => 'gem',
@@ -289,190 +125,357 @@ class openshift_origin::broker {
         provider => 'gem',
       }
     )
-
-    ensure_resource('package', 'multi_json', {
-        ensure   => '1.5.0',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'netrc', {
-        ensure   => '0.7.1',
-        provider => 'gem',
-      }
-    )
-
-    ensure_resource('package', 'open4', {
-        ensure   => '1.3.0',
-        provider => 'gem',
-      }
-    )
-
+    
     ensure_resource('package', 'origin', {
         ensure   => '1.0.11',
         provider => 'gem',
       }
     )
 
-    ensure_resource('package', 'parseconfig', {
-        ensure   => '0.5.2',
+    ensure_resource('package', 'minitest', {
+        ensure   => '3.2.0',
         provider => 'gem',
+        alias    => 'minitest'
+      }
+    )
+  
+    ensure_resource('package', 'rubygem-actionmailer', {
+        ensure   => 'latest',
+        alias    => 'actionmailer',
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-actionpack', {
+        ensure   => 'latest',
+        alias    => 'actionpack',
       }
     )
 
-    ensure_resource('package', 'polyglot', {
-        ensure   => '0.3.3',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-activemodel', {
+        ensure   => 'latest',
+        alias    => 'activemodel'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-activerecord', {
+        ensure   => 'latest',
+        alias    => 'activerecord'
       }
     )
 
-    ensure_resource('package', 'rack', {
-        ensure   => '1.4.4',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-activeresource', {
+        ensure   => 'latest',
+        alias    => 'activeresource'
       }
     )
 
-    ensure_resource('package', 'rack-cache', {
-        ensure   => '1.2',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-activesupport', {
+        ensure   => 'latest',
+        alias    => 'activesupport'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-arel', {
+        ensure   => 'latest',
+        alias    => 'arel'
       }
     )
 
-    ensure_resource('package', 'rack-ssl', {
-        ensure   => '1.3.3',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-bigdecimal', {
+        ensure   => 'latest',
+        alias    => 'bigdecimal'
       }
     )
 
-    ensure_resource('package', 'rack-test', {
-        ensure   => '0.6.2',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-bson', {
+        ensure   => 'latest',
+        alias    => 'bson',
+        require  => [
+          Package['ruby-devel'],
+          Package['mongodb-devel'],
+        ],
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-bson_ext', {
+        ensure   => 'latest',
+        alias    => 'bson_ext'
       }
     )
 
-    ensure_resource('package', 'rails', {
-        ensure   => '3.2.11',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-builder', {
+        ensure   => 'latest',
+        alias    => 'builder'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-bundler', {
+        ensure   => 'latest',
+        alias    => 'bundler'
       }
     )
 
-    ensure_resource('package', 'railties', {
-        ensure   => '3.2.11',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-cucumber', {
+        ensure   => 'latest',
+        alias    => 'cucumber'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-diff-lcs', {
+        ensure   => 'latest',
+        alias    => 'diff-lcs'
       }
     )
 
-    ensure_resource('package', 'rake', {
-        ensure   => '0.9.2.2',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-dnsruby', {
+        ensure   => 'latest',
+        alias    => 'dnsruby'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-erubis', {
+        ensure   => 'latest',
+        alias    => 'erubis'
       }
     )
 
-    ensure_resource('package', 'rdoc', {
-        ensure   => '3.12',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-gherkin', {
+        ensure   => 'latest',
+        alias    => 'gherkin'
       }
     )
 
-    ensure_resource('package', 'mysql', {
-        provider => 'gem',
-        require  => [Package['ruby-devel'], Package['mysql-devel']]
+    ensure_resource('package', 'rubygem-hike', {
+        ensure   => 'latest',
+        alias    => 'hike'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-i18n', {
+        ensure   => 'latest',
+        alias    => 'i18n'
       }
     )
 
-    ensure_resource('package', 'regin', {
-        ensure   => '0.3.8',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-journey', {
+        ensure   => 'latest',
+        alias    => 'journey'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-json', {
+        ensure   => 'latest',
+        alias    => 'json'
       }
     )
 
-    ensure_resource('package', 'rest-client', {
-        ensure   => '1.6.1',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-mail', {
+        ensure   => 'latest',
+        alias    => 'mail'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-metaclass', {
+        ensure   => 'latest',
+        alias    => 'metaclass'
       }
     )
 
-    ensure_resource('package', 'simplecov', {
-        ensure   => '0.7.1',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-mime-types', {
+        ensure   => 'latest',
+        alias    => 'mime-types'
       }
     )
 
-    ensure_resource('package', 'simplecov-html', {
-        ensure   => '0.7.1',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-mocha', {
+        ensure   => 'latest',
+        alias    => 'mocha'
       }
     )
 
-    ensure_resource('package', 'sprockets', {
-        ensure   => '2.2.2',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-mongo', {
+        ensure   => 'latest',
+        alias    => 'mongo'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-cucumber', {
+        ensure   => 'latest',
+        alias    => 'cucumber'
       }
     )
 
-    ensure_resource('package', 'state_machine', {
-        ensure   => '1.1.2',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-multi_json', {
+        ensure   => 'latest',
+        alias    => 'multi_json'
       }
     )
 
-    ensure_resource('package', 'stomp', {
-        ensure   => '1.2.2',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-netrc', {
+        ensure   => 'latest',
+        alias    => 'netrc'
       }
     )
 
-    ensure_resource('package', 'systemu', {
-        ensure   => '2.5.2',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-open4', {
+        ensure   => 'latest',
+        alias    => 'open4'
       }
     )
 
-    ensure_resource('package', 'term-ansicolor', {
-        ensure   => '1.0.7',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-parseconfig', {
+        ensure   => 'latest',
+        alias    => 'parseconfig'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-polyglot', {
+        ensure   => 'latest',
+        alias    => 'polyglot'
       }
     )
 
-    ensure_resource('package', 'thor', {
-        ensure   => '0.17.0',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-rack', {
+        ensure   => 'latest',
+        alias    => 'rack'
       }
     )
 
-    ensure_resource('package', 'tilt', {
-        ensure   => '1.3.3',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-rack-cache', {
+        ensure   => 'latest',
+        alias    => 'rack-cache'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-rack-ssl', {
+        ensure   => 'latest',
+        alias    => 'rack-ssl'
       }
     )
 
-    ensure_resource('package', 'treetop', {
-        ensure   => '1.4.12',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-rack-test', {
+        ensure   => 'latest',
+        alias    => 'rack-test'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-rails', {
+        ensure   => 'latest',
+        alias    => 'rails'
       }
     )
 
-    ensure_resource('package', 'tzinfo', {
-        ensure   => '0.3.35',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-railties', {
+        ensure   => 'latest',
+        alias    => 'railties'
       }
     )
 
-    ensure_resource('package', 'xml-simple', {
-        ensure   => '1.1.2',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-rake', {
+        ensure   => 'latest',
+        alias    => 'rake'
       }
     )
 
-    ensure_resource('package', 'webmock', {
-        ensure   => '1.9.0',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-rdoc', {
+        ensure   => 'latest',
+        alias    => 'rdoc'
       }
     )
 
-    ensure_resource('package', 'fakefs', {
-        ensure   => '0.4.2',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-regin', {
+        ensure   => 'latest',
+        alias    => 'regin'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-rest-client', {
+        ensure   => 'latest',
+        alias    => 'rest-client'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-simplecov', {
+        ensure   => 'latest',
+        alias    => 'simplecov'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-simplecov-html', {
+        ensure   => 'latest',
+        alias    => 'simplecov-html'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-sprockets', {
+        ensure   => 'latest',
+        alias    => 'sprockets'
+      }
+    )
+
+    ensure_resource('package', 'rubygem-state_machine', {
+        ensure   => 'latest',
+        alias    => 'state_machine'
+      }
+    )
+
+    ensure_resource('package', 'rubygem-stomp', {
+        ensure   => 'latest',
+        alias    => 'stomp'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-systemu', {
+        ensure   => 'latest',
+        alias    => 'systemu'
+      }
+    )
+
+    ensure_resource('package', 'rubygem-term-ansicolor', {
+        ensure   => 'latest',
+        alias    => 'term-ansicolor'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-thor', {
+        ensure   => 'latest',
+        alias    => 'thor'
+      }
+    )
+
+    ensure_resource('package', 'rubygem-tilt', {
+        ensure   => 'latest',
+        alias    => 'tilt'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-treetop', {
+        ensure   => 'latest',
+        alias    => 'treetop'
+      }
+    )
+
+    ensure_resource('package', 'rubygem-tzinfo', {
+        ensure   => 'latest',
+        alias    => 'tzinfo'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-xml-simple', {
+        ensure   => 'latest',
+        alias    => 'xml-simple'
+      }
+    )
+
+    ensure_resource('package', 'rubygem-webmock', {
+        ensure   => 'latest',
+        alias    => 'webmock'
+      }
+    )
+    
+    ensure_resource('package', 'rubygem-fakefs', {
+        ensure   => 'latest',
+        alias    => 'fakefs'
       }
     )
   }
