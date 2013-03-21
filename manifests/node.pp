@@ -172,6 +172,29 @@ class openshift_origin::node {
     warning 'Please ensure that quotas are enabled for /var/lib/openshift'
   }
 
+  if $::openshift_origin::configure_fs_quotas == true {
+    if $::operatingsystem == "Fedora" {
+      if $::operatingsystemrelease == "18" {
+        file { 'quota enable service':
+          ensure  => present,
+          path    => '/usr/lib/systemd/system/openshift-quotaon.service',
+          content => template('openshift_origin/openshift-quotaon.service'),
+          owner   => 'root',
+          group   => 'root',
+          mode    => '0644',
+          require => [],
+        }
+        service { ['openshift-quotaon']:
+          require => [
+            File['quota enable service'],
+          ],
+          provider => 'systemd',
+          enable => true,
+        }
+      }
+    }
+  }
+
   if $::openshift_origin::configure_cgroups == true {
     if $::openshift_origin::enable_network_services == true {
       service { [
