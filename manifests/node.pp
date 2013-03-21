@@ -67,48 +67,6 @@ class openshift_origin::node {
     }
   )
 
-  ensure_resource('selboolean', 'httpd_run_stickshift', {
-      persistent => true,
-      value      => 'on',
-    }
-  )
-
-  ensure_resource('selboolean', 'allow_polyinstantiation', {
-      persistent => true,
-      value      => 'on',
-    }
-  )
-
-  ensure_resource('selboolean', 'httpd_can_network_connect', {
-      persistent => true,
-      value      => 'on',
-    }
-  )
-
-  ensure_resource('selboolean', 'httpd_can_network_relay', {
-      persistent => true,
-      value      => 'on',
-    }
-  )
-
-  ensure_resource('selboolean', 'httpd_read_user_content', {
-      persistent => true,
-      value      => 'on',
-    }
-  )
-
-  ensure_resource('selboolean', 'httpd_enable_homedirs', {
-      persistent => true,
-      value      => 'on',
-    }
-  )
-
-  ensure_resource('selboolean', 'httpd_execmem', {
-      persistent => true,
-      value      => 'on',
-    }
-  )
-
   ensure_resource('package', 'git', {
       ensure => present
     }
@@ -124,7 +82,7 @@ class openshift_origin::node {
 
   if $::openshift_origin::configure_firewall == true {
     $webproxy_http_port = $::use_firewalld ? {
-      true    => '8000/tcp',
+      'true'  => '8000/tcp',
       default => '8000:tcp',
     }
 
@@ -134,7 +92,7 @@ class openshift_origin::node {
     }
 
     $webproxy_https_port = $::use_firewalld ? {
-      true    => '8443/tcp',
+      'true'  => '8443/tcp',
       default => '8443:tcp',
     }
 
@@ -212,6 +170,29 @@ class openshift_origin::node {
     }
   } else {
     warning 'Please ensure that quotas are enabled for /var/lib/openshift'
+  }
+
+  if $::openshift_origin::configure_fs_quotas == true {
+    if $::operatingsystem == "Fedora" {
+      if $::operatingsystemrelease == "18" {
+        file { 'quota enable service':
+          ensure  => present,
+          path    => '/usr/lib/systemd/system/openshift-quotaon.service',
+          content => template('openshift_origin/openshift-quotaon.service'),
+          owner   => 'root',
+          group   => 'root',
+          mode    => '0644',
+          require => [],
+        }
+        service { ['openshift-quotaon']:
+          require => [
+            File['quota enable service'],
+          ],
+          provider => 'systemd',
+          enable => true,
+        }
+      }
+    }
   }
 
   if $::openshift_origin::configure_cgroups == true {
@@ -479,6 +460,7 @@ class openshift_origin::node {
       package { [
         'openshift-origin-cartridge-postgresql-8.4',
         'openshift-origin-cartridge-ruby-1.9-scl',
+        'openshift-origin-cartridge-ruby-1.8',
         'openshift-origin-cartridge-php-5.3',
         'openshift-origin-cartridge-perl-5.10',
         'openshift-origin-cartridge-python-2.6',

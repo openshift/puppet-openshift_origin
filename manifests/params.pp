@@ -31,19 +31,19 @@
 class openshift_origin::params {
   # Make sure the tools needed to manage the firewall are installed
   $firewall_package     = $::use_firewalld ? {
-    true    => 'firewalld',
+    'true'  => 'firewalld',
     default => 'system-config-firewall-base',
   }
 
   # Set the base firewall command for enableling services
   $firewall_service_cmd = $::use_firewalld ? {
-    true    => '/usr/bin/firewall-cmd --permanent --zone=public --add-service=',
+    'true'  => '/usr/bin/firewall-cmd --permanent --zone=public --add-service=',
     default => '/usr/sbin/lokkit --service=',
   }
 
   # Set the base firewall command for enableling services
   $firewall_port_cmd    = $::use_firewalld ? {
-    true    => '/usr/bin/firewall-cmd --permanent --zone=public --add-port=',
+    'true'  => '/usr/bin/firewall-cmd --permanent --zone=public --add-port=',
     default => '/usr/sbin/lokkit --port=',
   }
 }

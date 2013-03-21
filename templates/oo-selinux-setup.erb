@@ -1,0 +1,66 @@
+#!/usr/bin/env oo-ruby
+#--
+# Copyright 2010 Red Hat, Inc.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#    http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#++
+
+require 'rubygems'
+require 'parseconfig'
+require 'getoptlong'
+require 'fileutils'
+require 'logger'
+require 'open4'
+$log = Logger.new(STDOUT)
+$log.level = Logger::INFO
+
+def run(cmd)
+  $log.debug("Running command:")
+  $log.debug(cmd)
+  error_str = ""
+  status = Open4.popen4(cmd) do |pid, stdin, stdout, stderr|
+    $log.debug(stdout.read)
+    error_str = stderr.read
+  end
+  $log.error(error_str) if (status.to_i != 0 and !error_str.empty?)
+  $log.debug("Exit: #{status}")
+  return status.to_i
+end
+
+def enable_se_booleans(bool_list)
+  bool_list.delete_if{ |bool| `getsebool #{bool}`.match(/--> on/) }
+  semanage_commands = bool_list.map { |bool| "boolean -m --on #{bool}" }.join("\n")
+
+run <<-EOOF
+/usr/sbin/semanage -i - <<_EOF
+#{semanage_commands}
+_EOF
+EOOF
+end
+
+FileUtils.mkdir_p("/etc/openshift")
+if File.exist?("/etc/openshift/.selinux-setup-complete")
+  $log.info "Selinux has already been setup on this machine. Exiting"
+else
+  enable_se_booleans([
+    <%= scope.lookupvar('::openshift_origin::selinux::broker_booleans') %>,
+    <%= scope.lookupvar('::openshift_origin::selinux::named_booleans') %>,
+    <%= scope.lookupvar('::openshift_origin::selinux::node_booleans') %>,
+    <%= scope.lookupvar('::openshift_origin::selinux::console_booleans') %>,
+  ].flatten)
+  run "service openshift-broker restart"
+  run "service openshift-console restart"
+  File.open("/etc/openshift/.selinux-setup-complete", "w") do |f|
+    f.write("\n")
+  end
+end

@@ -6,8 +6,9 @@ logpath=/var/log/mongodb/mongodb.log
 # fork and run in background
 fork = true
 
-bind_ip = 127.0.0.1,<%= ipaddress %>
-#port = 27017
+#Default binds to all interfaces which conflicts with mongo running on gears
+bind_ip = 127.0.0.1
+port = 27017
 
 dbpath=/var/lib/mongodb
 
@@ -17,7 +18,7 @@ pidfilepath=/var/run/mongodb/mongodb.pid
 #cpu = true
 
 # Turn on/off security.  Off is currently the default
-#auth = true
+auth = true
 
 # Verbose logging output.
 #verbose = true
