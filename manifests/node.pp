@@ -79,6 +79,10 @@ class openshift_origin::node {
       ensure => present
     }
   )
+  ensure_resource('package', 'oddjob', {
+      ensure => present
+    }
+  )
 
   if $::openshift_origin::configure_firewall == true {
     $webproxy_http_port = $::use_firewalld ? {
@@ -352,6 +356,11 @@ class openshift_origin::node {
       require => Package['cronie']
     }
 
+    service { 'oddjobd':
+      enable  => true,
+      require => Package['oddjob']
+    }
+
     $openshift_init_provider = $::operatingsystem ? {
       'Fedora' => 'systemd',
       'CentOS' => 'redhat',
@@ -373,7 +382,7 @@ class openshift_origin::node {
       enable  => true,
     }
   } else {
-    warning 'Please ensure that mcollective, cron, openshift-gears, openshift-node-web-proxy are running on all nodes'
+    warning 'Please ensure that mcollective, cron, openshift-gears, openshift-node-web-proxy, and oddjobd are running on all nodes'
   }
 
   exec { 'Restoring SELinux contexts':
