@@ -67,6 +67,42 @@ class { 'openshift_origin' :
 }
 ```
 
+Example: Single host (broker+console+node) which uses the **Kerberos** Auth plugin. Please note:
+
+* The Broker needs to be enrolled in the KDC as a host, `host/node_fqdn` as well as a service, `HTTP/node_fqdn`
+* Keytab should be generated, is located on the Broker machine, and Apache should be able to access it (`chown apache <kerberos_keytab>`)
+* Like the example config below:
+  * set `broker_auth_plugin` to `'kerberos'`
+  * set `kerberos_keytab` to the absolute file location of the keytab
+  * set `kerberos_realm` to the kerberos realm that the Broker host is enrolled with
+  * set `kerberos_service` to the kerberos service, e.g. `HTTP/node_fqdn`
+* After setup, `kinit <user>` then test the setup with `curl -Ik --negotiate -u : <node_fqdn>`.
+* For any errors, on the Broker, check `/var/log/openshift/broker/httpd/error_log`.
+
+
+```puppet
+class { 'openshift_origin' :
+  node_fqdn                  => "${hostname}.${domain}",
+  cloud_domain               => 'openshift.local',
+  dns_servers                => ['8.8.8.8'],
+  os_unmanaged_users         => [],
+  enable_network_services    => true,
+  configure_firewall         => true,
+  configure_ntp              => true,
+  configure_activemq         => true,
+  configure_mongodb          => true,
+  configure_named            => false,
+  configure_avahi            => true,
+  configure_broker           => true,
+  configure_node             => true,
+  development_mode           => true,
+  broker_auth_plugin         => 'kerberos',
+  kerberos_keytab            => '/var/www/openshift/broker/httpd/conf.d/http.keytab',
+  kerberos_realm             => 'EXAMPLE.COM',
+  kerberos_service           => $node_fqdn,
+}
+```
+
 ## Parameters
 
 The following lists all the class parameters the `openshift_origin` class accepts.
@@ -190,8 +226,8 @@ set to false, it is expected that cgroups are configured elsewhere in the Puppet
 
 ### broker_auth_plugin
 
-The authentication plugin to use with the OpenShift OpenShift Broker. Supported values are `'mongo'` and
-`'basic-auth'`
+The authentication plugin to use with the OpenShift OpenShift Broker. Supported values are `'mongo'`,
+`'basic-auth'`, and `'kerberos'`
 
 ### broker_auth_pub_key
 
@@ -209,6 +245,18 @@ Password for `broker_auth_priv_key` private key
 ### broker_auth_salt
 
 Salt used to generate authentication tokens for communication between node and broker.
+
+### kerberos_keytab
+
+The full/absolute path to the Kerberos keytab for the Broker service, e.g. `'/var/www/openshift/broker/http/conf.d/http.keytab'`.
+
+### kerberos_realm
+
+The hostname in all caps that the Broker host/service is enrolled with, e.g. `'EXAMPLE.COM'`
+
+### kerberos_service
+
+The fully-qualified domain name that the service is enrolled with in your Kerberos setup. Do not include `HTTP/`, just the fqdn, e.g. `'example.com'` or just `$node_fqdn`.
 
 ### broker_rsync_key
 

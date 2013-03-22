@@ -1,12 +1,16 @@
 LoadModule auth_basic_module modules/mod_auth_basic.so
-LoadModule authn_file_module modules/mod_authn_file.so
 LoadModule authz_user_module modules/mod_authz_user.so
+LoadModule auth_kerb_module modules/mod_auth_kerb.so
 
 <Location /broker>
     AuthName "OpenShift"
-    AuthType Basic
-    AuthUserFile /etc/openshift/htpasswd
-    require valid-user
+    AuthType Kerberos
+    KrbMethodNegotiate On
+    KrbMethodK5Passwd On
+    KrbServiceName HTTP/<%= scope.lookupvar('::openshift_origin::kerberos_service') %>
+    KrbAuthRealms <%= scope.lookupvar('::openshift_origin::kerberos_realm') %>
+    Krb5KeyTab <%= scope.lookupvar('::openshift_origin::kerberos_keytab') %>
+    Require valid-user
 
     # The node->broker auth is handled in the Ruby code
     BrowserMatch Openshift passthrough
