@@ -1,0 +1,6 @@
+#
+# Cartridges may expose files through the FrontendHttpServer connect call.
+#
+<Directory /usr/libexec/openshift/cartridges/*/info/configuration >
+    Require all granted
+</Directory>

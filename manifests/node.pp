@@ -428,6 +428,20 @@ class openshift_origin::node {
     }
   }
 
+  if ($::openshift_origin::configure_node == true) {
+    if $::operatingsystem == "Fedora" {
+      file { 'allow cartridge files through apache':
+        ensure  => present,
+        path    => '/etc/httpd/conf.d/cartridge_files.conf',
+        content => template('openshift_origin/node/cartridge_files.conf.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0660',
+        require =>  Package['httpd'],
+      }
+    }
+  }
+
   package { [
     'openshift-origin-cartridge-abstract',
     'openshift-origin-cartridge-10gen-mms-agent-0.1',
