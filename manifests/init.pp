@@ -316,6 +316,12 @@ class openshift_origin (
   }
   )
 
+  ensure_resource('package', 'ruby-devel', {
+      ensure  => present,
+    }
+  )
+
+
   if $enable_network_services == true {
     service { [httpd, network, sshd]:
       enable  => true,

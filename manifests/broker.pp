@@ -30,11 +30,6 @@
 # limitations under the License.
 #
 class openshift_origin::broker {
-  ensure_resource('package', 'ruby-devel', {
-      ensure => 'latest',
-    }
-  )
-
   ensure_resource('package', 'mysql-devel', {
       ensure => 'latest',
     }

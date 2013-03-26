@@ -36,6 +36,16 @@ class openshift_origin::console {
     }
   )
 
+  ensure_resource('package', 'gcc', {
+      ensure  => present,
+    }
+  )
+
+  ensure_resource('package', 'make', {
+      ensure  => present,
+    }
+  )
+
   ensure_resource('package', 'openshift-origin-console', {
       ensure  => present,
       require => Yumrepo[openshift-origin],
@@ -101,7 +111,12 @@ class openshift_origin::console {
     ensure_resource('package', 'rdiscount', {
         ensure   => '1.6.8',
         provider => 'gem',
-        alias    => 'rubygem-rdiscount'
+        alias    => 'rubygem-rdiscount',
+        require  => [
+            Package['ruby-devel'],
+            Package['gcc'],
+            Package['make']
+          ]
       }
     )
 
