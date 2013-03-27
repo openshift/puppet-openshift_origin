@@ -206,6 +206,10 @@ Array of DNS servers to use when configuring named forwarding. Defaults to `['8.
 Enables quotas on the local node. Applicable only to OpenShift OpenShift Nodes.  If this setting is set to false, it is expected
 that Quotas are configured elsewhere in the Puppet catalog
 
+### console_session_secret
+
+Secret used for signing Rails sessions.
+
 ### oo_device
 
 Device on which gears are stored (`/var/lib/openshift`)
@@ -245,6 +249,10 @@ Password for `broker_auth_priv_key` private key
 ### broker_auth_salt
 
 Salt used to generate authentication tokens for communication between node and broker.
+
+### broker_session_secret
+
+Secret used for signing Rails sessions.
 
 ### kerberos_keytab
 
