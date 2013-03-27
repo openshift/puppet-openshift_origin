@@ -10,6 +10,7 @@ CLOUD_DOMAIN="<%= scope.lookupvar('::openshift_origin::cloud_domain') %>"       
 # You may want these, depending on the complexity of your networking:
 # EXTERNAL_ETH_DEV='eth0'                                 # Specify the internet facing public ethernet device
 # INTERNAL_ETH_DEV='eth1'                                 # Specify the internal cluster facing ethernet device
+INSTANCE_ID="<%= scope.lookupvar('::openshift_origin::node_fqdn') %>"                                      # Set by RH EC2 automation
 
 # Generally the following should not be changed:
 ENABLE_CGROUPS=<%= scope.lookupvar('::openshift_origin::configure_cgroups') ? '1':'0' %>                                          # Enable cgroups for gears (0=off, 1=on)
@@ -27,3 +28,8 @@ PROXY_MIN_PORT_NUM=35531                                  # Lower bound of port 
 PROXY_PORTS_PER_GEAR=5                                    # Number of proxy ports available per gear
 CREATE_APP_SYMLINKS=0                                     # If set to 1, creates gear-name symlinks to the UUID directories (debugging only)
 OPENSHIFT_HTTP_CONF_DIR="/etc/httpd/conf.d/openshift"
+
+PLATFORM_LOG_FILE=/var/log/openshift/node/platform.log
+PLATFORM_LOG_LEVEL=DEBUG
+PLATFORM_TRACE_LOG_FILE=/var/log/openshift/node/platform-trace.log
+PLATFORM_TRACE_LOG_LEVEL=DEBUG
