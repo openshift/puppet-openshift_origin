@@ -33,3 +33,5 @@ AUTH_PRIVKEYFILE="/etc/openshift/server_priv.pem"
 AUTH_PRIVKEYPASS=<%= scope.lookupvar('::openshift_origin::broker_auth_key_password') %>
 AUTH_PUBKEYFILE="/etc/openshift/server_pub.pem"
 AUTH_RSYNC_KEY_FILE="/etc/openshift/rsync_id_rsa"
+
+SESSION_SECRET=<%= scope.lookupvar('::openshift_origin::broker_session_secret') %>

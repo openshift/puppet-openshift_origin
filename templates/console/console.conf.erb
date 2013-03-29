@@ -97,3 +97,5 @@ REMOTE_USER_HEADER=REMOTE_USER
 # Required when CONSOLE_SECURITY=remote_user, may be empty
 #
 REMOTE_USER_COPY_HEADERS=X-Remote-User
+
+SESSION_SECRET="<%= scope.lookupvar('::openshift_origin::console_session_secret') %>"
