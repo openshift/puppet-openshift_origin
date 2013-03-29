@@ -34,7 +34,7 @@ class openshift_origin::named {
 
   if $::openshift_origin::named_tsig_priv_key == '' {
     warning "Generate the Key file with '/usr/sbin/dnssec-keygen -a HMAC-MD5 -b 512 -n USER -r /dev/urandom -K /var/named ${openshift_origin::cloud_domain}'"
-    warning "Use the last field in the generated key file /var/named/K${openshift_origin::cloud_domain}*.key"
+    warning "Use the value of the Key field in the generated private key file /var/named/K${openshift_origin::cloud_domain}*.private"
     fail 'named_tsig_priv_key is required.'
   }
 
