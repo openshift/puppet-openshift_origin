@@ -117,6 +117,15 @@ class openshift_origin::node {
     mode    => '0644',
     require => Package['rubygem-openshift-origin-node'],
   }
+  
+  file { 'node sshd config':
+    ensure  => present,
+    path    => '/etc/ssh/sshd_config',
+    content => template('openshift_origin/node/sshd_config.erb'),
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0600',
+  }
 
   file { 'openshift node config':
     ensure  => present,
@@ -340,15 +349,15 @@ class openshift_origin::node {
     mode    => '0644',
   }
 
-  $printf = $::operatingsystem ? {
-    'Fedora' => '/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"',
-    default  => '/usr/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"'
-  }
+#  $printf = $::operatingsystem ? {
+#    'Fedora' => '/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"',
+#    default  => '/usr/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"'
+#  }
 
-  exec { 'Update sshd configs':
-    command => $printf,
-    unless  => '/bin/grep -qFx \'AcceptEnv GIT_SSH\' \'/etc/ssh/sshd_config\''
-  }
+#  exec { 'Update sshd configs':
+#    command => $printf,
+#    unless  => '/bin/grep -qFx \'AcceptEnv GIT_SSH\' \'/etc/ssh/sshd_config\''
+#  }
 
   if $::openshift_origin::enable_network_services == true {
     service { 'crond':
