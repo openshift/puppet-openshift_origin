@@ -1,5 +1,0 @@
-#%PAM-1.0
-auth            include         runuser
-session         optional        pam_keyinit.so force revoke
-session         include         runuser
-session         required        pam_namespace.so no_unmount_on_close

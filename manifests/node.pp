@@ -223,78 +223,89 @@ class openshift_origin::node {
   }
 
   if $::openshift_origin::configure_pam == true {
-    $pam_sshd_template = $::operatingsystem ? {
-      'Fedora' => template('openshift_origin/node/pam.sshd-fedora.erb'),
-      default  => template('openshift_origin/node/pam.sshd-rhel.erb'),
+    augeas { 'openshift node pam sshd':
+      context => "/files/etc/pam.d/sshd",
+      changes => [
+	  "set /files/etc/pam.d/sshd/#comment[.='pam_selinux.so close should be the first session rule'] 'pam_openshift.so close should be the first session rule'",
+          "ins 01 before *[argument='close']",
+          "set 01/type session",
+          "set 01/control required",
+          "set 01/module pam_openshift.so",
+          "set 01/argument close",
+          "set 01/#comment 'Managed by puppet:openshift_origin'",
+
+          "set /files/etc/pam.d/sshd/#comment[.='pam_selinux.so open should only be followed by sessions to be executed in the user context'] 'pam_openshift.so open should only be followed by sessions to be executed in the user context'",
+          "ins 02 before *[argument='open']",
+          "set 02/type session",
+          "set 02/control required",
+          "set 02/module pam_openshift.so",
+          "set 02/argument[1] open",
+          "set 02/argument[2] env_params",
+          "set 02/#comment 'Managed by puppet:openshift_origin'",
+
+          "rm *[module='pam_selinux.so']",
+
+          "set 03/type session",
+          "set 03/control required",
+          "set 03/module pam_namespace.so",
+          "set 03/argument[1] no_unmount_on_close",
+          "set 03/#comment 'Managed by puppet:openshift_origin'",
+
+          "set 04/type session",
+          "set 04/control optional",
+          "set 04/module pam_cgroup.so",
+          "set 04/#comment 'Managed by puppet:openshift_origin'",
+        ],
+        onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
     }
 
-    file { 'openshift node pam sshd':
-      ensure  => present,
-      path    => '/etc/pam.d/sshd',
-      content => $pam_sshd_template,
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      require => Package['pam_openshift'],
+    augeas { 'openshift node pam runuser':
+      context => "/files/etc/pam.d/runuser",
+      changes => [
+          "set 01/type session",
+          "set 01/control required",
+          "set 01/module pam_namespace.so",
+          "set 01/argument[1] no_unmount_on_close",
+          "set 01/#comment 'Managed by puppet:openshift_origin'",
+        ],
+        onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
     }
 
-    $pam_runuser_template = $::operatingsystem ? {
-      default => template('openshift_origin/node/pam.runuser-fedora.erb'),
+    augeas { 'openshift node pam runuser-l':
+      context => "/files/etc/pam.d/runuser-l",
+      changes => [
+          "set 01/type session",
+          "set 01/control required",
+          "set 01/module pam_namespace.so",
+          "set 01/argument[1] no_unmount_on_close",
+          "set 01/#comment 'Managed by puppet:openshift_origin'",
+        ],
+        onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
     }
 
-    file { 'openshift node pam runuser':
-      ensure  => present,
-      path    => '/etc/pam.d/runuser',
-      content => $pam_runuser_template,
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      require => Package['pam_openshift'],
+    augeas { 'openshift node pam su':
+      context => "/files/etc/pam.d/su",
+      changes => [
+          "set 01/type session",
+          "set 01/control required",
+          "set 01/module pam_namespace.so",
+          "set 01/argument[1] no_unmount_on_close",
+          "set 01/#comment 'Managed by puppet:openshift_origin'",
+        ],
+        onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
     }
 
-    $pam_runuser_l_template = $::operatingsystem ? {
-      default => template('openshift_origin/node/pam.runuser-l-fedora.erb'),
-    }
-
-    file { 'openshift node pam runuser-l':
-      ensure  => present,
-      path    => '/etc/pam.d/runuser-l',
-      content => $pam_runuser_l_template,
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      require => Package['pam_openshift'],
-    }
-
-    $pam_su_template = $::operatingsystem ? {
-      'Fedora' => template('openshift_origin/node/pam.su-fedora.erb'),
-      default  => template('openshift_origin/node/pam.su-rhel.erb'),
-    }
-
-    file { 'openshift node pam su':
-      ensure  => present,
-      path    => '/etc/pam.d/su',
-      content => $pam_su_template,
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      require => Package['pam_openshift'],
-    }
-
-    $pam_system_auth_ac_template = $::operatingsystem ? {
-      'Fedora' => template('openshift_origin/node/pam.system-auth-ac-fedora.erb'),
-      default  => template('openshift_origin/node/pam.system-auth-ac-rhel.erb'),
-    }
-
-    file { 'openshift node pam system-auth-ac':
-      ensure  => present,
-      path    => '/etc/pam.d/system-auth-ac',
-      content => $pam_system_auth_ac_template,
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      require => Package['pam_openshift'],
-    }
+    augeas { 'openshift node pam system-auth-ac':
+      context => "/files/etc/pam.d/system-auth-ac",
+      changes => [
+          "set 01/type session",
+          "set 01/control required",
+          "set 01/module pam_namespace.so",
+          "set 01/argument[1] no_unmount_on_close",
+          "set 01/#comment 'Managed by puppet:openshift_origin'",
+        ],
+        onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
+    }  
 
     $os_all_unmanaged_users = [['root', 'adm', 'apache'], $::openshift_origin::os_unmanaged_users]
 
