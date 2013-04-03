@@ -127,6 +127,15 @@ class openshift_origin::node {
     group   => 'root',
     mode    => '0644',
   }
+  
+  fileÊ{Ê'nodeÊsshdÊconfig':
+ÊÊÊÊensureÊÊ=>Êpresent,
+ÊÊÊÊpathÊÊÊÊ=>Ê'/etc/ssh/sshd_config',
+ÊÊÊÊcontentÊ=>Êtemplate('openshift_origin/node/sshd_config.erb'),
+ÊÊÊÊownerÊÊÊ=>Ê'root',
+ÊÊÊÊgroupÊÊÊ=>Ê'root',
+ÊÊÊÊmodeÊÊÊÊ=>Ê'0600',
+ÊÊ}
 
   if !defined(File['mcollective client config']) {
     file { 'mcollective client config':
@@ -351,15 +360,15 @@ class openshift_origin::node {
     mode    => '0644',
   }
 
-  $printf = $::operatingsystem ? {
-    'Fedora' => '/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"',
-    default  => '/usr/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"'
-  }
+#  $printf = $::operatingsystem ? {
+#    'Fedora' => '/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"',
+#    default  => '/usr/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"'
+#  }
 
-  exec { 'Update sshd configs':
-    command => $printf,
-    unless  => '/bin/grep -qFx \'AcceptEnv GIT_SSH\' \'/etc/ssh/sshd_config\''
-  }
+3  exec { 'Update sshd configs':
+#    command => $printf,
+#    unless  => '/bin/grep -qFx \'AcceptEnv GIT_SSH\' \'/etc/ssh/sshd_config\''
+#  }
 
   if $::openshift_origin::enable_network_services == true {
     service { 'crond':
@@ -483,6 +492,7 @@ class openshift_origin::node {
           'openshift-origin-cartridge-php-5.4',
           'openshift-origin-cartridge-perl-5.16',
           'openshift-origin-cartridge-phpmyadmin-3.5',
+          'openshift-origin-cartridge-jbossas-7',
         ]:
           ensure  => present,
           require => [
