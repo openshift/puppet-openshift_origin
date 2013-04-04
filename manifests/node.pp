@@ -128,14 +128,14 @@ class openshift_origin::node {
     mode    => '0644',
   }
   
-  fileÊ{Ê'nodeÊsshdÊconfig':
-ÊÊÊÊensureÊÊ=>Êpresent,
-ÊÊÊÊpathÊÊÊÊ=>Ê'/etc/ssh/sshd_config',
-ÊÊÊÊcontentÊ=>Êtemplate('openshift_origin/node/sshd_config.erb'),
-ÊÊÊÊownerÊÊÊ=>Ê'root',
-ÊÊÊÊgroupÊÊÊ=>Ê'root',
-ÊÊÊÊmodeÊÊÊÊ=>Ê'0600',
-ÊÊ}
+  file { 'node sshd config':
+    ensure  => present,
+    path    => '/etc/ssh/sshd_config',
+    content => template('openshift_origin/node/sshd_config.erb'),
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0600',
+  }
 
   if !defined(File['mcollective client config']) {
     file { 'mcollective client config':
