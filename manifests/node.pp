@@ -585,6 +585,13 @@ class openshift_origin::node {
         Yumrepo[openshift-origin],
         Yumrepo[openshift-origin-deps],
       ],
+      notify => Exec['oo-admin-cartridge'],
+    }
+    
+    # Note, this does not handle cartridge uninstalls
+    exec { 'oo-admin-cartridge':
+      command => '/usr/sbin/oo-admin-cartridge --recursive -a install -s /usr/libexec/openshift/cartridges/v2/',
+      refreshonly => true,
     }
   }
 }

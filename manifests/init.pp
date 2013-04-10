@@ -153,6 +153,7 @@ class openshift_origin (
   $cloud_domain               = 'example.com',
   $dns_servers                = ['8.8.8.8', '8.8.4.4'],
   $configure_fs_quotas        = true,
+  $console_session_secret     = 'changeme',
   $oo_device                  = $::gear_root_device,
   $oo_mount                   = $::gear_root_mount,
   $configure_cgroups          = true,
@@ -161,7 +162,8 @@ class openshift_origin (
   $broker_auth_pub_key        = '',
   $broker_auth_priv_key       = '',
   $broker_auth_key_password   = '',
-  $broker_auth_salt           = 'ClWqe5zKtEW4CJEMyjzQ',
+  $broker_auth_salt           = 'changeme',
+  $broker_session_secret      = 'changeme',
   $broker_rsync_key           = '',
   $broker_dns_plugin          = 'nsupdate',
   $kerberos_keytab            = '/var/www/openshift/broker/httpd/conf.d/http.keytab',
@@ -179,6 +181,30 @@ class openshift_origin (
   $development_mode           = false
 ) {
   include openshift_origin::params
+
+  if $console_session_secret == 'changeme' {
+    warning 'The default console_session_secret is being used'
+  }
+
+  if $broker_session_secret == 'changeme' {
+    warning 'The default broker_session_secret is being used'
+  }
+
+  if $broker_auth_salt == 'changeme' {
+    warning 'The default broker_auth_salt is being used'
+  }
+
+  if $mongo_auth_password == 'mooo' {
+    warning 'The default mongo_auth_password is being used'
+  }
+
+  if $mq_server_password == 'marionette' {
+    warning 'The default mq_server_password is being used'
+  }
+
+  if $::facterversion <= '1.6.16' {
+    fail 'Facter version needs to be updated to at least 1.6.17'
+  }
 
   $service   = $::operatingsystem ? {
     'Fedora' => '/usr/sbin/service',
