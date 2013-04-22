@@ -107,13 +107,13 @@ else
   end
   restart_mongo
   $log.info "......set db admin users"
-  run "/usr/bin/mongo localhost/openshift_broker_dev --eval 'db.addUser(\"openshift\", \"mooo\")'"
-  run "/usr/bin/mongo localhost/admin --eval 'db.addUser(\"openshift\", \"mooo\")'"
+  mongo_auth_password = "<%= scope.lookupvar("openshift_origin::mongo_auth_password") %>"
+  run "/usr/bin/mongo localhost/openshift_broker_dev --eval 'db.addUser(\"openshift\", \"#{mongo_auth_password}\")'"
+  run "/usr/bin/mongo localhost/admin --eval 'db.addUser(\"openshift\", \"#{mongo_auth_password}\")'"
   $log.info "......register mongo auth admin user"
 
   salt = "<%= scope.lookupvar("openshift_origin::broker_auth_salt") %>"
   encoded_password = Digest::MD5.hexdigest(Digest::MD5.hexdigest("admin") + salt)
-  mongo_auth_password = "<%= scope.lookupvar("openshift_origin::mongo_auth_password") %>"
   run "/usr/bin/mongo openshift_broker_dev --username openshift --password #{mongo_auth_password} --eval 'db.auth_user.update({\"_id\":\"admin\"}, {\"_id\":\"admin\",\"user\":\"admin\",\"password_hash\":\"#{encoded_password}\"}, true)'"
 
   stop_mongo
