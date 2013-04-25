@@ -206,6 +206,10 @@ class openshift_origin (
     fail 'Facter version needs to be updated to at least 1.6.17'
   }
 
+  if $::selinux_current_mode == 'disabled' {
+    fail 'SELinux is required for OpenShift.'
+  }
+
   $service   = $::operatingsystem ? {
     'Fedora' => '/usr/sbin/service',
     default  => '/sbin/service',
