@@ -12,6 +12,8 @@ LoadModule auth_kerb_module modules/mod_auth_kerb.so
     Krb5KeyTab <%= scope.lookupvar('::openshift_origin::kerberos_keytab') %>
     Require valid-user
 
+    SetEnvIfNoCase Authorization Bearer passthrough
+
     # The node->broker auth is handled in the Ruby code
     BrowserMatch Openshift passthrough
     Allow from env=passthrough

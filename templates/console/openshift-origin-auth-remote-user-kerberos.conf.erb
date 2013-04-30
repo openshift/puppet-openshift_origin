@@ -18,6 +18,8 @@ RequestHeader set X-Remote-User "%{RU}e" env=RU
     Krb5KeyTab <%= scope.lookupvar('::openshift_origin::kerberos_keytab') %>
     require valid-user
 
+    SetEnvIfNoCase Authorization Bearer passthrough
+
     # The node->broker auth is handled in the Ruby code
     BrowserMatch OpenShift passthrough
     Allow from env=passthrough
