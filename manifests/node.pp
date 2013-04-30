@@ -492,6 +492,7 @@ class openshift_origin::node {
           'openshift-origin-cartridge-php-5.4',
           'openshift-origin-cartridge-perl-5.16',
           'openshift-origin-cartridge-phpmyadmin-3.5',
+          'openshift-origin-cartridge-jbossas-7',
         ]:
           ensure  => present,
           require => [
