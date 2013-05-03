@@ -27,9 +27,19 @@ LoadModule authz_user_module modules/mod_authz_user.so
 
 # The following APIs do not require auth:
 <Location /broker/rest/cartridges*>
-    Allow from all
+    <IfVersion >= 2.4>
+        Require all granted
+    </IfVersion>
+    <IfVersion < 2.4>
+        Allow from all
+    </IfVersion>
 </Location>
 
 <Location /broker/rest/api*>
-    Allow from all
+    <IfVersion >= 2.4>
+        Require all granted
+    </IfVersion>
+    <IfVersion < 2.4>
+        Allow from all
+    </IfVersion>
 </Location>
