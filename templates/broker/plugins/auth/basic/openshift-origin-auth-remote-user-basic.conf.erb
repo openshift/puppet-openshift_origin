@@ -13,7 +13,7 @@ LoadModule authz_user_module modules/mod_authz_user.so
     # The node->broker auth is handled in the Ruby code
     BrowserMatchNoCase ^OpenShift passthrough
     <IfVersion >= 2.4>
-        <If "-n env(passthrough)">
+        <If "-n env('passthrough')">
             Require all granted
         </If>
     </IfVersion>
@@ -25,7 +25,7 @@ LoadModule authz_user_module modules/mod_authz_user.so
     # Turn the Console output header into the Apache environment variable for the broker remote-user plugin
     SetEnvIf X-Remote-User "(..*)" REMOTE_USER=$1
     <IfVersion >= 2.4>
-        <If "-n env(local_traffic)">
+        <If "-n env('local_traffic')">
             Require all granted
         </If>
     </IfVersion>
