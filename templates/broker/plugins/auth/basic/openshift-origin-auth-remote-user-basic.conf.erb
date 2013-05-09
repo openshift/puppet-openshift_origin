@@ -6,36 +6,33 @@ LoadModule authz_user_module modules/mod_authz_user.so
     AuthName "OpenShift broker API"
     AuthType Basic
     AuthUserFile /etc/openshift/htpasswd
-    require valid-user
 
     SetEnvIfNoCase Authorization Bearer passthrough
 
     # The node->broker auth is handled in the Ruby code
     BrowserMatchNoCase ^OpenShift passthrough
-    <IfVersion >= 2.4>
-        <If "-n env('passthrough')">
-            Require all granted
-        </If>
-    </IfVersion>
-    <IfVersion < 2.4>
-        Allow from env=passthrough
-    </IfVersion>
     # Console traffic will hit the local port.  mod_proxy will set this header automatically.
     SetEnvIf X-Forwarded-For "^$" local_traffic=1
     # Turn the Console output header into the Apache environment variable for the broker remote-user plugin
     SetEnvIf X-Remote-User "(..*)" REMOTE_USER=$1
+
     <IfVersion >= 2.4>
-        <If "-n env('local_traffic')">
-            Require all granted
-        </If>
-    </IfVersion>
-    <IfVersion < 2.4>
-        Allow from env=local_traffic
+        <RequireAny>
+            Require valid-user
+            Require env local_traffic passthrough
+        </RequireAny>
     </IfVersion>
 
-    Order Deny,Allow
-    Deny from all
-    Satisfy any
+    <IfVersion < 2.4>
+        Require valid-user
+        Allow from env=local_traffic
+        Allow from env=passthrough
+
+        Order Deny,Allow
+        Deny from all
+        Satisfy any
+    </IfVersion>
+
 </Location>
 
 # The following APIs do not require auth:
