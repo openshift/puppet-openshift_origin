@@ -106,6 +106,8 @@
 #   resolution. (This should be false if using Avahi for MDNS updates)
 # [*development_mode*]
 #   Set to true to enable development mode and detailed logging
+# [*min_gear_uid]
+#   Min gear uid/gid
 #
 # === Copyright
 #
@@ -178,7 +180,9 @@ class openshift_origin (
   $named_tsig_priv_key        = '',
   $os_unmanaged_users         = [],
   $update_network_dns_servers = true,
-  $development_mode           = false
+  $development_mode           = false,
+  $eth_device                 = 'eth0',
+  $min_gear_uid               = 500,
 ) {
   include openshift_origin::params
 
@@ -478,13 +482,6 @@ class openshift_origin (
     exec { 'Open port for HTTPS':
       command => "${openshift_origin::params::firewall_service_cmd}https",
       require => Package['firewall-package'],
-    }
-  }
-
-  if $update_network_dns_servers == true {
-    augeas { 'network setup':
-      context => '/files/etc/sysconfig/network-scripts/ifcfg-eth0',
-      changes => ["set DNS1 ${named_ipaddress}", "set HWADDR ${::macaddress_eth0}"],
     }
   }
 

@@ -8,7 +8,7 @@ BROKER_HOST="<%= scope.lookupvar('::openshift_origin::broker_fqdn') %>"         
 CLOUD_DOMAIN="<%= scope.lookupvar('::openshift_origin::cloud_domain') %>"                        # Domain suffix to use for applications (Must match broker config)
 
 # You may want these, depending on the complexity of your networking:
-# EXTERNAL_ETH_DEV='eth0'                                 # Specify the internet facing public ethernet device
+EXTERNAL_ETH_DEV='<%= scope.lookupvar('::openshift_origin::eth_device') %>'                                 # Specify the internet facing public ethernet device
 # INTERNAL_ETH_DEV='eth1'                                 # Specify the internal cluster facing ethernet device
 INSTANCE_ID="<%= scope.lookupvar('::openshift_origin::node_fqdn') %>"                                      # Set by RH EC2 automation
 
@@ -18,7 +18,7 @@ GEAR_BASE_DIR="/var/lib/openshift"                        # gear root directory
 GEAR_SKEL_DIR="/etc/openshift/skel"                       # skel files to use when building a gear
 GEAR_SHELL="/usr/bin/oo-trap-user"                        # shell to use for the gear
 GEAR_GECOS="OpenShift guest"                              # Gecos information to populate for the gear user
-GEAR_MIN_UID=500                                          # Lower bound of UID used to create gears
+GEAR_MIN_UID=<%= scope.lookupvar('::openshift_origin::min_gear_uid')%>                                          # Lower bound of UID used to create gears
 GEAR_MAX_UID=6500                                         # Upper bound of UID used to create gears
 OPENSHIFT_NODE_PLUGINS="openshift-origin-node/plugins/unix_user_observer"                                    # Extentions to load when customize/observe openshift-origin-node models
 CARTRIDGE_BASE_PATH="/usr/libexec/openshift/cartridges"   # Locations where cartridges are installed

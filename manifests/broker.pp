@@ -30,11 +30,6 @@
 # limitations under the License.
 #
 class openshift_origin::broker {
-  ensure_resource('package', 'mysql-devel', {
-      ensure => 'latest',
-    }
-  )
-
   ensure_resource('package', 'mongodb-devel', {
       ensure => 'latest',
     }
@@ -102,7 +97,12 @@ class openshift_origin::broker {
   )
 
   if $::operatingsystem == 'Fedora' {
-  
+    ensure_resource('package', 'mariadb-devel', {
+        ensure => 'latest',
+        alias  => 'mysql-devel'
+      }
+    )
+
     ensure_resource('package', 'mysql', {
         provider => 'gem',
         require  => [Package['ruby-devel'], Package['mysql-devel']]
@@ -477,6 +477,11 @@ class openshift_origin::broker {
   }
 
   if ($::operatingsystem == "RedHat" or $::operatingsystem == "CentOS") {
+    ensure_resource('package', 'mysql-devel', {
+        ensure => 'latest',
+      }
+    )
+
     ensure_resource('package', 'ruby193-rubygem-actionmailer', {
         ensure => 'latest',
         alias  => 'actionmailer',
@@ -852,11 +857,39 @@ class openshift_origin::broker {
   }
 
   file { 'openshift production log':
-    path    => '/var/www/openshift/broker/log/production.log',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0666',
+    ensure  => 'present',
+    path    => '/var/log/openshift/broker/production.log',
+    owner   => 'apache',
+    group   => 'apache',
+    mode    => '0750',
     require => Package['openshift-origin-broker'],
+  }
+
+  file { 'openshift development log':
+    ensure  => 'present',
+    path    => '/var/log/openshift/broker/development.log',
+    owner   => 'apache',
+    group   => 'apache',
+    mode    => '0750',
+    require => Package['openshift-origin-broker'],
+  }
+
+  file { 'openshift usage log':
+    ensure  => 'present',
+    path    => '/var/log/openshift/broker/usage.log',
+    owner   => 'apache',
+    group   => 'apache',
+    mode    => '0750',
+    require => Package['openshift-origin-broker'],
+  }
+
+  exec { 'restorecon -vr /var/log/openshift':
+    provider  => 'shell',
+    subscribe => [
+      File['openshift production log'],
+      File['openshift development log'],
+      File['openshift usage log'],
+    ],
   }
 
   if !defined(File['mcollective client config']) {

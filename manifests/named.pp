@@ -133,4 +133,31 @@ class openshift_origin::named {
     enable    => true,
     require   => Exec['named restorecon'],
   }
+
+  if $::openshift_origin::update_network_dns_servers == true {
+    $mac_template = "<%= scope.lookupvar('::macaddress_${::openshift_origin::eth_device}') %>"
+    $mac_address  = inline_template( $mac_template )
+    augeas { 'network setup':
+      context => "/files/etc/sysconfig/network-scripts/ifcfg-${::openshift_origin::eth_device}",
+      changes => [
+                "set DNS1 ${::openshift_origin::named_ipaddress}",
+                #"set HWADDR ${mac_address}",
+                "set PEERDNS no"],
+      require => Service['named']
+    }
+    file { '/etc/resolv.conf':
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => "nameserver ${::openshift_origin::named_ipaddress}",
+      require => Service['named']
+    }
+    exec { 'register broker DNS':
+      command => "/usr/sbin/oo-register-dns -h ${::hostname} -n ${::ipaddress}",
+      require => [
+        Service['named'],
+        Package['openshift-origin-broker-util']
+      ]
+    }
+  }
 }
