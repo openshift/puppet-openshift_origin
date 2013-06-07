@@ -140,9 +140,21 @@ class openshift_origin::console {
         alias    => 'rubygem-haml'
       }
     )
+
+    ensure_resource('package', 'rubygem-ci_reporter', {
+        ensure   => 'latest',
+        alias    => 'ci_reporter',
+      }
+    )
   }
 
   if ($::operatingsystem == "RedHat" or $::operatingsystem == "CentOS") {
+    ensure_resource('package', 'ruby193-rubygem-ci_reporter', {
+        ensure   => 'latest',
+        alias    => 'rubygem-ci_reporter',
+      }
+    )
+
     ensure_resource('package', 'ruby193-rubygem-sass-rails', {
         ensure   => 'latest',
         alias    => 'rubygem-sass-rails',
@@ -225,6 +237,7 @@ class openshift_origin::console {
       Package['rubygem-net-http-persistent'],
       Package['rubygem-haml'],
       Package['rubygem-formtastic'],
+      Package['rubygem-ci_reporter'],
       File['openshift console.conf'],
     ],
     refreshonly => true,
