@@ -91,7 +91,7 @@ end
 
 FileUtils.mkdir_p("/etc/openshift")
 if File.exist?("/etc/openshift/.mongo-setup-complete")
-  $log.info "Mongo has already been setup on this machine. Exiting"
+  $log.info "Mongo has already been setup on this machine. Lock file '/etc/openshift/.mongo-setup-complete' is present. Exiting"
 else
   $log.info "Configuring Mongo DB"
   $log.info "...setup mongo db admin users"
