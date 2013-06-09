@@ -1066,9 +1066,9 @@ class openshift_origin::broker {
         ensure => installed,
       }
       
-      file {'kerberos keytab':
+      file {'broker http keytab':
         ensure => present,
-        path => $::openshift_origin::kerberos_keytab,
+        path => $::openshift_origin::http_kerberos_keytab,
         owner => 'apache',
         group => 'apache',
         mode => '0644',
@@ -1085,7 +1085,7 @@ class openshift_origin::broker {
         require => [
           Package['rubygem-openshift-origin-auth-remote-user'],
           Package['mod_auth_kerb'],
-          File['kerberos keytab']
+          File['broker http keytab']
         ]
       }
 
@@ -1099,7 +1099,7 @@ class openshift_origin::broker {
         require => [
           Package['rubygem-openshift-origin-auth-remote-user'],
           Package['mod_auth_kerb'],
-          File['kerberos keytab']
+          File['broker http keytab']
         ]
       }
 
@@ -1119,19 +1119,45 @@ class openshift_origin::broker {
 
   case $::openshift_origin::broker_dns_plugin {  
     'nsupdate'   : {
-      if $openshift_origin::named_tsig_priv_key == '' {
+      if $openshift_origin::named_tsig_priv_key == '' and !$openshift_origin::broker_dns_gsstsig {
         warning "Generate the Key file with '/usr/sbin/dnssec-keygen -a HMAC-MD5 -b 512 -n USER -r /dev/urandom -K /var/named ${openshift_origin::cloud_domain}'"
         warning "Use the last field in the generated key file /var/named/K${openshift_origin::cloud_domain}*.key"
         fail 'named_tsig_priv_key is required.'
       }
-      
-      file { 'plugin openshift-origin-dns-nsupdate.conf':
-        path    => '/etc/openshift/plugins.d/openshift-origin-dns-nsupdate.conf',
-        content => template('openshift_origin/broker/plugins/dns/nsupdate/nsupdate.conf.erb'),
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0644',
-        require => Package['rubygem-openshift-origin-dns-nsupdate'],
+      if $openshift_origin::broker_dns_gsstsig and $openshift_origin::dns_kerberos_keytab == '' {
+        warning "Kerberos keytab for the DNS service was not found. Please generate a keytab for DNS/${openshift_origin::node_fqdn}"
+        fail "broker_dns_keytab is required."
+      }
+
+      if $openshift_origin::broker_dns_gsstsig {
+        file { 'broker-dns-keytab':
+          ensure => present,
+          path => $openshift_origin::dns_kerberos_keytab,
+          owner => 'apache',
+          group => 'apache',
+          mode => '0664',
+          require => Package['rubygem-openshift-origin-dns-nsupdate'],
+        }
+        file { 'plugin openshift-origin-dns-nsupdate.conf':
+          path   => '/etc/openshift/plugins.d/openshift-origin-dns-nsupdate.conf',
+          content => template('openshift_origin/broker/plugins/dns/nsupdate/nsupdate-kerb.conf.erb'),
+          owner   => 'root',
+          group   => 'root',
+          mode    => '0644',
+          require => [
+            Package['rubygem-openshift-origin-dns-nsupdate'],
+            File['broker-dns-keytab'],
+            ]
+        }
+      } else {
+        file { 'plugin openshift-origin-dns-nsupdate.conf':
+          path    => '/etc/openshift/plugins.d/openshift-origin-dns-nsupdate.conf',
+          content => template('openshift_origin/broker/plugins/dns/nsupdate/nsupdate.conf.erb'),
+          owner   => 'root',
+          group   => 'root',
+          mode    => '0644',
+          require => Package['rubygem-openshift-origin-dns-nsupdate'],
+        }
       }
     }
     'avahi'      : {

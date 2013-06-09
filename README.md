@@ -67,7 +67,7 @@ this class.
       broker_dns_plugin          => 'avahi',
     }
 
-### Example: Single host (broker+console+node) which uses the **Kerberos** Auth plugin. 
+### Example: Single host (broker+console+node) which uses the **Kerberos** Auth plugin and GSS-TSIG. 
 
     class { 'openshift_origin' :
       node_fqdn                  => "${hostname}.${domain}",
@@ -85,7 +85,10 @@ this class.
       configure_node             => true,
       development_mode           => true,
       broker_auth_plugin         => 'kerberos',
-      kerberos_keytab            => '/var/www/openshift/broker/httpd/conf.d/http.keytab',
+      broker_dns_plugin          => 'nsupdate',
+      broker_dns_gsstsig         => true,
+      http_kerberos_keytab       => '/etc/http.keytab',
+      dns_kerberos_keytab        => '/etc/dns.keytab'
       kerberos_realm             => 'EXAMPLE.COM',
       kerberos_service           => $node_fqdn,
     }
@@ -96,10 +99,18 @@ Please note:
 * Keytab should be generated, is located on the Broker machine, and Apache should be able to access it (`chown apache <kerberos_keytab>`)
 * Like the example config below:
   * set `broker_auth_plugin` to `'kerberos'`
-  * set `kerberos_keytab` to the absolute file location of the keytab
+  * set `http_kerberos_keytab` and `dns_kerberos_keytab` to the absolute file location of the keytab
   * set `kerberos_realm` to the kerberos realm that the Broker host is enrolled with
-  * set `kerberos_service` to the kerberos service, e.g. `HTTP/node_fqdn`
-* After setup, `kinit <user>` then test the setup with `curl -Ik --negotiate -u : <node_fqdn>`.
+  * set `kerberos_service` to the FQDN of the enrolled kerberos service, e.g. `node_fqdn`
+* After setup, to test:
+  * authentication: `kinit <user>` then `curl -Ik --negotiate -u : <node_fqdn>`
+  * GSS-TSIG (should return `nil`):
+    `$ cd /var/www/openshift/broker`
+    `$ bundle --local`
+    `$ rails console`
+    `$ d = OpenShift::DnsService.instance`
+    `$ d.register_application "appname", "namespace", "node_fqdn"`
+    `=> nil`
 * For any errors, on the Broker, check `/var/log/openshift/broker/httpd/error_log`.
 
 

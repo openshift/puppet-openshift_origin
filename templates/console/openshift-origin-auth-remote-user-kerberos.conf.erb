@@ -15,7 +15,7 @@ RequestHeader set X-Remote-User "%{RU}e" env=RU
     KrbMethodK5Passwd On
     KrbServiceName HTTP/<%= scope.lookupvar('::openshift_origin::kerberos_service') %>
     KrbAuthRealms <%= scope.lookupvar('::openshift_origin::kerberos_realm') %>
-    Krb5KeyTab <%= scope.lookupvar('::openshift_origin::kerberos_keytab') %>
+    Krb5KeyTab <%= scope.lookupvar('::openshift_origin::http_kerberos_keytab') %>
     require valid-user
 
     SetEnvIfNoCase Authorization Bearer passthrough
