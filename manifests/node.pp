@@ -285,6 +285,11 @@ class openshift_origin::node {
           "set 01/module pam_namespace.so",
           "set 01/argument[1] no_unmount_on_close",
           "set 01/#comment 'Managed by puppet:openshift_origin'",
+
+          "set 02/type session",
+          "set 02/control optional",
+          "set 02/module pam_cgroup.so",
+          "set 02/#comment 'Managed by puppet:openshift_origin'",
         ],
         onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
     }
@@ -297,6 +302,11 @@ class openshift_origin::node {
           "set 01/module pam_namespace.so",
           "set 01/argument[1] no_unmount_on_close",
           "set 01/#comment 'Managed by puppet:openshift_origin'",
+
+          "set 02/type session",
+          "set 02/control optional",
+          "set 02/module pam_cgroup.so",
+          "set 02/#comment 'Managed by puppet:openshift_origin'",
         ],
         onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
     }
@@ -309,6 +319,11 @@ class openshift_origin::node {
           "set 01/module pam_namespace.so",
           "set 01/argument[1] no_unmount_on_close",
           "set 01/#comment 'Managed by puppet:openshift_origin'",
+
+          "set 02/type session",
+          "set 02/control optional",
+          "set 02/module pam_cgroup.so",
+          "set 02/#comment 'Managed by puppet:openshift_origin'",
         ],
         onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
     }
@@ -321,6 +336,11 @@ class openshift_origin::node {
           "set 01/module pam_namespace.so",
           "set 01/argument[1] no_unmount_on_close",
           "set 01/#comment 'Managed by puppet:openshift_origin'",
+
+          "set 02/type session",
+          "set 02/control optional",
+          "set 02/module pam_cgroup.so",
+          "set 02/#comment 'Managed by puppet:openshift_origin'",
         ],
         onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
     }  
