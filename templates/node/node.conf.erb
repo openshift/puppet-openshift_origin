@@ -20,6 +20,9 @@ GEAR_SHELL="/usr/bin/oo-trap-user"                        # shell to use for the
 GEAR_GECOS="OpenShift guest"                              # Gecos information to populate for the gear user
 GEAR_MIN_UID=<%= scope.lookupvar('::openshift_origin::min_gear_uid')%>                                          # Lower bound of UID used to create gears
 GEAR_MAX_UID=6500                                         # Upper bound of UID used to create gears
+<% if scope.lookupvar('::openshift_origin::user_supplementary_groups') != "" -%>
+GEAR_SUPL_GRPS="<%= scope.lookupvar('::openshift_origin::user_supplementary_groups') %>"  # Supplementary groups for gear UIDs (comma separated list)
+<% end -%>
 OPENSHIFT_NODE_PLUGINS="openshift-origin-node/plugins/unix_user_observer"                                    # Extentions to load when customize/observe openshift-origin-node models
 CARTRIDGE_BASE_PATH="/usr/libexec/openshift/cartridges"   # Locations where cartridges are installed
 LAST_ACCESS_DIR="/var/lib/openshift/.last_access"         # Location to maintain last accessed time for gears

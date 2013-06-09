@@ -101,6 +101,8 @@
 # [*os_unmanaged_users*]
 #   List of users with UID which should not be managed by OpenShift. (By default OpenShift Origin PAM will reserve all
 #   UID's > 500 and prevent user logins)
+# [*user_supplementary_groups*]
+#   Comma separated list of supplementary groups that the user should be a member of when the new unix user is being created
 # [*update_network_dns_servers*]
 #   True if Bind DNS server specified in <code>named_ipaddress</code> should be added as first DNS server for application name.
 #   resolution. (This should be false if using Avahi for MDNS updates)
@@ -181,6 +183,7 @@ class openshift_origin (
   $mongo_auth_password        = 'mooo',
   $named_tsig_priv_key        = '',
   $os_unmanaged_users         = [],
+  $user_supplementary_groups  = '',
   $update_network_dns_servers = true,
   $development_mode           = false,
   $eth_device                 = 'eth0',
