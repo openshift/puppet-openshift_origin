@@ -216,6 +216,18 @@ class openshift_origin::console {
     )
   }
 
+  # This File resource is to guarantee that the Gemfile.lock created
+  # by the following Exec has the appropriate permissions (otherwise
+  # it is created as owned by root:root)  
+  file { '/var/www/openshift/console/Gemfile.lock':
+    ensure    => 'present',
+    owner     => 'apache',
+    group     => 'apache',
+    mode      => '0644',
+    subscribe => Exec ['Console gem dependencies'],
+    require   => Exec ['Console gem dependencies'],
+  }
+
   exec { 'Console gem dependencies':
     cwd         => '/var/www/openshift/console/',
     command     => "${::openshift_origin::rm} -f Gemfile.lock && \
