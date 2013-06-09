@@ -48,7 +48,7 @@ class openshift_origin::named {
     owner   => 'named',
     group   => 'named',
     mode    => '0644',
-    require => File['/var/named'],
+    require => File['/var/named/dynamic'],
   }
 
   exec { 'create rndc.key':
@@ -73,7 +73,7 @@ class openshift_origin::named {
 
   file { '/var/named':
     ensure  => directory,
-    owner   => 'named',
+    owner   => 'root',
     group   => 'named',
     mode    => '0750',
     require => Package['bind'],
