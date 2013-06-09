@@ -66,6 +66,11 @@ class openshift_origin::console {
     default  => '/usr/bin/scl enable ruby193 "rake assets:precompile"',
   }
 
+  $console_bundle_install    = $::operatingsystem ? {
+    'Fedora' => '/usr/bin/bundle install',
+    default  => '/usr/bin/scl enable ruby193 "bundle install"',
+  }
+
   $console_bundle_show    = $::operatingsystem ? {
     'Fedora' => '/usr/bin/bundle show',
     default  => '/usr/bin/scl enable ruby193 "bundle show"',
@@ -231,6 +236,7 @@ class openshift_origin::console {
   exec { 'Console gem dependencies':
     cwd         => '/var/www/openshift/console/',
     command     => "${::openshift_origin::rm} -f Gemfile.lock && \
+    ${console_bundle_install} && \
     ${console_bundle_show} && \
     ${::openshift_origin::chown} apache:apache Gemfile.lock && \
     ${::openshift_origin::rm} -rf tmp/cache/* && \
