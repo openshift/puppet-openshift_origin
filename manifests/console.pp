@@ -61,6 +61,15 @@ class openshift_origin::console {
     require => Package['openshift-origin-console'],
   }
 
+  file { 'openshift console-dev.conf':
+    path    => '/etc/openshift/console-dev.conf',
+    content => template('openshift_origin/console/console.conf.erb'),
+    owner   => 'apache',
+    group   => 'apache',
+    mode    => '0644',
+    require => Package['openshift-origin-console'],
+  }
+
   $console_asset_rake_cmd = $::operatingsystem ? {
     'Fedora' => '/usr/bin/rake assets:precompile',
     default  => '/usr/bin/scl enable ruby193 "rake assets:precompile"',
