@@ -17,6 +17,5 @@ class { 'openshift_origin' :
   configure_node             => true,
   development_mode           => true,
   configure_cgroups          => true,
-  use_v2_carts               => true,
   eth_device => 'p2p1'
 }
