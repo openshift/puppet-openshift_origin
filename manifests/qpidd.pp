@@ -41,7 +41,7 @@ class openshift_origin::qpidd {
   )
 
   file { '/etc/qpidd.conf':
-    content => template('openshift/qpid/qpidd.conf.erb'),
+    content => template('openshift_origin/qpid/qpidd.conf.erb'),
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
