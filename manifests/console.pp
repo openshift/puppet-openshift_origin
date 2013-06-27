@@ -272,4 +272,22 @@ class openshift_origin::console {
   } else {
     warning 'Please ensure that openshift-console service is enable on console machines'
   }
+
+  if $::openshift_origin::broker_auth_plugin == 'ldap' {
+    if $::openshift_origin::ldap_uri == '' {
+      fail 'No LDAP URI specified (see ldap_uri).'
+    }
+    file { 'Console httpd config':
+      path    => '/var/www/openshift/console/httpd/conf.d/openshift-origin-auth-remote-user-ldap.conf',
+      content => template('openshift_origin/console/openshift-origin-auth-remote-user-ldap.conf.erb'),
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      require => [
+        Package['rubygem-openshift-origin-auth-remote-user'],
+      ],
+      notify  => Service["openshift-console"],
+    }
+  }
+
 }
