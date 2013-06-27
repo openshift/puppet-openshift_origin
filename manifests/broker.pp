@@ -1056,6 +1056,40 @@ class openshift_origin::broker {
         notify  => Service["openshift-broker"],
       }
     }
+    'ldap' : {
+      if $::openshift_origin::ldap_uri == '' {
+        fail 'No LDAP URI specified (see ldap_uri).'
+      }
+
+      package { ['rubygem-openshift-origin-auth-remote-user']:
+        ensure  => present,
+        require => Yumrepo[openshift-origin],
+      }
+
+      file { 'Broker httpd config':
+        path    => '/var/www/openshift/broker/httpd/conf.d/openshift-origin-auth-remote-user-ldap.conf',
+        content => template('openshift_origin/broker/plugins/auth/ldap/openshift-origin-auth-remote-user-ldap.conf.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => [
+          Package['rubygem-openshift-origin-auth-remote-user'],
+        ],
+        notify  => Service["openshift-broker"],
+      }
+
+      file { 'Auth plugin config':
+        path    => '/etc/openshift/plugins.d/openshift-origin-auth-remote-user.conf',
+        content => template('openshift_origin/broker/plugins/auth/basic/remote-user.conf.plugin.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => [
+          Package['rubygem-openshift-origin-auth-remote-user'],
+        ],
+        notify  => Service["openshift-broker"],
+      }
+    }
     'kerberos' : {
       package { ['rubygem-openshift-origin-auth-remote-user']:
         ensure => present,
