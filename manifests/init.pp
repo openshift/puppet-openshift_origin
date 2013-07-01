@@ -487,7 +487,7 @@ class openshift_origin (
   if $update_network_dns_servers == true {
     augeas { 'network setup':
       context => '/files/etc/sysconfig/network-scripts/ifcfg-eth0',
-      changes => ["set DNS1 ${named_ipaddress}", "set HWADDR ${::macaddress_eth0}"],
+      changes => "set DNS1 ${named_ipaddress}",
     }
   }
 
