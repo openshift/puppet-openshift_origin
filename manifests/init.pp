@@ -145,6 +145,7 @@ class openshift_origin (
   $configure_node             = true,
   $set_sebooleans             = true,
   $install_login_shell        = false,
+  $eth_device                 = 'eth0',
   $install_repo               = 'nightlies',
   $named_ipaddress            = $::ipaddress,
   $avahi_ipaddress            = $::ipaddress,
@@ -185,6 +186,7 @@ class openshift_origin (
   $development_mode           = false,
   $eth_device                 = 'eth0',
   $min_gear_uid               = 500,
+  $node_container             = 'selinux'
 ) {
   include openshift_origin::params
 
@@ -338,17 +340,21 @@ class openshift_origin (
   }
 
   ensure_resource('package', 'policycoreutils', {
-  }
+    }
   )
   ensure_resource('package', 'mcollective', {
-    require => Yumrepo['openshift-origin-deps'],
-  }
+      require => Yumrepo['openshift-origin-deps'],
+    }
   )
   ensure_resource('package', 'httpd', {
-  }
+    }
   )
   ensure_resource('package', 'openssh-server', {
-  }
+    }
+  )
+
+  ensure_resource('package', 'facter', {
+    }
   )
 
   ensure_resource('package', 'ruby-devel', {
@@ -484,6 +490,33 @@ class openshift_origin (
     exec { 'Open port for HTTPS':
       command => "${openshift_origin::params::firewall_service_cmd}https",
       require => Package['firewall-package'],
+    }
+  }
+
+  if $update_network_dns_servers == true {
+    $mac_template = "<%= scope.lookupvar('::macaddress_${::openshift_origin::eth_device}') %>"
+    $mac_address  = inline_template( $mac_template )
+    augeas { 'network setup':
+      context => "/files/etc/sysconfig/network-scripts/ifcfg-${::openshift_origin::eth_device}",
+      changes => [
+        "set DNS1 ${named_ipaddress}", 
+        "set PEERDNS no",
+        "set IPV6INIT no",
+      ],
+    }
+
+    if ($configure_named ==  true and $configure_broker ==  true) {
+      exec{ "Register host ${::hostname} with IP ${::ipaddress} with named":
+        command => "/usr/sbin/oo-register-dns -h ${::hostname} -n ${::ipaddress}",
+        require => [
+          Package['openshift-origin-msg-node-mcollective'],
+          Package['facter'],
+          Package['openshift-origin-broker-util'],
+          Service['named']
+        ]
+      }
+    } else {
+      warning 'Please make sure that $::hostname is resolvable via DNS.'
     }
   }
 

@@ -81,6 +81,44 @@ class openshift_origin::console {
   }
 
   if $::operatingsystem == 'Fedora' {
+
+    ensure_resource('package', 'rubygem-capybara', {
+        ensure   => 'latest',
+        alias    => 'rubygem-capybara',
+      }
+    )
+
+    ensure_resource('package', 'rubygem-poltergeist', {
+        ensure   => 'latest',
+        alias    => 'rubygem-poltergeist',
+      }
+    )
+
+    ensure_resource('package', 'rubygem-webmock', {
+        ensure   => 'latest',
+      }
+    )
+
+    ensure_resource('package', 'rubygem-simplecov', {
+        ensure   => 'latest',
+      }
+    )
+
+    ensure_resource('package', 'rubygem-mocha', {
+        ensure   => 'latest',
+      }
+    )
+
+    ensure_resource('package', 'rubygem-minitest', {
+        ensure   => 'latest',
+      }
+    )
+
+    ensure_resource('package', 'rubygem-ci_reporter', {
+        ensure   => 'latest',
+      }
+    )
+
     ensure_resource('package', 'rubygem-sass-rails', {
         ensure   => 'latest',
         alias    => 'rubygem-sass-rails',
@@ -123,15 +161,8 @@ class openshift_origin::console {
       }
     )
 
-    ensure_resource('package', 'rdiscount', {
-        ensure   => '1.6.8',
-        provider => 'gem',
-        alias    => 'rubygem-rdiscount',
-        require  => [
-            Package['ruby-devel'],
-            Package['gcc'],
-            Package['make']
-          ]
+    ensure_resource('package', 'rubygem-rdiscount', {
+        ensure   => 'latest',
       }
     )
 
@@ -142,24 +173,13 @@ class openshift_origin::console {
       }
     )
 
-    ensure_resource('package', 'net-http-persistent', {
-        ensure   => '2.7',
-        provider => 'gem',
-        alias    => 'rubygem-net-http-persistent'
-      }
-    )
-
-    ensure_resource('package', 'haml', {
-        ensure   => '3.1.7',
-        provider => 'gem',
-        alias    => 'rubygem-haml'
-      }
-    )
-
-    ensure_resource('package', 'rubygem-ci_reporter', {
+    ensure_resource('package', 'rubygem-net-http-persistent', {
         ensure   => 'latest',
-        alias    => 'ci_reporter',
-        require => Yumrepo[openshift-origin-deps],
+      }
+    )
+
+    ensure_resource('package', 'rubygem-haml', {
+        ensure   => 'latest',
       }
     )
   }
@@ -277,6 +297,12 @@ class openshift_origin::console {
       Package['rubygem-haml'],
       Package['rubygem-formtastic'],
       Package['rubygem-ci_reporter'],
+      Package['rubygem-minitest'],
+      Package['rubygem-mocha'],
+      Package['rubygem-simplecov'],
+      Package['rubygem-webmock'],
+      Package['rubygem-poltergeist'],
+      Package['rubygem-capybara'],
       File['openshift console.conf'],
     ],
     refreshonly => true,

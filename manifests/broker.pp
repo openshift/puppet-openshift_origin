@@ -99,37 +99,33 @@ class openshift_origin::broker {
   if $::operatingsystem == 'Fedora' {
     ensure_resource('package', 'mariadb-devel', {
         ensure => 'latest',
-        alias  => 'mysql-devel'
-      }
-    )
-
-    ensure_resource('package', 'mysql', {
-        provider => 'gem',
-        require  => [Package['ruby-devel'], Package['mysql-devel']]
+        alias  => 'mariadb-devel',
       }
     )
     
-    ensure_resource('package', 'mongoid', {
-        ensure   => '3.0.21',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-mongoid', {
+        ensure  => 'latest',
+        require => Yumrepo[openshift-origin-deps],
+        alias   => 'mongoid'
       }
     )
 
-    ensure_resource('package', 'moped', {
-        ensure   => '1.3.2',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-moped', {
+        ensure  => 'latest',
+        require => Yumrepo[openshift-origin-deps],
+        alias   => 'moped'
       }
     )
     
-    ensure_resource('package', 'origin', {
-        ensure   => '1.0.11',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-origin', {
+        ensure   => 'latest',
+        require  => Yumrepo[openshift-origin-deps],
+        alias    => 'origin'
       }
     )
 
-    ensure_resource('package', 'minitest', {
-        ensure   => '3.2.0',
-        provider => 'gem',
+    ensure_resource('package', 'rubygem-minitest', {
+        ensure   => 'latest',
         alias    => 'minitest'
       }
     )
@@ -282,10 +278,10 @@ class openshift_origin::broker {
       }
     )
 
-    ensure_resource('package', 'mocha', {
-        ensure   => '0.12.10',
-        provider => 'gem',
-        alias    => 'mocha'
+    ensure_resource('package', 'rubygem-mocha', {
+        ensure  => 'latest',
+        require => Yumrepo[openshift-origin-deps],
+        alias   => 'mocha'
       }
     )
 
@@ -479,9 +475,10 @@ class openshift_origin::broker {
   if ($::operatingsystem == "RedHat" or $::operatingsystem == "CentOS") {
     ensure_resource('package', 'mysql-devel', {
         ensure => 'latest',
+        alias  => 'mariadb-devel',
       }
     )
-
+  
     ensure_resource('package', 'ruby193-rubygem-actionmailer', {
         ensure => 'latest',
         alias  => 'actionmailer',

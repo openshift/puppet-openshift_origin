@@ -240,145 +240,165 @@ class openshift_origin::node {
     warning 'CGroups disabled'
   }
 
-  if $::openshift_origin::configure_pam == true {
-    augeas { 'openshift node pam sshd':
-      context => "/files/etc/pam.d/sshd",
-      changes => [
-	  "set /files/etc/pam.d/sshd/#comment[.='pam_selinux.so close should be the first session rule'] 'pam_openshift.so close should be the first session rule'",
-          "ins 01 before *[argument='close']",
-          "set 01/type session",
-          "set 01/control required",
-          "set 01/module pam_openshift.so",
-          "set 01/argument close",
-          "set 01/#comment 'Managed by puppet:openshift_origin'",
+  if $::openshift_origin::node_container == 'selinux' {
+    ensure_resource('package', "rubygem-openshift-origin-container-selinux", {
+        ensure  => present,
+      }
+    )
 
-          "set /files/etc/pam.d/sshd/#comment[.='pam_selinux.so open should only be followed by sessions to be executed in the user context'] 'pam_openshift.so open should only be followed by sessions to be executed in the user context'",
-          "ins 02 before *[argument='open']",
-          "set 02/type session",
-          "set 02/control required",
-          "set 02/module pam_openshift.so",
-          "set 02/argument[1] open",
-          "set 02/argument[2] env_params",
-          "set 02/#comment 'Managed by puppet:openshift_origin'",
-
-          "rm *[module='pam_selinux.so']",
-
-          "set 03/type session",
-          "set 03/control required",
-          "set 03/module pam_namespace.so",
-          "set 03/argument[1] no_unmount_on_close",
-          "set 03/#comment 'Managed by puppet:openshift_origin'",
-
-          "set 04/type session",
-          "set 04/control optional",
-          "set 04/module pam_cgroup.so",
-          "set 04/#comment 'Managed by puppet:openshift_origin'",
-        ],
-        onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
+    if $::openshift_origin::configure_pam == true {
+      augeas { 'openshift node pam sshd':
+        context => "/files/etc/pam.d/sshd",
+        changes => [
+        "set /files/etc/pam.d/sshd/#comment[.='pam_selinux.so close should be the first session rule'] 'pam_openshift.so close should be the first session rule'",
+            "ins 01 before *[argument='close']",
+            "set 01/type session",
+            "set 01/control required",
+            "set 01/module pam_openshift.so",
+            "set 01/argument close",
+            "set 01/#comment 'Managed by puppet:openshift_origin'",
+    
+            "set /files/etc/pam.d/sshd/#comment[.='pam_selinux.so open should only be followed by sessions to be executed in the user context'] 'pam_openshift.so open should only be followed by sessions to be executed in the user context'",
+            "ins 02 before *[argument='open']",
+            "set 02/type session",
+            "set 02/control required",
+            "set 02/module pam_openshift.so",
+            "set 02/argument[1] open",
+            "set 02/argument[2] env_params",
+            "set 02/#comment 'Managed by puppet:openshift_origin'",
+    
+            "rm *[module='pam_selinux.so']",
+    
+            "set 03/type session",
+            "set 03/control required",
+            "set 03/module pam_namespace.so",
+            "set 03/argument[1] no_unmount_on_close",
+            "set 03/#comment 'Managed by puppet:openshift_origin'",
+    
+            "set 04/type session",
+            "set 04/control optional",
+            "set 04/module pam_cgroup.so",
+            "set 04/#comment 'Managed by puppet:openshift_origin'",
+          ],
+          onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
+      }
+    
+      augeas { 'openshift node pam runuser':
+        context => "/files/etc/pam.d/runuser",
+        changes => [
+            "set 01/type session",
+            "set 01/control required",
+            "set 01/module pam_namespace.so",
+            "set 01/argument[1] no_unmount_on_close",
+            "set 01/#comment 'Managed by puppet:openshift_origin'",
+          ],
+          onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
+      }
+    
+      augeas { 'openshift node pam runuser-l':
+        context => "/files/etc/pam.d/runuser-l",
+        changes => [
+            "set 01/type session",
+            "set 01/control required",
+            "set 01/module pam_namespace.so",
+            "set 01/argument[1] no_unmount_on_close",
+            "set 01/#comment 'Managed by puppet:openshift_origin'",
+          ],
+          onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
+      }
+    
+      augeas { 'openshift node pam su':
+        context => "/files/etc/pam.d/su",
+        changes => [
+            "set 01/type session",
+            "set 01/control required",
+            "set 01/module pam_namespace.so",
+            "set 01/argument[1] no_unmount_on_close",
+            "set 01/#comment 'Managed by puppet:openshift_origin'",
+          ],
+          onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
+      }
+    
+      augeas { 'openshift node pam system-auth-ac':
+        context => "/files/etc/pam.d/system-auth-ac",
+        changes => [
+            "set 01/type session",
+            "set 01/control required",
+            "set 01/module pam_namespace.so",
+            "set 01/argument[1] no_unmount_on_close",
+            "set 01/#comment 'Managed by puppet:openshift_origin'",
+          ],
+          onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
+      }  
+    
+      $os_all_unmanaged_users = [['root', 'adm', 'apache'], $::openshift_origin::os_unmanaged_users]
+    
+      file { 'openshift node pam-namespace sandbox.conf':
+        ensure  => present,
+        path    => '/etc/security/namespace.d/sandbox.conf',
+        content => template('openshift_origin/node/namespace-d-sandbox.conf.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => Package['pam_openshift'],
+      }
+    
+      file { 'openshift node pam-namespace tmp.conf':
+        ensure  => present,
+        path    => '/etc/security/namespace.d/tmp.conf',
+        content => template('openshift_origin/node/namespace-d-tmp.conf.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => Package['pam_openshift'],
+      }
+    
+      file { 'openshift node pam-namespace vartmp.conf':
+        ensure  => present,
+        path    => '/etc/security/namespace.d/vartmp.conf',
+        content => template('openshift_origin/node/namespace-d-vartmp.conf.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => Package['pam_openshift'],
+      }
+    } else {
+      warning 'Please configure pam on all nodes.'
     }
 
-    augeas { 'openshift node pam runuser':
-      context => "/files/etc/pam.d/runuser",
-      changes => [
-          "set 01/type session",
-          "set 01/control required",
-          "set 01/module pam_namespace.so",
-          "set 01/argument[1] no_unmount_on_close",
-          "set 01/#comment 'Managed by puppet:openshift_origin'",
-
-          "set 02/type session",
-          "set 02/control optional",
-          "set 02/module pam_cgroup.so",
-          "set 02/#comment 'Managed by puppet:openshift_origin'",
-        ],
-        onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
-    }
-
-    augeas { 'openshift node pam runuser-l':
-      context => "/files/etc/pam.d/runuser-l",
-      changes => [
-          "set 01/type session",
-          "set 01/control required",
-          "set 01/module pam_namespace.so",
-          "set 01/argument[1] no_unmount_on_close",
-          "set 01/#comment 'Managed by puppet:openshift_origin'",
-
-          "set 02/type session",
-          "set 02/control optional",
-          "set 02/module pam_cgroup.so",
-          "set 02/#comment 'Managed by puppet:openshift_origin'",
-        ],
-        onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
-    }
-
-    augeas { 'openshift node pam su':
-      context => "/files/etc/pam.d/su",
-      changes => [
-          "set 01/type session",
-          "set 01/control required",
-          "set 01/module pam_namespace.so",
-          "set 01/argument[1] no_unmount_on_close",
-          "set 01/#comment 'Managed by puppet:openshift_origin'",
-
-          "set 02/type session",
-          "set 02/control optional",
-          "set 02/module pam_cgroup.so",
-          "set 02/#comment 'Managed by puppet:openshift_origin'",
-        ],
-        onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
-    }
-
-    augeas { 'openshift node pam system-auth-ac':
-      context => "/files/etc/pam.d/system-auth-ac",
-      changes => [
-          "set 01/type session",
-          "set 01/control required",
-          "set 01/module pam_namespace.so",
-          "set 01/argument[1] no_unmount_on_close",
-          "set 01/#comment 'Managed by puppet:openshift_origin'",
-
-          "set 02/type session",
-          "set 02/control optional",
-          "set 02/module pam_cgroup.so",
-          "set 02/#comment 'Managed by puppet:openshift_origin'",
-        ],
-        onlyif => "match *[#comment='Managed by puppet:openshift_origin'] size == 0"
-    }  
-
-    $os_all_unmanaged_users = [['root', 'adm', 'apache'], $::openshift_origin::os_unmanaged_users]
-
-    file { 'openshift node pam-namespace sandbox.conf':
+    file { 'selinux container config':
       ensure  => present,
-      path    => '/etc/security/namespace.d/sandbox.conf',
-      content => template('openshift_origin/node/namespace-d-sandbox.conf.erb'),
+      path    => '/etc/openshift/node-plugins.d/openshift-origin-container-selinux.conf',
+      content => '',
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
-      require => Package['pam_openshift'],
+      require => Package['rubygem-openshift-origin-container-selinux'],
     }
-
-    file { 'openshift node pam-namespace tmp.conf':
-      ensure  => present,
-      path    => '/etc/security/namespace.d/tmp.conf',
-      content => template('openshift_origin/node/namespace-d-tmp.conf.erb'),
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      require => Package['pam_openshift'],
-    }
-
-    file { 'openshift node pam-namespace vartmp.conf':
-      ensure  => present,
-      path    => '/etc/security/namespace.d/vartmp.conf',
-      content => template('openshift_origin/node/namespace-d-vartmp.conf.erb'),
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      require => Package['pam_openshift'],
-    }
-  } else {
-    warning 'Please configure pam on all nodes.'
   }
+
+  if $::openshift_origin::node_container == 'libvirt-lxc' {
+    ensure_resource('package', 'libvirt-daemon', {
+        ensure  => present,
+      }
+    )
+
+    file { '/etc/openshift/node-plugins.d/openshift-origin-container-libvirt-lxc.conf':
+      ensure  => present,
+      require => Package['rubygem-openshift-origin-container-libvirt-lxc']
+    }
+
+    ensure_resource('package', 'libvirt-sandbox', {
+        ensure  => present,
+      }
+    )
+
+    service { 'libvirtd':
+      enable  => true,
+      require => [Package['libvirt-daemon'], Package['libvirt-sandbox']]
+    }
+  }
+  
 
   file { 'sysctl config tweaks':
     ensure  => present,
@@ -388,16 +408,6 @@ class openshift_origin::node {
     group   => 'root',
     mode    => '0644',
   }
-
-#  $printf = $::operatingsystem ? {
-#    'Fedora' => '/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"',
-#    default  => '/usr/bin/printf "\nAcceptEnv GIT_SSH\n" >> "/etc/ssh/sshd_config"'
-#  }
-
-#  exec { 'Update sshd configs':
-#    command => $printf,
-#    unless  => '/bin/grep -qFx \'AcceptEnv GIT_SSH\' \'/etc/ssh/sshd_config\''
-#  }
 
   if $::openshift_origin::enable_network_services == true {
     service { 'crond':
@@ -517,7 +527,7 @@ class openshift_origin::node {
     'openshift-origin-cartridge-jenkins',
     'openshift-origin-cartridge-jenkins-client',
     'openshift-origin-cartridge-mongodb',
-    #'openshift-origin-cartridge-nodejs',
+    'openshift-origin-cartridge-nodejs',
     'openshift-origin-cartridge-perl',
     'openshift-origin-cartridge-php',
     'openshift-origin-cartridge-phpmyadmin',
@@ -575,6 +585,17 @@ class openshift_origin::node {
   # Note, this does not handle cartridge uninstalls
   exec { 'oo-admin-cartridge':
     command => '/usr/sbin/oo-admin-cartridge --recursive -a install -s /usr/libexec/openshift/cartridges/v2/',
+    refreshonly => true,
+    notify => Exec['openshift-facts'],
+  }
+
+  exec { 'openshift-facts':
+    command     => '/usr/bin/oo-exec-ruby /usr/libexec/mcollective/update_yaml.rb /etc/mcollective/facts.yaml',
+    environment => ['LANG=en_US.UTF-8', 'LC_ALL=en_US.UTF-8'],
+    require     => [
+      Package['openshift-origin-msg-node-mcollective'],
+      Package['mcollective'],
+    ],
     refreshonly => true,
   }
 }

@@ -98,9 +98,16 @@ else
   $log.info "......disable mongo auth"
   insert_if_not_exist("/etc/mongodb.conf", /^smallfiles = .*$/, "smallfiles = true")
   find_and_replace("/etc/mongodb.conf", /^#?auth = .*$/, "auth = false")
-  hostname = Socket.gethostname
-  ipaddr   = IPSocket.getaddress(hostname)
-  if(ipaddr == '127.0.0.1')
+
+  begin
+    hostname = Socket.gethostname
+    ipaddr   = IPSocket.getaddress(hostname)
+  rescue
+    addresses = `ip addr`.scan(/inet ([\d]+\.[\d]+\.[\d]+\.[\d]+)/).flatten
+    ipaddr = (addresses - ["127.0.0.1"]).first
+  end
+
+  if(ipaddr == '127.0.0.1' or ipaddr.nil? or ipaddr.empty?)
     find_and_replace("/etc/mongodb.conf", /^#?bind_ip = .*$/, "bind_ip = 127.0.0.1")
   else
     find_and_replace("/etc/mongodb.conf", /^#?bind_ip = .*$/, "bind_ip = 127.0.0.1,#{ipaddr}")
