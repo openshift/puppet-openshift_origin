@@ -101,7 +101,7 @@ else
 
   begin
     hostname = Socket.gethostname
-    ipaddr   = IPSocket.getaddress(hostname)
+    ipaddr   = Socket::getaddrinfo(hostname,nil,Socket::AF_INET)[0][3]
   rescue
     addresses = `ip addr`.scan(/inet ([\d]+\.[\d]+\.[\d]+\.[\d]+)/).flatten
     ipaddr = (addresses - ["127.0.0.1"]).first
