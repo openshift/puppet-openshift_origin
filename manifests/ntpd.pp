@@ -38,7 +38,6 @@ class openshift_origin::ntpd (
   )
 
   class { 'ntp':
-    ensure     => running,
     servers    => ['time.apple.com iburst', 'pool.ntp.org iburst', 'clock.redhat.com iburst'],
     autoupdate => true,
   }

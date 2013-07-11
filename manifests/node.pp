@@ -222,7 +222,6 @@ class openshift_origin::node {
       service { [
         'cgconfig',
         'cgred',
-        'openshift-cgroups',
         'openshift-port-proxy',
       ]:
         require => [
@@ -234,7 +233,7 @@ class openshift_origin::node {
         enable  => true,
       }
     } else {
-      warning 'Please ensure that cgconfig, cgred, openshift-cgroups, openshift-port-proxy are running on all nodes'
+      warning 'Please ensure that cgconfig, cgred, openshift-port-proxy are running on all nodes'
     }
   } else {
     warning 'CGroups disabled'
