@@ -496,6 +496,8 @@ class openshift_origin (
   if $update_network_dns_servers == true {
     $mac_template = "<%= scope.lookupvar('::macaddress_${::openshift_origin::eth_device}') %>"
     $mac_address  = inline_template( $mac_template )
+
+    #update for network and NetworkManager
     augeas { 'network setup':
       context => "/files/etc/sysconfig/network-scripts/ifcfg-${::openshift_origin::eth_device}",
       changes => [
@@ -503,6 +505,11 @@ class openshift_origin (
         "set PEERDNS no",
         "set IPV6INIT no",
       ],
+    }
+
+    #dhclient understands PEERDNS=no but not DNS1. Need to cerate resolv.conf manually
+    file { '/etc/resolv.conf':
+      content => "nameserver ${named_ipaddress}",
     }
 
     if ($configure_named ==  true and $configure_broker ==  true) {
