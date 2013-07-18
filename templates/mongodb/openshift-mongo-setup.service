@@ -5,6 +5,7 @@ Before=openshift-origin-broker.service openshift-origin-console.service
 
 [Service]
 Type=oneshot
+User=root
 ExecStart=/usr/sbin/oo-mongo-setup
 
 [Install]

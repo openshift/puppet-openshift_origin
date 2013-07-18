@@ -427,6 +427,15 @@ class openshift_origin (
     include openshift_origin::selinux
   }
 
+  if ($set_sebooleans == true) {
+    file { '/etc/openshift/.selinux-setup-complete':
+      content => '',
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+    }
+  }
+
   if ($install_login_shell == true) {
     include openshift_origin::custom_shell
   }

@@ -364,16 +364,6 @@ class openshift_origin::node {
     } else {
       warning 'Please configure pam on all nodes.'
     }
-
-    file { 'selinux container config':
-      ensure  => present,
-      path    => '/etc/openshift/node-plugins.d/openshift-origin-container-selinux.conf',
-      content => '',
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      require => Package['rubygem-openshift-origin-container-selinux'],
-    }
   }
 
   if $::openshift_origin::node_container == 'libvirt-lxc' {
@@ -381,11 +371,6 @@ class openshift_origin::node {
         ensure  => present,
       }
     )
-
-    file { '/etc/openshift/node-plugins.d/openshift-origin-container-libvirt-lxc.conf':
-      ensure  => present,
-      require => Package['rubygem-openshift-origin-container-libvirt-lxc']
-    }
 
     ensure_resource('package', 'libvirt-sandbox', {
         ensure  => present,

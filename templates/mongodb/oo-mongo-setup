@@ -59,13 +59,14 @@ def run(cmd)
 end
 
 def stop_mongo
+  return if run("service mongod stop") == 0
   run "/usr/bin/pkill -u mongodb"
 
   $log.debug("Repair mongodb database if needed...")
   run "/bin/rm -f /var/lib/mongodb/mongod.lock"
   find_and_replace("/etc/mongodb.conf", /^journal = .*$/, "journal = false")
   run "/bin/su -c 'mongod -f /etc/mongodb.conf --repair' --shell /bin/bash mongodb"
-  $log.debug("Waiting for repair to complete")  
+  $log.debug("Waiting for repair to complete")
   while run('/bin/fgrep "dbexit: really exiting now" /var/log/mongodb/mongodb.log') != 0 do
     $log.info("...")
     sleep 2
@@ -75,6 +76,7 @@ def stop_mongo
 end
 
 def start_mongo
+  return if run("service mongod start") == 0
   $log.debug "Initializing mongodb database"
   run "/bin/su -c 'mongod -f /etc/mongodb.conf' --shell /bin/bash mongodb"
   while run('/bin/fgrep "[initandlisten] waiting for connections" /var/log/mongodb/mongodb.log') != 0 do
@@ -85,6 +87,7 @@ end
 
 def restart_mongo
   $log.info("Restarting mongo db")
+  return if run("service mongod restart") == 0
   stop_mongo
   start_mongo
 end
@@ -92,6 +95,7 @@ end
 FileUtils.mkdir_p("/etc/openshift")
 if File.exist?("/etc/openshift/.mongo-setup-complete")
   $log.info "Mongo has already been setup on this machine. Lock file '/etc/openshift/.mongo-setup-complete' is present. Exiting"
+  restart_mongo
 else
   $log.info "Configuring Mongo DB"
   $log.info "...setup mongo db admin users"
@@ -129,5 +133,5 @@ else
   File.open("/etc/openshift/.mongo-setup-complete", "w") do |f|
     f.write("\n")
   end
+  start_mongo
 end
-run "service mongod restart"

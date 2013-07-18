@@ -36,3 +36,5 @@ PLATFORM_LOG_FILE=/var/log/openshift/node/platform.log
 PLATFORM_LOG_LEVEL=DEBUG
 PLATFORM_TRACE_LOG_FILE=/var/log/openshift/node/platform-trace.log
 PLATFORM_TRACE_LOG_LEVEL=DEBUG
+
+CONTAINERIZATION_PLUGIN=openshift-origin-container-<%= scope.lookupvar('::openshift_origin::node_container')%>
