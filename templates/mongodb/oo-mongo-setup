@@ -59,27 +59,41 @@ def run(cmd)
 end
 
 def stop_mongo
-  return if run("service mongod stop") == 0
-  run "/usr/bin/pkill -u mongodb"
+  unless File.exist?("/usr/bin/systemctl") && run("/usr/bin/systemctl stop mongod.service") == 0
+    run "/usr/bin/pkill -u mongodb"
 
-  $log.debug("Repair mongodb database if needed...")
-  run "/bin/rm -f /var/lib/mongodb/mongod.lock"
-  find_and_replace("/etc/mongodb.conf", /^journal = .*$/, "journal = false")
-  run "/bin/su -c 'mongod -f /etc/mongodb.conf --repair' --shell /bin/bash mongodb"
-  $log.debug("Waiting for repair to complete")
-  while run('/bin/fgrep "dbexit: really exiting now" /var/log/mongodb/mongodb.log') != 0 do
-    $log.info("...")
-    sleep 2
+    $log.debug("Repair mongodb database if needed...")
+    run "/bin/rm -f /var/lib/mongodb/mongod.lock"
+    find_and_replace("/etc/mongodb.conf", /^journal = .*$/, "journal = false")
+    run "/bin/su -c 'mongod -f /etc/mongodb.conf --repair' --shell /bin/bash mongodb"
+    $log.debug("Waiting for repair to complete")
+    while run('/bin/fgrep "dbexit: really exiting now" /var/log/mongodb/mongodb.log') != 0 do
+      $log.info("...")
+      sleep 2
+    end
+    run "/bin/rm -f /var/lib/mongodb/mongod.lock"
+    find_and_replace("/etc/mongodb.conf", /^journal = .*$/, "journal = true")
+  else
+    $log.debug("Waiting for mongo to stop ")
+    return if !File.exist?("/var/log/mongodb/mongodb.log")
+    while run('/bin/fgrep "dbexit: really exiting now" /var/log/mongodb/mongodb.log') != 0 do
+      $log.info("...")
+      sleep 2
+    end
   end
-  run "/bin/rm -f /var/lib/mongodb/mongod.lock"
-  find_and_replace("/etc/mongodb.conf", /^journal = .*$/, "journal = true")
 end
 
 def start_mongo
-  return if run("service mongod start") == 0
   $log.debug "Initializing mongodb database"
-  run "/bin/su -c 'mongod -f /etc/mongodb.conf' --shell /bin/bash mongodb"
+  unless File.exist?("/usr/bin/systemctl") && run("/usr/bin/systemctl start mongod.service") == 0
+    run "/bin/su -c 'mongod -f /etc/mongodb.conf' --shell /bin/bash mongodb"
+  end
   while run('/bin/fgrep "[initandlisten] waiting for connections" /var/log/mongodb/mongodb.log') != 0 do
+    $log.info("...")
+    sleep 3
+  end
+
+  while run('/usr/bin/mongo localhost/admin --eval "1"') != 0 do
     $log.info("...")
     sleep 3
   end
@@ -87,9 +101,23 @@ end
 
 def restart_mongo
   $log.info("Restarting mongo db")
-  return if run("service mongod restart") == 0
   stop_mongo
   start_mongo
+end
+
+#ensure that the IP addr to bind to is correct
+begin
+  hostname = Socket.gethostname
+  ipaddr   = Socket::getaddrinfo(hostname,nil,Socket::AF_INET)[0][3]
+rescue
+  addresses = `ip addr`.scan(/inet ([\d]+\.[\d]+\.[\d]+\.[\d]+)/).flatten
+  ipaddr = (addresses - ["127.0.0.1"]).first
+end
+
+if(ipaddr == '127.0.0.1' or ipaddr.nil? or ipaddr.empty?)
+  find_and_replace("/etc/mongodb.conf", /^#?bind_ip = .*$/, "bind_ip = 127.0.0.1")
+else
+  find_and_replace("/etc/mongodb.conf", /^#?bind_ip = .*$/, "bind_ip = 127.0.0.1,#{ipaddr}")
 end
 
 FileUtils.mkdir_p("/etc/openshift")
@@ -103,19 +131,6 @@ else
   insert_if_not_exist("/etc/mongodb.conf", /^smallfiles = .*$/, "smallfiles = true")
   find_and_replace("/etc/mongodb.conf", /^#?auth = .*$/, "auth = false")
 
-  begin
-    hostname = Socket.gethostname
-    ipaddr   = Socket::getaddrinfo(hostname,nil,Socket::AF_INET)[0][3]
-  rescue
-    addresses = `ip addr`.scan(/inet ([\d]+\.[\d]+\.[\d]+\.[\d]+)/).flatten
-    ipaddr = (addresses - ["127.0.0.1"]).first
-  end
-
-  if(ipaddr == '127.0.0.1' or ipaddr.nil? or ipaddr.empty?)
-    find_and_replace("/etc/mongodb.conf", /^#?bind_ip = .*$/, "bind_ip = 127.0.0.1")
-  else
-    find_and_replace("/etc/mongodb.conf", /^#?bind_ip = .*$/, "bind_ip = 127.0.0.1,#{ipaddr}")
-  end
   restart_mongo
   $log.info "......set db admin users"
   run "/usr/bin/mongo localhost/openshift_broker_dev --eval 'db.addUser(\"openshift\", \"mooo\")'"
