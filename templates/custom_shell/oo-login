@@ -55,14 +55,18 @@ def login
   hostname = Socket.gethostname
   ipaddr   = IPSocket.getaddress(hostname)
   addstr("OpenShift console: https://#{hostname}/console")
+  setpos(row+4,col)
+  addstr("Console login:     admin")
   setpos(row+5,col)
-  addstr("Console login:    admin")
-  setpos(row+6,col)
-  addstr("Console password: admin")
-  setpos(row+8,col)
+  addstr("Console password:  admin")
+  setpos(row+7,col)
   addstr("IP address: #{ipaddr}")
-  setpos(row+20,col)
-  addstr("Press any key to login")
+  setpos(row+8,col)
+  addstr("SSH user:   openshift")
+  setpos(row+9,col)
+  addstr("Password:   openshift")
+  setpos(row+11,col)
+  addstr("Press any key for root console")
   getch
   refresh
 end
