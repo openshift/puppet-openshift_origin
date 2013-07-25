@@ -428,11 +428,18 @@ class openshift_origin (
   }
 
   if ($set_sebooleans == true) {
+    file { '/etc/openshift':
+      ensure  => "directory",
+      owner   => 'root',
+      group   => 'root',
+    }
+
     file { '/etc/openshift/.selinux-setup-complete':
       content => '',
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
+      require => File['/etc/openshift'],
     }
   }
 
@@ -443,9 +450,9 @@ class openshift_origin (
   if $install_client_tools == true {
     # Install rhc tools. On RHEL/CentOS, this will install under ruby 1.8 environment
     ensure_resource('package', 'rhc', {
-      ensure  => present,
-      require => Yumrepo[openshift-origin],
-    }
+        ensure  => present,
+        require => Yumrepo[openshift-origin],
+      }
     )
 
     file { '/etc/openshift/express.conf':

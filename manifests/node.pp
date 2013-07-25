@@ -503,6 +503,24 @@ class openshift_origin::node {
     require => File['create node setting markers dir']
   }
 
+  package { 'jenkins':
+    ensure  => "1.510-1.1",
+    require => [
+      Yumrepo['jenkins'],
+    ]
+  }
+
+  package { 'yum-plugin-versionlock':
+    ensure  => latest,
+  }
+
+  exec { '/usr/bin/yum versionlock jenkins':
+    require => [
+      Package['jenkins'],
+      Package['yum-plugin-versionlock'],
+    ]
+  }
+
   package { [
     'openshift-origin-cartridge-10gen-mms-agent',
     'openshift-origin-cartridge-cron',
@@ -523,6 +541,7 @@ class openshift_origin::node {
     require => [
       Yumrepo[openshift-origin],
       Yumrepo[openshift-origin-deps],
+      Package['jenkins'],
     ],
     notify => Exec['oo-admin-cartridge'],
   }
