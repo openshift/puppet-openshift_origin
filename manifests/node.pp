@@ -601,4 +601,16 @@ class openshift_origin::node {
     ],
     refreshonly => true,
   }
+
+  if( $::operatingsystem == 'Fedora' ) {
+    file { '/usr/lib/systemd/system/mcollective.service':
+      content => template('openshift_origin/node/mcollective.service.erb'),
+      notify  => Exec['systemd-daemon-reload']
+    }
+  }
+
+  exec { 'systemd-daemon-reload':
+    command     => '/bin/systemctl --system daemon-reload',
+    refreshonly => true,
+  }
 }
