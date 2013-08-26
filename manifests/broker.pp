@@ -82,6 +82,11 @@ class openshift_origin::broker {
   ensure_resource('package', 'rubygem-passenger', {
       ensure  => latest,
       require => Yumrepo[openshift-origin-deps],
+      name => $::operatingsystem ? {
+        'Fedora' => 'rubygem-passenger',
+        'CentOS' => 'ruby193-rubygem-passenger',
+        default  => 'ruby193-rubygem-passenger', 
+      }
     }
   )
 
