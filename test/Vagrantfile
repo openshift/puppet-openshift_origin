@@ -6,9 +6,9 @@ Vagrant::Config.run do |config|
   config.vm.box_url = 'http://www.krishnaraman.net/downloads/fedora-19.box'
   config.vm.forward_port 80, 8080
   config.vm.forward_port 443, 8443
-  config.vm.forward_port 53, 53
+  config.vm.forward_port 53, 5353, :protocol => :udp
   config.vm.host_name = 'broker.example.com'
-  
+
   config.vm.share_folder "manifests", "/home/vagrant/manifests", "manifests"
   config.vm.provision :shell, :inline => %{ \
     touch /var/log/origin-setup.log; \
