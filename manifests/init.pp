@@ -388,11 +388,23 @@ class openshift_origin (
     }
   )
 
-  ensure_resource('package', 'ruby-devel', {
-      ensure  => present,
-    }
-  )
-
+  if $::operatingsystem == "Fedora" {
+    ensure_resource('package', 'ruby-devel', {
+        ensure  => present,
+      }
+    )
+  } else {
+    ensure_resource('package', 'ruby193-ruby-devel', {
+        ensure => present,
+        alias => 'ruby-devel',
+      }
+    )
+    ensure_resource('package', 'ruby193-rubygems', {
+        ensure => present,
+        alias => 'rubygems',
+      }
+    )
+  }
 
   if $enable_network_services == true {
     service { [httpd, network, sshd]:

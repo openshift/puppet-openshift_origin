@@ -41,6 +41,13 @@ class openshift_origin::mongo {
       require => Yumrepo['openshift-origin-deps'],
     }
   )
+  if $::operatingsystem != 'Fedora' {
+    ensure_resource('package', 'ruby193-ruby', {
+        ensure => present,
+        require => Yumrepo['openshift-origin-deps'],
+      }
+    )
+  }
 
   file { 'Temporarily Disable mongo auth':
     ensure  => present,
@@ -100,7 +107,13 @@ class openshift_origin::mongo {
       enable   => true,
     }
   } else {
+    $cmd = $::operatingsystem ? {
+      'Fedora' => '/usr/sbin/oo-mongo-setup',
+      default => '/usr/bin/scl enable ruby193 /usr/sbin/oo-mongo-setup',
+    }
+
     exec { '/usr/sbin/oo-mongo-setup':
+      command => $cmd,
       require => File['mongo setup script']
     }
   }
