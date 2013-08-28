@@ -1,10 +1,13 @@
 # Domain suffix to use for applications (Must match node config)
 CLOUD_DOMAIN="<%= scope.lookupvar('::openshift_origin::cloud_domain') %>"
-# Comma seperted list of valid gear sizes
-VALID_GEAR_SIZES="small,medium"
+# Comma-separated list of valid gear sizes
+# Eg: "small,medium,large"
+VALID_GEAR_SIZES="small"
 
 # Default number of gears to assign to a new user
 DEFAULT_MAX_GEARS="100"
+# Default gear sizes (comma-separated) allowed to a new user
+DEFAULT_GEAR_CAPABILITIES="small"
 # Default gear size for a new gear
 DEFAULT_GEAR_SIZE="small"
 
@@ -15,11 +18,12 @@ MONGO_HOST_PORT="<%= scope.lookupvar('::openshift_origin::mongodb_fqdn') %>:2701
 MONGO_USER="<%= scope.lookupvar('::openshift_origin::mongo_auth_user') %>"
 MONGO_PASSWORD="<%= scope.lookupvar('::openshift_origin::mongo_auth_password') %>"
 MONGO_DB="<%= scope.lookupvar('::openshift_origin::mongo_db_name') %>"
-
+MONGO_SSL="false"
 #Enables gear/filesystem resource usage tracking
-ENABLE_USAGE_TRACKING_DATASTORE="false"
-#Log resource usage information to syslog
-ENABLE_USAGE_TRACKING_SYSLOG="false"
+ENABLE_USAGE_TRACKING_DATASTORE="true"
+#Log resource usage information
+ENABLE_USAGE_TRACKING_AUDIT_LOG="false"
+USAGE_TRACKING_AUDIT_LOG_FILE="/var/log/openshift/broker/usage.log"
 
 #Enable all broker analytics
 ENABLE_ANALYTICS="false"
@@ -28,10 +32,72 @@ ENABLE_ANALYTICS="false"
 ENABLE_USER_ACTION_LOG="true"
 USER_ACTION_LOG_FILE="/var/log/openshift/broker/user_action.log"
 
+# Whenever this value is changed all gear encryption tokens must be recreated.
+# It's recommended that you set this value using "openssl rand -base64 64".  It
+# must be the same across all Brokers.
 AUTH_SALT=<%= scope.lookupvar('::openshift_origin::broker_auth_salt') %>
-AUTH_PRIVKEYFILE="/etc/openshift/server_priv.pem"
-AUTH_PRIVKEYPASS=<%= scope.lookupvar('::openshift_origin::broker_auth_key_password') %>
-AUTH_PUBKEYFILE="/etc/openshift/server_pub.pem"
+AUTH_PRIV_KEY_FILE="/etc/openshift/server_priv.pem"
+AUTH_PRIV_KEY_PASS=<%= scope.lookupvar('::openshift_origin::broker_auth_key_password') %>
+AUTH_PUB_KEY_FILE="/etc/openshift/server_pub.pem"
 AUTH_RSYNC_KEY_FILE="/etc/openshift/rsync_id_rsa"
 
+# Set the default and maximum expiration for authorization tokens by
+# type.  Comma delimited list of expiration pairs, where the key
+# corresponds the canonical form of a scope, and the value corresponds
+# to one or two time durations.  The time durations may be specified in
+# standard ruby syntax (<number>.days) are converted to seconds.  If two
+# times are specified, the first is the default value and the second is
+# the maximum duration the token may exist for. The key '*' will apply
+# to all other scopes.
+#
+# Recognized scopes:
+#
+#   userinfo - access to only information about the current user
+#   read     - read-only access to the REST API
+#   session  - full access as the user
+#
+# Examples:
+#
+#   # All tokens, regardless of type, expire in 1 month and default to
+#   # 1 month in duration.
+#   AUTH_SCOPE_TIMEOUTS="*=1.months"
+#
+#   # All tokens, regardless of type, expire in 1 month and default to
+#   # 1 week in duration.
+#   AUTH_SCOPE_TIMEOUTS="*=1.week|1.months"
+#
+#   # The read scope expires in 1 day, all other tokens expire in one
+#   # week.
+#   AUTH_SCOPE_TIMEOUTS="read=1.month, *=1.week"
+#
+# The value may be any valid Ruby expression that evaluates to a number.
+#
+AUTH_SCOPE_TIMEOUTS="session=1.days|7.days, *=1.months|6.months"
+
+
+# This session must be shared amongst all Brokers but otherwise secret.  If
+# this value is changed sessions will be dropped.  This value is used for
+# setting the rails secret_token (or the secret_key_base for Rails 4.0).
+# "openssl rand -hex 64" can be use to generate a unique value.
+#
+# SESSION_SECRET=
 SESSION_SECRET=<%= scope.lookupvar('::openshift_origin::broker_session_secret') %>
+
+#Enable/disable maintenance mode
+ENABLE_MAINTENANCE_MODE="false"
+MAINTENANCE_NOTIFICATION_FILE="/etc/openshift/outage_notification.txt"
+
+# Give users the ability to download a cartridge into their gears on creation and cartridge add
+DOWNLOAD_CARTRIDGES_ENABLED="true"
+# For downloading cartridges, follow these constraints
+MAX_DOWNLOADED_CARTS_PER_APP="5"
+MAX_DOWNLOAD_REDIRECTS="2"
+MAX_DOWNLOAD_TIME="10"
+# Maximum size for downloadable manifest file (in bytes)
+MAX_CART_SIZE="20480"
+
+# Whether cartridges that specify direct SSL connection to the gear
+# are allowed, denied or forced.
+SSL_ENDPOINT="allow"
+# SSL_ENDPOINT="deny"
+# SSL_ENDPOINT="force"
