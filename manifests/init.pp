@@ -563,7 +563,6 @@ class openshift_origin (
       exec{ "Register host ${::hostname} with IP ${::ipaddress} with named":
         command => "/usr/sbin/oo-register-dns -h ${::hostname} -n ${::ipaddress}",
         require => [
-          Package['openshift-origin-msg-node-mcollective'],
           Package['facter'],
           Package['openshift-origin-broker-util'],
           Service['named']
