@@ -1,0 +1,72 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+#
+# First install vagrant-vbguest plugin. It's needed after kernel update, to keep virtualbox guest addition working.
+#
+# For vagrant 1.1
+#     vagrant plugin install vagrant-vbguest
+# For Vagrant 1.0 and older
+#     vagrant gem install vagrant-vbguest
+#
+# Note : do not call this command inside the `test` dir, it will fails.
+#
+# Launch vagrant
+#
+#     git clone https://github.com/openshift/puppet-openshift_origin.git
+#     cd puppet-openshift_origin
+#     cd test
+#     mv Vagrantfile.centos Vagrantfile
+#     vagrant up
+#     vagrant vbguest   # the kernel was updated, virtualbox guest-additions need to be updated too
+#     vagrant halt      # SELinux need a reboot
+#     vagrant up
+
+Vagrant::Config.run do |config|
+  config.vm.box = 'centos_64'
+  config.vm.box_url = 'http://developer.nrel.gov/downloads/vagrant-boxes/CentOS-6.4-x86_64-v20130309.box'
+  config.vm.forward_port 22, 22
+  config.vm.forward_port 80, 80
+  config.vm.forward_port 443, 443
+  config.vm.forward_port 53, 53
+  config.vm.host_name = 'broker.example.com'
+
+  ### vagrant-vbguest
+  Vagrant::Config.run do |config|
+     config.vbguest.auto_update = false
+  end
+
+  ### OpenShift
+  config.vm.share_folder "manifests", "/home/vagrant/manifests", "manifests"
+  config.vm.provision :shell, :inline => %{ \
+    touch /var/log/origin-setup.log; \
+    sudo -E rpm -ivh http://ftp-stud.hs-esslingen.de/pub/epel/6/i386/epel-release-6-8.noarch.rpm       2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E yum update -y                                                                              2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E rpm -ivh http://yum.puppetlabs.com/el/6/products/i386/puppetlabs-release-6-6.noarch.rpm    2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E yum install -y puppet facter                                                               2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E rpm -e $(rpm -qa | grep -i puppetlabs-release)                                             2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E puppet module install puppetlabs/stdlib                                                    2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E puppet module install puppetlabs/ntp                                                       2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E yum update -y                                                                              2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E puppet module uninstall openshift/openshift_origin                                         2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E puppet module install openshift/openshift_origin                                           2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E puppet apply --verbose /home/vagrant/manifests/init.pp                                     2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E puppet apply --verbose /home/vagrant/manifests/configure.pp                                2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E /etc/init.d/network  restart                                                               2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E /etc/init.d/activemq restart                                                               2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E /etc/init.d/cgconfig restart                                                               2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E /etc/init.d/cgred restart                                                                  2>&1 | tee -a /var/log/origin-setup.log; \
+    sleep 5;                                                                                                                                    \
+    sudo -E /etc/init.d/openshift-cgroups restart                                                      2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E /etc/init.d/httpd restart                                                                  2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E /etc/init.d/openshift-broker restart                                                       2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E /etc/init.d/openshift-node-web-proxy restart                                               2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E /etc/init.d/named restart                                                                  2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E /etc/init.d/mcollective restart                                                            2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E sed -i 's/SELINUX=disabled/SELINUX=permissive/g' /etc/selinux/config                       2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E sed -i 's/nameserver .*$/nameserver 127.0.0.1/g' /etc/resolv.conf                          2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config     2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E /etc/init.d/sshd restart                                                                   2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E /usr/sbin/oo-register-dns -h broker -n 127.0.0.1                                           2>&1 | tee -a /var/log/origin-setup.log; \
+    sudo -E gem install rhc                                                                            2>&1 | tee -a /var/log/origin-setup.log;
+  }
+end
