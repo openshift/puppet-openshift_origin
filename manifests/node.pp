@@ -179,7 +179,10 @@ class openshift_origin::node {
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        require => Package['mcollective'],
+        require => [
+          Package['mcollective'],
+          Yumrepo[openshift-origin-deps],
+        ],
       }
     }
   }

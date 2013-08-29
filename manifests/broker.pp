@@ -487,48 +487,56 @@ class openshift_origin::broker {
     ensure_resource('package', 'ruby193-rubygem-actionmailer', {
         ensure => 'latest',
         alias  => 'actionmailer',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-actionpack', {
         ensure => 'latest',
         alias  => 'actionpack',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-activemodel', {
         ensure => 'latest',
         alias  => 'activemodel',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-activerecord', {
         ensure => 'latest',
         alias  => 'activerecord',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-activeresource', {
         ensure => 'latest',
         alias  => 'activeresource',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-activesupport', {
         ensure => 'latest',
         alias  => 'activesupport',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-arel', {
         ensure => 'latest',
         alias  => 'arel',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-bigdecimal', {
       ensure => 'latest',
       alias  => 'bigdecimal',
+      require => Yumrepo[openshift-origin-deps],
     }
     )
 
@@ -538,6 +546,7 @@ class openshift_origin::broker {
         require => [
           Package['ruby-devel'],
           Package['mongodb-devel'],
+          Yumrepo[openshift-origin-deps],
         ],
       }
     )
@@ -548,6 +557,7 @@ class openshift_origin::broker {
         require => [
           Package['ruby-devel'],
           Package['mongodb-devel'],
+          Yumrepo[openshift-origin-deps],
         ],
       }
     )
@@ -555,277 +565,325 @@ class openshift_origin::broker {
     ensure_resource('package', 'ruby193-rubygem-builder', {
         ensure => 'latest',
         alias  => 'builder',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-bundler', {
         ensure => 'latest',
         alias  => 'bundler',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-cucumber', {
         ensure => 'latest',
         alias  => 'cucumber',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-diff-lcs', {
         ensure => 'latest',
         alias  => 'diff-lcs',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-dnsruby', {
         ensure => 'latest',
         alias  => 'dnsruby',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-erubis', {
         ensure => 'latest',
         alias  => 'erubis',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-gherkin', {
         ensure  => 'latest',
         alias   => 'gherkin',
-        require => Package['ruby-devel'],
+        require => [
+          Package['ruby-devel'],
+          Yumrepo[openshift-origin-deps],
+        ],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-hike', {
         ensure => 'latest',
         alias  => 'hike',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-i18n', {
         ensure => 'latest',
         alias  => 'i18n',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-journey', {
         ensure => 'latest',
         alias  => 'journey',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-json', {
         ensure => 'latest',
         alias  => 'json',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-mail', {
         ensure => 'latest',
         alias  => 'mail',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-metaclass', {
         ensure => 'latest',
         alias  => 'metaclass',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-mime-types', {
         ensure => 'latest',
         alias  => 'mime-types',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-minitest', {
         ensure => 'latest',
         alias  => 'minitest',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-mocha', {
         ensure => 'latest',
         alias  => 'mocha',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-mongo', {
         ensure => 'latest',
         alias  => 'mongo',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-mongoid', {
         ensure => 'latest',
         alias  => 'mongoid',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-moped', {
         ensure => 'latest',
         alias  => 'moped',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-multi_json', {
         ensure => 'latest',
         alias  => 'multi_json',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-open4', {
         ensure => 'latest',
         alias  => 'open4',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-origin', {
         ensure => 'latest',
         alias  => 'origin',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-parseconfig', {
         ensure => 'latest',
         alias  => 'parseconfig',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-polyglot', {
         ensure => 'latest',
         alias  => 'polyglot',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-rack', {
         ensure => 'latest',
         alias  => 'rack',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-rack-cache', {
         ensure => 'latest',
         alias  => 'rack-cache',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-rack-ssl', {
         ensure => 'latest',
         alias  => 'rack-ssl',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-rack-test', {
         ensure => 'latest',
         alias  => 'rack-test',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-rails', {
         ensure => 'latest',
         alias  => 'rails',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-railties', {
         ensure => 'latest',
         alias  => 'railties',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-rake', {
         ensure => 'latest',
         alias  => 'rake',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-rdoc', {
         ensure => 'latest',
         alias  => 'rdoc',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-regin', {
         ensure => 'latest',
         alias  => 'regin',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-rest-client', {
         ensure => 'latest',
         alias  => 'rest-client',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-simplecov', {
         ensure => 'latest',
         alias  => 'simplecov',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-simplecov-html', {
         ensure => 'latest',
         alias  => 'simplecov-html',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-sprockets', {
         ensure => 'latest',
         alias  => 'sprockets',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-state_machine', {
         ensure => 'latest',
         alias  => 'state_machine',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-stomp', {
         ensure => 'latest',
         alias  => 'stomp',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-systemu', {
         ensure => 'latest',
         alias  => 'systemu',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-term-ansicolor', {
         ensure => 'latest',
         alias  => 'term-ansicolor',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-thor', {
         ensure => 'latest',
         alias  => 'thor',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-tilt', {
         ensure => 'latest',
         alias  => 'tilt',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-treetop', {
         ensure => 'latest',
         alias  => 'treetop',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-tzinfo', {
         ensure => 'latest',
         alias  => 'tzinfo',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-xml-simple', {
         ensure => 'latest',
         alias  => 'xml-simple',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
   }
@@ -927,7 +985,11 @@ class openshift_origin::broker {
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        require => Package['mcollective'],
+        require => [
+          Package['mcollective'],
+          Package['ruby193-ruby'],
+          Yumrepo[openshift-origin-deps],
+        ],
       }
     }
   }

@@ -41,13 +41,6 @@ class openshift_origin::mongo {
       require => Yumrepo['openshift-origin-deps'],
     }
   )
-  if $::operatingsystem != 'Fedora' {
-    ensure_resource('package', 'ruby193-ruby', {
-        ensure => present,
-        require => Yumrepo['openshift-origin-deps'],
-      }
-    )
-  }
 
   file { 'Temporarily Disable mongo auth':
     ensure  => present,

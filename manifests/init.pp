@@ -370,6 +370,14 @@ class openshift_origin (
     }
   }
 
+  if $::operatingsystem != 'Fedora' {
+    ensure_resource('package', 'ruby193-ruby', {
+        ensure => present,
+        require => Yumrepo['openshift-origin-deps'],
+      }
+    )
+  }
+
   ensure_resource('package', 'policycoreutils', {
     }
   )
@@ -393,15 +401,29 @@ class openshift_origin (
         ensure  => present,
       }
     )
+
+    ensure_resource('package', 'openshift-origin-util', {
+        ensure  => present,
+        require => Yumrepo[openshift-origin],
+      }
+    )
   } else {
     ensure_resource('package', 'ruby193-ruby-devel', {
         ensure => present,
         alias => 'ruby-devel',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
     ensure_resource('package', 'ruby193-rubygems', {
         ensure => present,
         alias => 'rubygems',
+        require => Yumrepo[openshift-origin-deps],
+      }
+    )
+
+    ensure_resource('package', 'openshift-origin-util-scl', {
+        ensure  => present,
+        require => Yumrepo[openshift-origin],
       }
     )
   }
@@ -509,16 +531,19 @@ class openshift_origin (
     if $::operatingsystem == 'Redhat' {
       # Support gems and packages to allow rhc tools to run within SCL environment
       ensure_resource('package', 'ruby193-rubygem-net-ssh', {
-        ensure => present,
-      }
+          ensure => present,
+          require => Yumrepo[openshift-origin-deps],
+        }
       )
       ensure_resource('package', 'ruby193-rubygem-archive-tar-minitar', {
-        ensure => present,
-      }
+          ensure => present,
+          require => Yumrepo[openshift-origin-deps],
+        }
       )
       ensure_resource('package', 'ruby193-rubygem-commander', {
-        ensure => present,
-      }
+          ensure => present,
+          require => Yumrepo[openshift-origin-deps],
+        }
       )
 
       exec { 'gems to enable rhc in scl-193':
@@ -594,6 +619,7 @@ class openshift_origin (
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
+        require => Yumrepo[openshift-origin-deps],
       }
     }
   }

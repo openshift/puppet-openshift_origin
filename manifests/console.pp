@@ -283,24 +283,28 @@ class openshift_origin::console {
     ensure_resource('package', 'ruby193-rubygem-minitest', {
         ensure => 'latest',
         alias  => 'minitest',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-webmock', {
         ensure   => 'latest',
         alias    => 'webmock',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-poltergeist', {
         ensure   => 'latest',
         alias    => 'poltergeist',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
 
     ensure_resource('package', 'ruby193-rubygem-capybara', {
         ensure   => 'latest',
         alias    => 'capybara',
+        require => Yumrepo[openshift-origin-deps],
       }
     )
   }
