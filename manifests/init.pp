@@ -81,6 +81,9 @@
 #   Salt used to generate authentication tokens for communication between node and broker.
 # [*broker_rsync_key*]
 #   RSync Key used during move gear admin operations
+# [*ldap_uri*]
+#   URI to the LDAP server (e.g. ldap://ldap.example.com:389/ou=People,dc=my-domain,dc=com). Set <code>broker_auth_plugin</code> to
+#   <code>ldap</code> to enable this feature.
 # [*mq_provider*]
 #   Message queue plugin to configure for mcollecitve. Defaults to <code>'activemq'</code> Acceptable values are
 #   <code>'activemq'</code>, <code>'stomp'</code> and <code>'qpid'</code>
@@ -170,6 +173,7 @@ class openshift_origin (
   $broker_rsync_key           = '',
   $broker_dns_plugin          = 'nsupdate',
   $broker_dns_gsstsig         = false,
+  $ldap_uri                   = '',
   $dns_kerberos_keytab        = '/etc/dns.keytab',
   $http_kerberos_keytab       = '/etc/http.keytab',
   $kerberos_realm             = 'EXAMPLE.COM',
