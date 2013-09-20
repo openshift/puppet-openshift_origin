@@ -94,6 +94,8 @@
 #   name of the MongoDB database
 # [*mongo_auth_password*]
 #   Password to authenticate against Mongo DB server
+# [*mongo_admin_password*]
+#   Password for the admin user, if broker_auth_plugin is used
 # [*named_tsig_priv_key*]
 #   TSIG signature to authenticate against the Bind DNS server.
 # [*os_unmanaged_users*]
@@ -180,6 +182,7 @@ class openshift_origin (
   $mongo_auth_user            = 'openshift',
   $mongo_db_name              = 'openshift_broker_dev',
   $mongo_auth_password        = 'mooo',
+  $mongo_admin_password       = 'changeme',
   $named_tsig_priv_key        = '',
   $os_unmanaged_users         = [],
   $user_supplementary_groups  = '',
