@@ -273,6 +273,21 @@ class openshift_origin (
     'Fedora' => '/usr/bin/echo',
     default  => '/bin/echo',
   }
+  
+  $mcollective_client_cfg = $::operatingsystem ? {
+    'Fedora' => '/etc/mcollective/client.cfg',
+    default  => '/opt/rh/ruby193/root/etc/mcollective/client.cfg',
+  }
+  
+  $mcollective_server_cfg = $::operatingsystem ? {
+    'Fedora' => '/etc/mcollective/server.cfg',
+    default  => '/opt/rh/ruby193/root/etc/mcollective/server.cfg',
+  }
+
+  $mcollective_facts_yaml = $::operatingsystem ? {
+    'Fedora' => '/etc/mcollective/facts.yaml',
+    default  => '/opt/rh/ruby193/root/etc/mcollective/facts.yaml',
+  }
 
   if $configure_ntp == true {
     include openshift_origin::ntpd
@@ -381,10 +396,7 @@ class openshift_origin (
   ensure_resource('package', 'policycoreutils', {
     }
   )
-  ensure_resource('package', 'mcollective', {
-      require => Yumrepo['openshift-origin-deps'],
-    }
-  )
+  
   ensure_resource('package', 'httpd', {
     }
   )
@@ -397,6 +409,11 @@ class openshift_origin (
   )
 
   if $::operatingsystem == "Fedora" {
+    ensure_resource('package', 'mcollective', {
+        require => Yumrepo['openshift-origin-deps'],
+      }
+    )
+    
     ensure_resource('package', 'ruby-devel', {
         ensure  => present,
       }
@@ -408,6 +425,12 @@ class openshift_origin (
       }
     )
   } else {
+    ensure_resource('package', 'ruby193-mcollective', {
+        require => Yumrepo['openshift-origin-deps'],
+        alias   => 'mcollective'
+      }
+    )
+    
     ensure_resource('package', 'ruby193-ruby-devel', {
         ensure => present,
         alias => 'ruby-devel',

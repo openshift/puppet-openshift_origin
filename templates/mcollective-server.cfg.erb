@@ -44,4 +44,4 @@ plugin.qpid.timeout=5
 
 # Facts
 factsource = yaml
-plugin.yaml = /etc/mcollective/facts.yaml
+plugin.yaml = <%= scope.lookupvar('::openshift_origin::mcollective_facts_yaml') %>

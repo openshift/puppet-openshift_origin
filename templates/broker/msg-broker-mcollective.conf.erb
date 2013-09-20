@@ -2,7 +2,7 @@ MCOLLECTIVE_DISCTIMEOUT=5
 MCOLLECTIVE_TIMEOUT=60
 MCOLLECTIVE_VERBOSE=0
 MCOLLECTIVE_PROGRESS_BAR=0
-MCOLLECTIVE_CONFIG="/etc/mcollective/client.cfg"
+MCOLLECTIVE_CONFIG="<%= scope.lookupvar('::openshift_origin::mcollective_client_cfg') %>"
                                                                                                                                                                                                                                                                                   
 DISTRICTS_ENABLED=false
 DISTRICTS_REQUIRE_FOR_APP_CREATE=false

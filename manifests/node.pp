@@ -149,7 +149,7 @@ class openshift_origin::node {
   if !defined(File['mcollective client config']) {
     file { 'mcollective client config':
       ensure  => present,
-      path    => '/etc/mcollective/client.cfg',
+      path    => $::openshift_origin::mcollective_client_cfg,
       content => template('openshift_origin/mcollective-client.cfg.erb'),
       owner   => 'root',
       group   => 'root',
@@ -161,7 +161,7 @@ class openshift_origin::node {
   if !defined(File['mcollective server config']) {
     file { 'mcollective server config':
       ensure  => present,
-      path    => '/etc/mcollective/server.cfg',
+      path    => $::openshift_origin::mcollective_server_cfg,
       content => template('openshift_origin/mcollective-server.cfg.erb'),
       owner   => 'root',
       group   => 'root',
@@ -431,9 +431,19 @@ class openshift_origin::node {
       enable   => true,
     }
 
-    service { 'mcollective':
-      require => [Package['mcollective']],
-      enable  => true,
+    case $::operatingsystem {
+      'Fedora' : {
+        service { 'mcollective':
+          require => [Package['mcollective']],
+          enable  => true,
+        }
+      }
+      default  : {
+        service { 'ruby193-mcollective':
+          require => [Package['mcollective']],
+          enable  => true,
+        }
+      }
     }
   } else {
     warning 'Please ensure that mcollective, cron, openshift-gears, openshift-node-web-proxy, and oddjobd are running on all nodes'
@@ -458,6 +468,18 @@ class openshift_origin::node {
   }
 
   Exec['jenkins repo key'] -> Yumrepo['jenkins']
+  
+  ensure_resource('package', 'rubygem-openshift-origin-frontend-apache-mod-rewrite', {
+      ensure  => latest,
+      require => Yumrepo[openshift-origin],
+    }
+  )
+  
+  ensure_resource('package', 'rubygem-openshift-origin-frontend-nodejs-websocket', {
+      ensure  => latest,
+      require => Yumrepo[openshift-origin],
+    }
+  )
 
   if ($::openshift_origin::configure_broker == true and $::openshift_origin::configure_node == true) {
     file { 'broker and console route for node':
@@ -467,7 +489,11 @@ class openshift_origin::node {
       owner   => 'root',
       group   => 'apache',
       mode    => '0640',
-      require => Package['rubygem-openshift-origin-node'],
+      require => [
+        Package['rubygem-openshift-origin-node'],
+        Package['rubygem-openshift-origin-frontend-apache-mod-rewrite'],
+        Package['rubygem-openshift-origin-frontend-nodejs-websocket'],
+      ],
     }
 
     exec { 'regen node routes':
@@ -561,6 +587,7 @@ class openshift_origin::node {
     'Fedora' : {
         package { [
           'openshift-origin-cartridge-mariadb',
+          'openshift-origin-cartridge-jbossas',
         ]:
         ensure  => latest,
         require => [
@@ -603,20 +630,30 @@ class openshift_origin::node {
     notify => Exec['openshift-facts'],
   }
 
-  exec { 'openshift-facts':
-    command     => '/usr/bin/oo-exec-ruby /usr/libexec/mcollective/update_yaml.rb /etc/mcollective/facts.yaml',
-    environment => ['LANG=en_US.UTF-8', 'LC_ALL=en_US.UTF-8'],
-    require     => [
-      Package['openshift-origin-msg-node-mcollective'],
-      Package['mcollective'],
-    ],
-    refreshonly => true,
-  }
-
   if( $::operatingsystem == 'Fedora' ) {
     file { '/usr/lib/systemd/system/mcollective.service':
       content => template('openshift_origin/node/mcollective.service.erb'),
       notify  => Exec['systemd-daemon-reload']
+    }
+    
+    exec { 'openshift-facts':
+      command     => "/usr/bin/oo-exec-ruby /usr/libexec/mcollective/update_yaml.rb ${::openshift_origin::mcollective_facts_yaml}",
+      environment => ['LANG=en_US.UTF-8', 'LC_ALL=en_US.UTF-8'],
+      require     => [
+        Package['openshift-origin-msg-node-mcollective'],
+        Package['mcollective'],
+      ],
+      refreshonly => true,
+    }
+  } else {
+    exec { 'openshift-facts':
+      command     => '/usr/bin/oo-exec-ruby /opt/rh/ruby193/root/usr/libexec/mcollective/update_yaml.rb /opt/rh/ruby193/root/etc/mcollective/facts.yaml',
+      environment => ['LANG=en_US.UTF-8', 'LC_ALL=en_US.UTF-8'],
+      require     => [
+        Package['openshift-origin-msg-node-mcollective'],
+        Package['mcollective'],
+      ],
+      refreshonly => true,
     }
   }
 

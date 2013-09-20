@@ -951,7 +951,7 @@ class openshift_origin::broker {
   if !defined(File['mcollective client config']) {
     file { 'mcollective client config':
       ensure  => present,
-      path    => '/etc/mcollective/client.cfg',
+      path    => $::openshift_origin::mcollective_client_cfg,
       content => template('openshift_origin/mcollective-client.cfg.erb'),
       owner   => 'root',
       group   => 'root',
@@ -963,7 +963,7 @@ class openshift_origin::broker {
   if !defined(File['mcollective server config']) {
     file { 'mcollective server config':
       ensure  => present,
-      path    => '/etc/mcollective/server.cfg',
+      path    => $::openshift_origin::mcollective_server_cfg,
       content => template('openshift_origin/mcollective-server.cfg.erb'),
       owner   => 'root',
       group   => 'root',
