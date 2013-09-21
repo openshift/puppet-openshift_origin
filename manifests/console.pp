@@ -196,6 +196,48 @@ class openshift_origin::console {
   }
 
   if ($::operatingsystem == "RedHat" or $::operatingsystem == "CentOS") {
+    ensure_resource('package', 'ruby193-rubygem-capybara', {
+        ensure   => 'latest',
+        alias    => 'capybara',
+        require => Yumrepo[openshift-origin-deps],
+      }
+    )
+
+    ensure_resource('package', 'ruby193-rubygem-poltergeist', {
+        ensure   => 'latest',
+        alias    => 'poltergeist',
+        require => Yumrepo[openshift-origin-deps],
+      }
+    )
+
+    ensure_resource('package', 'ruby193-rubygem-webmock', {
+        ensure   => 'latest',
+        alias    => 'webmock',
+        require => Yumrepo[openshift-origin-deps],
+      }
+    )
+
+    ensure_resource('package', 'ruby193-rubygem-simplecov', {
+        ensure   => 'latest',
+        alias    => 'simplecov',
+        require => Yumrepo[openshift-origin-deps],
+      }
+    )
+
+    ensure_resource('package', 'ruby193-rubygem-mocha', {
+        ensure   => 'latest',
+        alias    => 'mocha',
+        require => Yumrepo[openshift-origin-deps],
+      }
+    )
+
+    ensure_resource('package', 'ruby193-rubygem-minitest', {
+        ensure => 'latest',
+        alias  => 'minitest',
+        require => Yumrepo[openshift-origin-deps],
+      }
+    )
+
     ensure_resource('package', 'ruby193-rubygem-ci_reporter', {
         ensure   => 'latest',
         alias    => 'ci_reporter',
@@ -259,6 +301,13 @@ class openshift_origin::console {
       }
     )
 
+    ensure_resource('package', 'ruby193-rubygem-formtastic', {
+        ensure   => 'latest',
+        alias    => 'formtastic',
+        require => Yumrepo[openshift-origin-deps],
+      }
+    )
+
     ensure_resource('package', 'ruby193-rubygem-net-http-persistent', {
         ensure   => 'latest',
         alias    => 'net-http-persistent',
@@ -269,41 +318,6 @@ class openshift_origin::console {
     ensure_resource('package', 'ruby193-rubygem-haml', {
         ensure   => 'latest',
         alias    => 'haml',
-        require => Yumrepo[openshift-origin-deps],
-      }
-    )
-
-    ensure_resource('package', 'ruby193-rubygem-formtastic', {
-        ensure   => 'latest',
-        alias    => 'formtastic',
-        require => Yumrepo[openshift-origin-deps],
-      }
-    )
-
-    ensure_resource('package', 'ruby193-rubygem-minitest', {
-        ensure => 'latest',
-        alias  => 'minitest',
-        require => Yumrepo[openshift-origin-deps],
-      }
-    )
-
-    ensure_resource('package', 'ruby193-rubygem-webmock', {
-        ensure   => 'latest',
-        alias    => 'webmock',
-        require => Yumrepo[openshift-origin-deps],
-      }
-    )
-
-    ensure_resource('package', 'ruby193-rubygem-poltergeist', {
-        ensure   => 'latest',
-        alias    => 'poltergeist',
-        require => Yumrepo[openshift-origin-deps],
-      }
-    )
-
-    ensure_resource('package', 'ruby193-rubygem-capybara', {
-        ensure   => 'latest',
-        alias    => 'capybara',
         require => Yumrepo[openshift-origin-deps],
       }
     )
