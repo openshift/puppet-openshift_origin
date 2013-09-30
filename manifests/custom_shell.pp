@@ -1,6 +1,6 @@
-# == Class: openshift_origin::mongo
+# == Class: openshift_origin::custom_shell
 #
-# Manage MongoDB for OpenShift Origin.
+# Manage Custom Shell in Fedora for OpenShift Origin.
 #
 # === Parameters
 #
@@ -8,7 +8,7 @@
 #
 # === Examples
 #
-#  include openshift_origin::mongo
+#  include openshift_origin::params
 #
 # === Copyright
 #
@@ -31,7 +31,7 @@
 #
 class openshift_origin::custom_shell {
   include openshift_origin::params
-  
+
   if ($::operatingsystem != 'Fedora') {
     fail 'Custom OpenShift Origin shell is only available on Fedora systems'
   }
@@ -56,7 +56,7 @@ class openshift_origin::custom_shell {
     group   => 'root',
     mode    => '0644',
   }
-  
+
   file { '/usr/bin/oo-login':
     ensure  => present,
     path    => '/usr/bin/oo-login',
