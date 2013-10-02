@@ -1,0 +1,9 @@
+if (<%= scope.lookupvar('::openshift_origin::params::iptables') %>-save | grep rhc-app-comm); then
+  echo "IPtables already contains chain rhc-app-comm"
+else
+  <%= scope.lookupvar('::openshift_origin::params::iptables') %> -N rhc-app-comm;
+  <%= scope.lookupvar('::openshift_origin::params::iptables') %> -I INPUT 4 -m tcp -p tcp --dport 35531:65535 -m state --state NEW -j ACCEPT;
+  <%= scope.lookupvar('::openshift_origin::params::iptables') %> -I INPUT 5 -j rhc-app-comm;
+  <%= scope.lookupvar('::openshift_origin::params::iptables') %> -I 1 OUTPUT -j rhc-app-comm;
+  <%= scope.lookupvar('::openshift_origin::params::iptables_save_command') %>;
+fi

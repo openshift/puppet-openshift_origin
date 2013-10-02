@@ -1,5 +1,5 @@
-BIND_SERVER="<%= scope.lookupvar('::openshift_origin::named_ipaddress') %>"
+BIND_SERVER="<%= scope.lookupvar('::openshift_origin::named_ip_addr') %>"
 BIND_PORT=53
-BIND_ZONE="<%= scope.lookupvar('::openshift_origin::cloud_domain') %>"
-BIND_KRB_PRINCIPAL="DNS/<%= scope.lookupvar('::openshift_origin::kerberos_service') %>@<%= scope.lookupvar('::openshift_origin::kerberos_realm') %>"
-BIND_KRB_KEYTAB="<%= scope.lookupvar('::openshift_origin::dns_kerberos_keytab') %>"
+BIND_ZONE="<%= scope.lookupvar('::openshift_origin::domain') %>"
+BIND_KRB_PRINCIPAL="DNS/<%= scope.lookupvar('::openshift_origin::broker_krb_service_name') %>@<%= scope.lookupvar('::openshift_origin::broker_krb_auth_realms') %>"
+BIND_KRB_KEYTAB="<%= scope.lookupvar('::openshift_origin::bind_krb_keytab') %>"

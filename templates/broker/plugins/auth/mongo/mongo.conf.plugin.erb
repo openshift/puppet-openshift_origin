@@ -1,7 +1,7 @@
 MONGO_REPLICA_SETS=false
 # Replica set example: "<host-1>:<port-1> <host-2>:<port-2> ..."
-MONGO_HOST_PORT="<%= scope.lookupvar('::openshift_origin::mongodb_fqdn') %>:27017"
-MONGO_USER="<%= scope.lookupvar('::openshift_origin::mongo_auth_user') %>"
-MONGO_PASSWORD="<%= scope.lookupvar('::openshift_origin::mongo_auth_password') %>"
-MONGO_DB="<%= scope.lookupvar('::openshift_origin::mongo_db_name') %>"
+MONGO_HOST_PORT="<%= scope.lookupvar('::openshift_origin::datastore_hostname') %>:27017"
+MONGO_USER="<%= scope.lookupvar('::openshift_origin::mongodb_broker_user') %>"
+MONGO_PASSWORD="<%= scope.lookupvar('::openshift_origin::mongodb_broker_password') %>"
+MONGO_DB="<%= scope.lookupvar('::openshift_origin::mongodb_name') %>"
 MONGO_COLLECTION="auth_user"

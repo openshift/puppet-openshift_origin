@@ -1,1 +1,1 @@
-forwarders { <%= scope.lookupvar('::openshift_origin::dns_servers').join("; ") %>; };
+forwarders { <%= scope.lookupvar('::openshift_origin::conf_named_upstream_dns').join("; ") %>; };

@@ -1,0 +1,1 @@
+/dev/shm  tmpfs  tmpfs:mntopts=size=5M:iscript=/usr/sbin/oo-namespace-init <%= scope.lookupvar('::openshift_origin::plugins::container::selinux::os_all_unmanaged_users').flatten.join(',') %>

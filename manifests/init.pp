@@ -1,651 +1,431 @@
-# == Class: openshift_origin
-#
-# This is the main class to manage all the components of a OpenShift Origin
-# infrastructure. This is the only class that needs to be declared.
-#
-# === Parameters:
-# [*node_fqdn*]
-#   The FQDN for this host
-# [*create_origin_yum_repos*]
-#   True if OpenShift Origin dependencies and OpenShift Origin nightly yum repositories should be created on this node.
-# [*install_client_tools*]
-#   True if OpenShift Client tools be installed on this node.
-# [*enable_network_services*]
-#   True if all support services be enabled. False if they are enabled by other classes in your catalog.
-# [*configure_firewall*]
-#   True if firewall should be configured for this node (Will blow away any existing configuration)
-# [*configure_ntp*]
-#   True if NTP should be configured on this node. False if ntp is configured by other classes in your catalog.
-# [*configure_activemq*]
-#   True if ActiveMQ should be installed and configured on this node (Used by m-collective)
-# [*configure_qpid*]
-#   True if Qpid message broker should be installed and configured on this node. (Optionally, used by m-collective. Replaced
-#   ActiveMQ)
-# [*configure_mongodb*]
-#   Set to true to setup mongo (This will start mongod). Set to 'delayed' to setup mongo upon next boot.
-# [*configure_named*]
-#   True if a Bind server should be configured and run on this node.
-# [*configure_avahi*]
-#   True if a Avahi server should be configured and run on this node. (This is an alternative to named. Only one should be
-#   enabled)
-# [*configure_broker*]
-#   True if an OpenShift Origin broker should be installed and configured on this node.
-# [*configure_console*]
-#   True if an OpenShift Origin console should be installed and configured on this node.
-# [*configure_node*]
-#   True if an OpenShift Origin node should be installed and configured on this node.
-# [*set_sebooleans*]
-#   Set to true to setup selinux booleans. Set to 'delayed' to setup selinux booleans upon next boot.
-# [*install_repo*]
-#   The YUM repository to use when installing OpenShift Origin packages. Specify <code>nightlies</code> to pull latest nightly
-#   build or provide a URL for another YUM repository.
-# [*named_ipaddress*]
-#   IP Address of DNS Bind server (If running on a different node)
-# [*avahi_ipaddress*]
-#   IP Address of Avahi MDNS server (If running on a different node)
-# [*mongodb_fqdn*]
-#   FQDN of node running the MongoDB server (If running on a different node)
-# [*mq_fqdn*]
-#   FQDN of node running the message queue (ActiveMQ or Qpid) server (If running on a different node)
-# [*broker_fqdn*]
-#   FQDN of node running the OpenShift OpenShift broker server (If running on a different node)
-# [*cloud_domain*]
-#   DNS suffix for applications running on this PaaS. Eg. <code>cloud.example.com</code> applications will be
-#   <code><app>-<namespace>.cloud.example.com</code>
-# [*dns_servers*]
-#   Array of DNS servers to use when configuring named forwarding. Defaults to <code>['8.8.8.8', '8.8.4.4']</code>
-# [*configure_fs_quotas*]
-#   Enables quotas on the local node. Applicable only to OpenShift OpenShift Nodes.  If this setting is set to false, it is expected
-#   that Quotas are configured elsewhere in the Puppet catalog
-# [*oo_device*]
-#   Device on which gears are stored (<code>/var/lib/openshift</code>)
-# [*oo_mount*]
-#   Base mount point for <code>/var/lib/openshift directory</code>
-# [*configure_cgroups*]
-#   Enables cgoups on the local node. Applicable only to OpenShift OpenShift Nodes. If this setting is set to false, it is expected
-#   that cgroups are configured elsewhere in the Puppet catalog
-# [*configure_pam*]
-#   Updates PAM settings on the local node to secure gear logins. Applicable only to OpenShift OpenShift Nodes. If this setting is
-#   set to false, it is expected that cgroups are configured elsewhere in the Puppet catalog
-# [*broker_auth_plugin*]
-#   The authentication plugin to use with the OpenShift OpenShift Broker. Supported values are <code>'mongo'</code> and
-#   <code>'basic-auth'</code>
-# [*broker_auth_pub_key*]
-#   Public key used to authenticate communication between node and broker. If left blank, this file is auto generated.
-# [*broker_auth_priv_key*]
-#   Private key used to authenticate communication between node and broker. If <code>broker_auth_pub_key</code> is left blank, this
-#   file is auto generated.
-# [*broker_auth_key_password*]
-#   Password for `broker_auth_priv_key` private key
-# [*broker_auth_salt*]
-#   Salt used to generate authentication tokens for communication between node and broker.
-# [*broker_rsync_key*]
-#   RSync Key used during move gear admin operations
-# [*mq_provider*]
-#   Message queue plugin to configure for mcollecitve. Defaults to <code>'activemq'</code> Acceptable values are
-#   <code>'activemq'</code>, <code>'stomp'</code> and <code>'qpid'</code>
-# [*mq_server_user*]
-#   User to authenticate against message queue server
-# [*mq_server_password*]
-#   Password to authenticate against message queue server
-# [*mongo_auth_user*]
-#   User to authenticate against Mongo DB server
-# [*mongo_db_name*]
-#   name of the MongoDB database
-# [*mongo_auth_password*]
-#   Password to authenticate against Mongo DB server
-# [*named_tsig_priv_key*]
-#   TSIG signature to authenticate against the Bind DNS server.
-# [*os_unmanaged_users*]
-#   List of users with UID which should not be managed by OpenShift. (By default OpenShift Origin PAM will reserve all
-#   UID's > 500 and prevent user logins)
-# [*user_supplementary_groups*]
-#   Comma separated list of supplementary groups that the user should be a member of when the new unix user is being created
-# [*update_network_dns_servers*]
-#   True if Bind DNS server specified in <code>named_ipaddress</code> should be added as first DNS server for application name.
-#   resolution. (This should be false if using Avahi for MDNS updates)
-# [*development_mode*]
-#   Set to true to enable development mode and detailed logging
-# [*min_gear_uid]
-#   Min gear uid/gid
-#
-# === Copyright
-#
 # Copyright 2013 Mojo Lingo LLC.
-# Copyright 2013 Red Hat, Inc.
+# Modifications by Red Hat, Inc.
+# 
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
 #
-# === License
+# == Class openshift_origin
+# 
+# This is the main class to manage parameters for all OpenShift Origin
+# installations.
+# 
+# === Parameters
+# [*roles*]
+#   Choose from the following roles to be configured on this node.
+#     * broker    - Installs the broker and console.
+#     * node      - Installs the node and cartridges.
+#     * activemq  - Installs activemq message broker.
+#     * datastore - Installs MongoDB (not sharded/replicated)
+#     * named     - Installs a BIND dns server configured with a TSIG key for updates.
+#   Default: ['broker','node','activemq','datastore','named']
+# 
+# [*install_method*]
+#   Choose from the following ways to provide packages:
+#     none - install sources are already set up when the script executes (default)
+#     yum - set up yum repos manually
+#       * repos_base
+#       * os_repo
+#       * os_updates_repo
+#       * jboss_repo_base
+#       * jenkins_repo_base
+#       * optional_repo
+#   Default: yum
+# 
+# [*repos_base*]
+#   Base path to repository for OpenShift Origin
+#   Nightlies:
+#     Fedora: https://mirror.openshift.com/pub/origin-server/nightly/fedora-19
+#     RHEL:   https://mirror.openshift.com/pub/origin-server/nightly/rhel-6
+#   Release-2:
+#     Fedora: https://mirror.openshift.com/pub/origin-server/release/2/fedora-19
+#     RHEL:   https://mirror.openshift.com/pub/origin-server/release/2/rhel-6
+#   Default: Fedora-19 Nightlies
+# 
+# [*override_install_repo*]
+#   Repository path override. Uses dependencies from repos_base but uses 
+#   override_install_repo path for OpenShift RPMs. Used when doing local builds.
+#   Default: none
+#   
+# [*os_repo*]
+#   The URL for a Fedora 19/RHEL 6 yum repository used with the "yum" install method.
+#   Should end in x86_64/os/.
+#   Default: no change
+#   
+# [*os_updates*]
+#   The URL for a Fedora 19/RHEL 6 yum updates repository used with the "yum" install method.
+#   Should end in x86_64/.
+#   Default: no change
+#   
+# [*jboss_repo_base*]
+#   The URL for a JBoss repositories used with the "yum" install method.
+#   Does not install repository if not specified.
+#   
+# [*jenkins_repo_base*]
+#   The URL for a Jenkins repositories used with the "yum" install method.
+#   Does not install repository if not specified.
+#   
+# [*optional_repo*]
+#   The URL for a EPEL or optional repositories used with the "yum" install method.
+#   Does not install repository if not specified.
+# 
+# [*domain*]
+#   Default: example.com
+#   The network domain under which apps and hosts will be placed.
+# 
+# [*broker_hostname*]
+# [*node_hostname*]
+# [*named_hostname*]
+# [*activemq_hostname*]
+# [*datastore_hostname*]
+#   Default: the root plus the domain, e.g. broker.example.com - except
+#   named=ns1.example.com 
+# 
+#   These supply the FQDN of the hosts containing these components. Used
+#   for configuring the host's name at install, and also for configuring
+#   the broker application to reach the services needed.
+# 
+#   IMPORTANT NOTE: if installing a nameserver, the script will create
+#   DNS entries for the hostnames of the other components being 
+#   installed on this host as well. If you are using a nameserver set
+#   up separately, you are responsible for all necessary DNS entries.
+# 
+# [*named_ip_addr*]
+#   Default: IP of a named instance or current IP if installing on this 
+#   node. This is used by every node to configure its primary name server.
+#   Default: the current IP (at install)  
+#   
+# [*bind_key*]
+#   When the nameserver is remote, use this to specify the HMAC-MD5 key
+#   for updates. This is the "Key:" field from the .private key file
+#   generated by dnssec-keygen. This field is required on all nodes. 
+#   
+# [*bind_krb_keytab*]
+#   When the nameserver is remote, Kerberos keytab together with principal
+#   can be used instead of the HMAC-MD5 key for updates.
+#   
+# [*bind_krb_principal*]
+#   When the nameserver is remote, this Kerberos principal together with
+#   Kerberos keytab can be used instead of the HMAC-MD5 key for updates.
+#   
+# [*conf_named_upstream_dns*]
+#   List of upstream DNS servers to use when installing named on this node.
+#   Default: ['8.8.8.8']
+# 
+# [*broker_ip_addr*]
+#   Default: the current IP (at install)
+#   This is used for the node to record its broker. Also is the default
+#   for the nameserver IP if none is given.
+# 
+# [*node_ip_addr*]
+#   Default: the current IP (at install)
+#   This is used for the node to give a public IP, if different from the
+#   one on its NIC.
+# 
+# [*configure_ntp*]
+#   Default: true
+#   Enabling this option configuresNTP.  It is important that the time 
+#   be synchronized across hosts because MCollective messages have a TTL
+#   of 60 seconds and may be dropped if the clocks are too far out of 
+#   synch.  However, NTP is not necessary if the clock will be kept in 
+#   synch by some other means.
+# 
+# Passwords used to secure various services. You are advised to specify
+# only alphanumeric values in this script as others may cause syntax
+# errors depending on context. If non-alphanumeric values are required,
+# update them separately after installation.
+# 
+# [*activemq_admin_password*]
+#   Default: scrambled
+#   This is the admin password for the ActiveMQ admin console, which is
+#   not needed by OpenShift but might be useful in troubleshooting.
+# 
+# [*mcollective_user*]
+# [*mcollective_password*]
+#   Default: mcollective/marionette
+#   This is the user and password shared between broker and node for
+#   communicating over the mcollective topic channels in ActiveMQ. Must
+#   be the same on all broker and node hosts.
+# 
+# [*mongodb_admin_user*]
+# [*mongodb_admin_password*]
+#   Default: admin/mongopass
+#   These are the username and password of the administrative user that
+#   will be created in the MongoDB datastore. These credentials are not
+#   used by in this script or by OpenShift, but an administrative user
+#   must be added to MongoDB in order for it to enforce authentication.
+#   Note: The administrative user will not be created if
+#   CONF_NO_DATASTORE_AUTH_FOR_LOCALHOST is enabled.
+# 
+# [*mongodb_broker_user*]
+# [*mongodb_broker_password*]
+#   Default: openshift/mongopass
+#   These are the username and password of the normal user that will be
+#   created for the broker to connect to the MongoDB datastore. The
+#   broker application's MongoDB plugin is also configured with these
+#   values.
+#   
+# [*mongodb_name*]
+#   Default: openshift_broker
+#   This is the name of the database in MongoDB in which the broker will
+#   store data.
+# 
+# [*openshift_user1*]
+# [*openshift_password1*]
+#   Default: demo/changeme
+#   This user and password are entered in the /etc/openshift/htpasswd
+#   file as a demo/test user. You will likely want to remove it after
+#   installation (or just use a different auth method).
+# 
+# [*conf_broker_auth_salt*]
+# [*conf_broker_auth_public_key*]
+# [*conf_broker_auth_private_key*]
+# [*conf_broker_auth_key_password*]
+#   Salt, public and private keys used when generating secure authentication 
+#   tokens for Application to Broker communication. Requests like scale up/down 
+#   and jenkins builds use these authentication tokens. This value must be the 
+#   same on all broker nodes.
+#   Default:  Self signed keys are generated. Will not work with multi-broker 
+#             setup.
+#   
+# [*conf_broker_session_secret*]
+# [*conf_console_session_secret*]
+#   Session secrets used to encode cookies used by console and broker. This 
+#   value must be the same on all broker nodes.
+#   
+# [*conf_valid_gear_sizes*]
+#   List of all gear sizes this will be used in this OpenShift installation.
+#   Default: ['small']
+# 
+# [*broker_dns_plugin*]
+#   DNS plugin used by the broker to register application DNS entries.
+#   Options:
+#     * nsupdate - nsupdate based plugin. Supports TSIG and GSS-TSIG based 
+#                  authentication. Uses bind_key for TSIG and bind_krb_keytab, 
+#                  bind_krb_principal for GSS_TSIG auth.
+#     * avahi    - sets up a MDNS based DNS resolution. Works only for 
+#                  all-in-one installations.
+# [*broker_auth_plugin*]
+#   Authentication setup for users of the OpenShift service.
+#   Options:
+#     * mongo         - Stores username and password in mongo.
+#     * kerberos      - Kerberos based authentication. Uses 
+#                       broker_krb_service_name, broker_krb_auth_realms,
+#                       broker_krb_keytab values.
+#     * htpasswd      - Stores username/password in a htaccess file.
+#     * ldap          - LDAP based authentication. Uses broker_ldap_uri
+#   Default: htpasswd
+# 
+# [*broker_krb_service_name*]
+#   The KrbServiceName value for mod_auth_kerb configuration
+# 
+# [*broker_krb_auth_realms*]
+# The KrbAuthRealms value for mod_auth_kerb configuration
+# 
+# [*broker_krb_keytab*]
+#   The Krb5KeyTab value of mod_auth_kerb is not configurable -- the keytab
+#   is expected in /var/www/openshift/broker/httpd/conf.d/http.keytab
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# [*broker_ldap_uri*]
+#   URI to the LDAP server (e.g. ldap://ldap.example.com:389/ou=People,dc=my-domain,dc=com).
+#   Set <code>broker_auth_plugin</code> to <code>ldap</code> to enable
+#   this feature.
+# 
+# [*node_container_plugin*]
+#   Specify the container type to use on the node.
+#   Options:
+#     * selinux - This is the default OpenShift Origin container type.
+# 
+# [*node_frontend_plugins*]
+#   Specify one or more plugins to use register HTTP and web-socket connections 
+#   for applications.
+#   Options:
+#     * apache-mod-rewrite  - Mod-Rewrite based plugin for HTTP and HTTPS 
+#         requests. Well suited for installations with a lot of 
+#         creates/deletes/scale actions.
+#     * apache-vhost        - VHost based plugin for HTTP and HTTPS. Suited for 
+#         installations with less app create/delete activity. Easier to 
+#         customize.
+#     * nodejs-websocket    - Web-socket proxy listening on ports 8000/8444
+#   Default: ['apache-mod-rewrite','nodejs-websocket']
+#   
+# [*node_unmanaged_users*]
+#   List of user names who have UIDs in the range of OpenShift gears but must be 
+#   excluded from OpenShift gear setups.
+#   Default: []
+# 
+# [*conf_node_external_eth_dev*]
+#   External facing network device. Used for routing and traffic control setup.
+#   Default: eth0
+# 
+# [*conf_node_supplementary_posix_groups*]
+#   Name of supplementary UNIX group to add a gear to.
+# 
+# [*development_mode*]
+#   Set development mode and extra logging. 
+#   Default: false
+# 
+# [*install_login_shell*]
+#   Install a Getty shell which displays DNS, IP and login information. Used for 
+#   all-in-one VM installation.
+# 
+# [*register_host_with_named*]
+#   Setup DNS entries for this host in a locally installed bind DNS instance.
+#   Default: false
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+# [*firewall_provider*]
+#   Select the firewall provider to configure OpenShift with.
+#   Options:
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#   * none
+#   * iptables
+#   * lokkit
 #
+# [*install_cartridges*]
+#   List of cartridges to be installed on the node. Options:
+#
+#   * 10gen-mms-agent
+#   * cron
+#   * diy
+#   * haproxy
+#   * mongodb
+#   * nodejs
+#   * perl
+#   * php
+#   * phpmyadmin
+#   * postgresql
+#   * python
+#   * ruby
+#   * jenkins
+#   * jenkins-client
+#   * mariadb         (will install mysql on RHEL)
+#   * jbossews
+#   * jbossas
+#   * jbosseap
+#
+#   Default: ['10gen-mms-agent','cron','diy','haproxy','mongodb',
+#             'nodejs','perl','php','phpmyadmin','postgresql',
+#             'python','ruby','jenkins','jenkins-client','mariadb']
+# 
+# == Manual Tasks
+# 
+# This script attempts to automate as many tasks as it reasonably can.
+# Unfortunately, it is constrained to setting up only a single host at a
+# time. In an assumed multi-host setup, you will need to do the 
+# following after the script has completed.
+# 
+# 1. Set up DNS entries for hosts
+#    If you installed BIND with the script, then any other components
+#    installed with the script on the same host received DNS entries.
+#    Other hosts must all be defined manually, including at least your
+#    node hosts. oo-register-dns may prove useful for this.
+# 
+# 2. Copy public rsync key to enable moving gears
+#    The broker rsync public key needs to go on nodes, but there is no
+#    good way to script that generically. Nodes should not have
+#    password-less access to brokers to copy the .pub key, so this must
+#    be performed manually on each node host:
+#       # scp root@broker:/etc/openshift/rsync_id_rsa.pub /root/.ssh/
+#    (above step will ask for the root password of the broker machine)
+#       # cat /root/.ssh/rsync_id_rsa.pub >> /root/.ssh/authorized_keys
+#       # rm /root/.ssh/rsync_id_rsa.pub
+#    If you skip this, each gear move will require typing root passwords
+#    for each of the node hosts involved.
+# 
+# 3. Copy ssh host keys between the node hosts
+#    All node hosts should identify as the same host, so that when gears
+#    are moved between hosts, ssh and git don't give developers spurious
+#    warnings about the host keys changing. So, copy /etc/ssh/ssh_* from
+#    one node host to all the rest (or, if using the same image for all
+#    hosts, just keep the keys from the image).
 class openshift_origin (
-  $node_fqdn                  = $::fqdn,
-  $create_origin_yum_repos    = true,
-  $install_client_tools       = true,
-  $enable_network_services    = true,
-  $configure_firewall         = true,
-  $configure_ntp              = true,
-  $configure_activemq         = true,
-  $configure_qpid             = false,
-  $configure_mongodb          = true,
-  $configure_named            = true,
-  $configure_avahi            = false,
-  $configure_broker           = true,
-  $configure_console          = true,
-  $configure_node             = true,
-  $set_sebooleans             = true,
-  $install_login_shell        = false,
-  $eth_device                 = 'eth0',
-  $install_repo               = 'nightlies',
-  $dependencies_repo          = 'nightlies',
-  $named_ipaddress            = $::ipaddress,
-  $avahi_ipaddress            = $::ipaddress,
-  $mongodb_fqdn               = 'localhost',
-  $mq_fqdn                    = $::fqdn,
-  $broker_fqdn                = $::fqdn,
-  $cloud_domain               = 'example.com',
-  $dns_servers                = ['8.8.8.8', '8.8.4.4'],
-  $configure_fs_quotas        = true,
-  $console_session_secret     = 'changeme',
-  $oo_device                  = $::gear_root_device,
-  $oo_mount                   = $::gear_root_mount,
-  $configure_cgroups          = true,
-  $configure_pam              = true,
-  $broker_auth_plugin         = 'mongo',
-  $broker_auth_pub_key        = '',
-  $broker_auth_priv_key       = '',
-  $broker_auth_key_password   = '',
-  $broker_auth_salt           = 'changeme',
-  $broker_session_secret      = 'changeme',
-  $broker_rsync_key           = '',
-  $broker_dns_plugin          = 'nsupdate',
-  $broker_dns_gsstsig         = false,
-  $dns_kerberos_keytab        = '/etc/dns.keytab',
-  $http_kerberos_keytab       = '/etc/http.keytab',
-  $kerberos_realm             = 'EXAMPLE.COM',
-  $kerberos_service           = $::fqdn,
-  $mq_provider                = 'activemq',
-  $mq_server_user             = 'mcollective',
-  $mq_server_password         = 'marionette',
-  $mongo_auth_user            = 'openshift',
-  $mongo_db_name              = 'openshift_broker_dev',
-  $mongo_auth_password        = 'mooo',
-  $named_tsig_priv_key        = '',
-  $os_unmanaged_users         = [],
-  $user_supplementary_groups  = '',
-  $update_network_dns_servers = true,
-  $development_mode           = false,
-  $eth_device                 = 'eth0',
-  $min_gear_uid               = 500,
-  $node_container             = 'selinux'
-) {
-  include openshift_origin::params
-
-  if $console_session_secret == 'changeme' {
-    warning 'The default console_session_secret is being used'
+  $roles                                = ['broker','node','activemq','datastore','named'],
+  $install_method                       = 'yum',
+  $repos_base                           = 'https://mirror.openshift.com/pub/origin-server/nightly/fedora-19',
+  $override_install_repo                = undef,
+  $os_repo                              = undef,
+  $os_updates_repo                      = undef,
+  $jboss_repo_base                      = undef,
+  $optional_repo                        = undef,
+  $domain                               = 'example.com',
+  $broker_hostname                      = 'broker.example.com',
+  $node_hostname                        = 'node.example.com',
+  $named_hostname                       = 'ns1.example.com',
+  $activemq_hostname                    = 'activemq.example.com',
+  $datastore_hostname                   = 'mongodb.example.com',
+  $named_ip_addr                        = $ipaddress,
+  $bind_key                             = '',
+  $bind_krb_keytab                      = '',
+  $bind_krb_principal                   = '',
+  $broker_ip_addr                       = $ipaddress,
+  $node_ip_addr                         = $ipaddress,
+  $configure_ntp                        = true,  
+  $activemq_admin_password              = inline_template('<%= SecureRandom.base64 %>'),
+  $mcollective_user                     = 'mcollective',
+  $mcollective_password                 = 'marionette',
+  $mongodb_admin_user                   = 'admin',
+  $mongodb_admin_password               = 'mongopass',
+  $mongodb_broker_user                  = 'openshift',
+  $mongodb_broker_password              = 'mongopass',
+  $mongodb_name                         = 'openshift_broker',
+  $openshift_user1                      = 'demo',
+  $openshift_password1                  = 'changeme',
+  $conf_broker_auth_salt                = inline_template('<%= SecureRandom.base64 %>'),
+  $conf_broker_auth_key_password        = undef,
+  $conf_broker_auth_public_key          = undef,
+  $conf_broker_auth_private_key         = undef,
+  $conf_broker_session_secret           = undef,
+  $conf_console_session_secret          = undef,
+  $conf_valid_gear_sizes                = ['small'],
+  $broker_dns_plugin                    = 'nsupdate',
+  $broker_auth_plugin                   = 'htpasswd',
+  $broker_krb_service_name              = '',
+  $broker_krb_auth_realms               = '',
+  $broker_krb_keytab                    = '',
+  $broker_ldap_uri                      = '',
+  $node_container_plugin                = 'selinux',
+  $node_frontend_plugins                = ['apache-mod-rewrite','nodejs-websocket'],
+  $node_unmanaged_users                 = [],
+  $conf_node_external_eth_dev           = 'eth0',
+  $conf_node_supplementary_posix_groups = '',
+  $development_mode                     = false,
+  $conf_named_upstream_dns              = ['8.8.8.8'],
+  $install_login_shell                  = false,
+  $register_host_with_named             = false,
+  $firewall_provider                    = 'iptables',
+  $install_cartridges                   = ['10gen-mms-agent','cron','diy','haproxy','mongodb',
+                                           'nodejs','perl','php','phpmyadmin','postgresql',
+                                           'python','ruby','jenkins','jenkins-client','mariadb'],
+  $update_resolv_conf                   = true,
+){
+  include openshift_origin::role
+  if member( $roles, 'named' ) {
+    class{ 'openshift_origin::role::named': 
+      before => Class['openshift_origin::update_resolv_conf'],
+    } 
+    if member( $roles, 'broker' )    { Class['openshift_origin::role::named']    -> Class['openshift_origin::role::broker'] }
+    if member( $roles, 'node' )      { Class['openshift_origin::role::named']    -> Class['openshift_origin::role::node'] }
+    if member( $roles, 'activemq' )  { Class['openshift_origin::role::named']    -> Class['openshift_origin::role::activemq'] }
+    if member( $roles, 'datastore' ) { Class['openshift_origin::role::named']    -> Class['openshift_origin::role::datastore'] }
   }
-
-  if $broker_session_secret == 'changeme' {
-    warning 'The default broker_session_secret is being used'
-  }
-
-  if $broker_auth_salt == 'changeme' {
-    warning 'The default broker_auth_salt is being used'
-  }
-
-  if $mongo_auth_password == 'mooo' {
-    warning 'The default mongo_auth_password is being used'
-  }
-
-  if $mq_server_password == 'marionette' {
-    warning 'The default mq_server_password is being used'
-  }
-
-  if $::facterversion <= '1.6.16' {
-    fail 'Facter version needs to be updated to at least 1.6.17'
-  }
-
-  if $::selinux_current_mode == 'disabled' {
-    fail 'SELinux is required for OpenShift.'
-  }
-
-  $service   = $::operatingsystem ? {
-    'Fedora' => '/usr/sbin/service',
-    default  => '/sbin/service',
-  }
-
-  $rpm       = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/rpm',
-    default  => '/bin/rpm',
-  }
-
-  $rm        = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/rm',
-    default  => '/bin/rm',
-  }
-
-  $touch     = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/touch',
-    default  => '/bin/touch',
-  }
-
-  $chown     = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/chown',
-    default  => '/bin/chown',
-  }
-
-  $httxt2dbm = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/httxt2dbm',
-    default  => '/usr/sbin/httxt2dbm',
-  }
-
-  $chmod     = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/chmod',
-    default  => '/bin/chmod',
-  }
-
-  $grep      = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/grep',
-    default  => '/bin/grep',
-  }
-
-  $cat       = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/cat',
-    default  => '/bin/cat',
-  }
-
-  $mv        = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/mv',
-    default  => '/bin/mv',
-  }
-
-  $echo      = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/echo',
-    default  => '/bin/echo',
-  }
+  if member( $roles, 'broker' ) {    class{ 'openshift_origin::role::broker': before => Class['openshift_origin::update_resolv_conf'] } }
+  if member( $roles, 'node' ) {      class{ 'openshift_origin::role::node': before => Class['openshift_origin::update_resolv_conf'] } }
+  if member( $roles, 'activemq' ) {  class{ 'openshift_origin::role::activemq': before => Class['openshift_origin::update_resolv_conf'] } }
+  if member( $roles, 'datastore' ) { class{ 'openshift_origin::role::datastore': before => Class['openshift_origin::update_resolv_conf'] } }
   
-  $mcollective_client_cfg = $::operatingsystem ? {
-    'Fedora' => '/etc/mcollective/client.cfg',
-    default  => '/opt/rh/ruby193/root/etc/mcollective/client.cfg',
-  }
-  
-  $mcollective_server_cfg = $::operatingsystem ? {
-    'Fedora' => '/etc/mcollective/server.cfg',
-    default  => '/opt/rh/ruby193/root/etc/mcollective/server.cfg',
-  }
+  class{ 'openshift_origin::update_resolv_conf': }
 
-  $mcollective_facts_yaml = $::operatingsystem ? {
-    'Fedora' => '/etc/mcollective/facts.yaml',
-    default  => '/opt/rh/ruby193/root/etc/mcollective/facts.yaml',
-  }
-
-  if $configure_ntp == true {
-    include openshift_origin::ntpd
-  } else {
-    warning 'Please make sure ntp or some other time synchronization is enabled.'
-    warning 'If date/time goes out of sync between broker and node machines then'
-    warning 'mcollective commands may start failing.'
-  }
-
-  if $configure_activemq == true {
-    include openshift_origin::activemq
-  }
-
-  if $configure_qpid == true {
-    include openshift_origin::qpidd
-  }
-
-  if $configure_mongodb == true or $configure_mongodb == 'delayed' {
-    include openshift_origin::mongo
-  }
-
-  if $configure_named == true {
-    include openshift_origin::named
-  }
-
-  if $configure_avahi == true {
-    include openshift_origin::avahi
-  }
-
-  if $create_origin_yum_repos == true {
-    case $dependencies_repo {
-      'nightlies' : {
-        case $::operatingsystem {
-          'Fedora' : {
-            $mirror_base_url = "https://mirror.openshift.com/pub/origin-server/nightly/fedora-19/dependencies/x86_64/"
-          }
-          default  : {
-            $mirror_base_url = "https://mirror.openshift.com/pub/origin-server/nightly/rhel-6/dependencies/x86_64/"
-          }
-        }
-      }
-      'release' : {
-        case $::operatingsystem {
-          'Fedora' : {
-            $mirror_base_url = "https://mirror.openshift.com/pub/origin-server/release/2/fedora-19/dependencies/x86_64/"
-          }
-          default  : {
-            $mirror_base_url = "https://mirror.openshift.com/pub/origin-server/release/2/rhel-6/dependencies/x86_64/"
-          }
-        }
-      }
-      default     : {
-        $mirror_base_url = $dependencies_repo
-      }
-    }
-
-    yumrepo { 'openshift-origin-deps':
-      name     => 'openshift-origin-deps',
-      baseurl  => $mirror_base_url,
-      enabled  => 1,
-      gpgcheck => 0,
-    }
-
-    case $install_repo {
-      'nightlies' : {
-        case $::operatingsystem {
-          'Fedora' : {
-            $install_repo_path = "https://mirror.openshift.com/pub/origin-server/nightly/fedora-19/latest/x86_64/"
-          }
-          default  : {
-            $install_repo_path = "https://mirror.openshift.com/pub/origin-server/nightly/rhel-6/latest/x86_64/"
-          }
-        }
-      }
-      'release' : {
-        case $::operatingsystem {
-          'Fedora' : {
-            $install_repo_path = "https://mirror.openshift.com/pub/origin-server/release/2/fedora-19/packages/x86_64/"
-          }
-          default  : {
-            $install_repo_path = "https://mirror.openshift.com/pub/origin-server/release/2/rhel-6/packages/x86_64/"
-          }
-        }
-      }
-      default     : {
-        $install_repo_path = $install_repo
-      }
-    }
-
-    yumrepo { 'openshift-origin-packages':
-      name     => 'openshift-origin',
-      baseurl  => $install_repo_path,
-      enabled  => 1,
-      gpgcheck => 0,
-    }
-  }
-
-  if $::operatingsystem != 'Fedora' {
-    ensure_resource('package', 'ruby193-ruby', {
-        ensure => present,
-        require => Yumrepo['openshift-origin-deps'],
-      }
-    )
-  }
-
-  ensure_resource('package', 'policycoreutils', {
-    }
-  )
-  
-  ensure_resource('package', 'httpd', {
-    }
-  )
-  ensure_resource('package', 'openssh-server', {
-    }
-  )
-
-  ensure_resource('package', 'facter', {
-    }
-  )
-
-  if $::operatingsystem == "Fedora" {
-    ensure_resource('package', 'mcollective', {
-        require => Yumrepo['openshift-origin-deps'],
-      }
-    )
-    
-    ensure_resource('package', 'ruby-devel', {
-        ensure  => present,
-      }
-    )
-
-    ensure_resource('package', 'openshift-origin-util', {
-        ensure  => present,
-        require => Yumrepo[openshift-origin],
-      }
-    )
-  } else {
-    ensure_resource('package', 'ruby193-mcollective', {
-        require => Yumrepo['openshift-origin-deps'],
-        alias   => 'mcollective'
-      }
-    )
-    
-    ensure_resource('package', 'ruby193-ruby-devel', {
-        ensure => present,
-        alias => 'ruby-devel',
-        require => Yumrepo[openshift-origin-deps],
-      }
-    )
-    ensure_resource('package', 'ruby193-rubygems', {
-        ensure => present,
-        alias => 'rubygems',
-        require => Yumrepo[openshift-origin-deps],
-      }
-    )
-
-    ensure_resource('package', 'openshift-origin-util-scl', {
-        ensure  => present,
-        require => Yumrepo[openshift-origin],
-      }
-    )
-  }
-
-  if $enable_network_services == true {
-    service { [httpd, network, sshd]:
-      enable  => true,
-      require => [Package['httpd'], Package['openssh-server']],
-    }
-  } else {
-    if !defined_with_params(Service['httpd'], {
-      'enable' => true
-    }
-    ) {
-      warning 'Please ensure that httpd is enabled on node and broker machines'
-    }
-
-    if !defined_with_params(Service['network'], {
-      'enable' => true
-    }
-    ) {
-      warning 'Please ensure that network is enabled on node and broker nodes'
-    }
-
-    if !defined_with_params(Service['sshd'], {
-      'enable' => true
-    }
-    ) {
-      warning 'Please ensure that sshd is enabled on all nodes'
-    }
-  }
-
-  if (($mq_provider == 'activemq' or $mq_provider == 'stomp') and $configure_activemq == true) {
-    $message_q_fqdn = $node_fqdn
-  }
-
-  if ($mq_provider == 'qpid' and $configure_qpid == true) {
-    $message_q_fqdn = $node_fqdn
-  }
-
-  if ($message_q_fqdn == '') {
-    $message_q_fqdn = $mq_fqdn
-  }
-
-  if ($configure_broker == true or $configure_node == true) and $message_q_fqdn == '' {
-    fail 'Please configure a message queue on this machine or provide the fqdn of the message queue server'
-  }
-
-  if ($configure_node == true) {
-    if ($configure_broker == false and $broker_fqdn == $node_fqdn) {
-      fail 'Please provide the broker fqdn'
-    }
-
-    include openshift_origin::node
-  }
-
-  if ($configure_broker == true) {
-    include openshift_origin::broker
-  }
-
-  if ($configure_console == true) {
-    include openshift_origin::console
-  }
-
-  if ($set_sebooleans == true or $set_sebooleans == 'delayed') {
-    include openshift_origin::selinux
-  }
-
-  if ($set_sebooleans == true) {
-    file { '/etc/openshift':
-      ensure  => "directory",
-      owner   => 'root',
-      group   => 'root',
-    }
-
-    file { '/etc/openshift/.selinux-setup-complete':
-      content => '',
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      require => File['/etc/openshift'],
-    }
-  }
-
-  if ($install_login_shell == true) {
-    include openshift_origin::custom_shell
-  }
-
-  if $install_client_tools == true {
-    # Install rhc tools. On RHEL/CentOS, this will install under ruby 1.8 environment
-    ensure_resource('package', 'rhc', {
-        ensure  => present,
-        require => Yumrepo[openshift-origin],
-      }
-    )
-
-    file { '/etc/openshift/express.conf':
-      content => template('openshift_origin/express.conf.erb'),
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      require => Package['rhc'],
-    }
-
-    if $::operatingsystem == 'Redhat' {
-      # Support gems and packages to allow rhc tools to run within SCL environment
-      ensure_resource('package', 'ruby193-rubygem-net-ssh', {
-          ensure => present,
-          require => Yumrepo[openshift-origin-deps],
-        }
-      )
-      ensure_resource('package', 'ruby193-rubygem-archive-tar-minitar', {
-          ensure => present,
-          require => Yumrepo[openshift-origin-deps],
-        }
-      )
-      ensure_resource('package', 'ruby193-rubygem-commander', {
-          ensure => present,
-          require => Yumrepo[openshift-origin-deps],
-        }
-      )
-
-      exec { 'gems to enable rhc in scl-193':
-        command => '/usr/bin/scl enable ruby193 "gem install rspec --version 1.3.0 --no-rdoc --no-ri" ; \
-          /usr/bin/scl enable ruby193 "gem install fakefs --no-rdoc --no-ri" ; \
-          /usr/bin/scl enable ruby193 "gem install httpclient --version 2.3.2 --no-rdoc --no-ri" ;'
-      }
-    }
-  }
-
-  if $configure_firewall == true {
-    ensure_resource('package', $openshift_origin::params::firewall_package, {
-      ensure => present,
-      alias  => 'firewall-package',
-    }
-    )
-
-    exec { 'Open port for SSH':
-      command => "${openshift_origin::params::firewall_service_cmd}ssh",
-      require => Package['firewall-package'],
-    }
-
-    exec { 'Open port for HTTP':
-      command => "${openshift_origin::params::firewall_service_cmd}http",
-      require => Package['firewall-package'],
-    }
-
-    exec { 'Open port for HTTPS':
-      command => "${openshift_origin::params::firewall_service_cmd}https",
-      require => Package['firewall-package'],
-    }
-  }
-
-  if $update_network_dns_servers == true {
-    $mac_template = "<%= scope.lookupvar('::macaddress_${::openshift_origin::eth_device}') %>"
-    $mac_address  = inline_template( $mac_template )
-
-    #update for network and NetworkManager
-    augeas { 'network setup':
-      context => "/files/etc/sysconfig/network-scripts/ifcfg-${::openshift_origin::eth_device}",
-      changes => [
-        "set DNS1 ${named_ipaddress}", 
-        "set PEERDNS no",
-        "set IPV6INIT no",
-      ],
-    }
-
-    #dhclient understands PEERDNS=no but not DNS1. Need to cerate resolv.conf manually
-    file { '/etc/resolv.conf':
-      content => "nameserver ${named_ipaddress}",
-    }
-
-    if ($configure_named ==  true and $configure_broker ==  true) {
-      $broker_hostname_arr = split($broker_fqdn, '[.]')
-      $broker_hostname = $broker_hostname_arr[0]
-      exec{ "Register host ${broker_hostname} with IP ${::ipaddress} with named":
-        command => "/usr/sbin/oo-register-dns -h ${broker_hostname} -n ${::ipaddress} -d ${cloud_domain}",
-        require => [
-          Package['facter'],
-          Package['openshift-origin-broker-util'],
-          Service['named']
-        ]
-      }
-    } else {
-      warning 'Please make sure that $::hostname is resolvable via DNS.'
-    }
-  }
-
-  if($::operatingsystem == 'Redhat' or $::operatingsystem == 'CentOS') {
-    if !defined(File['/etc/profile.d/scl193.sh']) {
-      file { '/etc/profile.d/scl193.sh':
-        ensure  => present,
-        path    => '/etc/profile.d/scl193.sh',
-        content => template('openshift_origin/rhel-scl-ruby193-env.erb'),
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0644',
-        require => Yumrepo[openshift-origin-deps],
-      }
+  if $::operatingsystem == 'Fedora' {
+    service { 'NetworkManager-wait-online':
+      enable => true,
     }
   }
 }

@@ -1,27 +1,27 @@
 # These should not be left at default values, even for a demo.
 # "PUBLIC" networking values are ones that end-users should be able to reach.
-PUBLIC_HOSTNAME="<%= scope.lookupvar('::openshift_origin::node_fqdn') %>"                         # The node host's public hostname
-PUBLIC_IP="<%= ipaddress %>"                              # The node host's public IP address
-BROKER_HOST="<%= scope.lookupvar('::openshift_origin::broker_fqdn') %>"                     # IP or DNS name of broker server for REST API
+PUBLIC_HOSTNAME="<%= scope.lookupvar('::openshift_origin::node_hostname') %>"                         # The node host's public hostname
+PUBLIC_IP="<%= @ipaddress %>"                              # The node host's public IP address
+BROKER_HOST="<%= scope.lookupvar('::openshift_origin::broker_hostname') %>"                     # IP or DNS name of broker server for REST API
 
 # Usually (unless in a demo) this should be changed to the domain for your installation:
-CLOUD_DOMAIN="<%= scope.lookupvar('::openshift_origin::cloud_domain') %>"                        # Domain suffix to use for applications (Must match broker config)
+CLOUD_DOMAIN="<%= scope.lookupvar('::openshift_origin::domain') %>"                        # Domain suffix to use for applications (Must match broker config)
 
 # You may want these, depending on the complexity of your networking:
-EXTERNAL_ETH_DEV='<%= scope.lookupvar('::openshift_origin::eth_device') %>'                                 # Specify the internet facing public ethernet device
+EXTERNAL_ETH_DEV='<%= scope.lookupvar('::openshift_origin::conf_node_external_eth_dev') %>'                                 # Specify the internet facing public ethernet device
 # INTERNAL_ETH_DEV='eth1'                                 # Specify the internal cluster facing ethernet device
-INSTANCE_ID="<%= scope.lookupvar('::openshift_origin::node_fqdn') %>"                                      # Set by RH EC2 automation
+INSTANCE_ID="<%= scope.lookupvar('::openshift_origin::node_hostname') %>"                                      # Set by RH EC2 automation
 
 # Generally the following should not be changed:
-ENABLE_CGROUPS=<%= scope.lookupvar('::openshift_origin::configure_cgroups') ? '1':'0' %>                                          # Enable cgroups for gears (0=off, 1=on)
+ENABLE_CGROUPS='1'                                        # Enable cgroups for gears (0=off, 1=on)
 GEAR_BASE_DIR="/var/lib/openshift"                        # gear root directory
 GEAR_SKEL_DIR="/etc/openshift/skel"                       # skel files to use when building a gear
 GEAR_SHELL="/usr/bin/oo-trap-user"                        # shell to use for the gear
 GEAR_GECOS="OpenShift guest"                              # Gecos information to populate for the gear user
-GEAR_MIN_UID=<%= scope.lookupvar('::openshift_origin::min_gear_uid')%>                                          # Lower bound of UID used to create gears
+GEAR_MIN_UID=1000                                         # Lower bound of UID used to create gears
 GEAR_MAX_UID=6500                                         # Upper bound of UID used to create gears
-<% if scope.lookupvar('::openshift_origin::user_supplementary_groups') != "" -%>
-GEAR_SUPL_GRPS="<%= scope.lookupvar('::openshift_origin::user_supplementary_groups') %>"  # Supplementary groups for gear UIDs (comma separated list)
+<% if scope.lookupvar('::openshift_origin::conf_node_supplementary_posix_groups') != "" -%>
+GEAR_SUPL_GRPS="<%= scope.lookupvar('::openshift_origin::conf_node_supplementary_posix_groups') %>"  # Supplementary groups for gear UIDs (comma separated list)
 <% end -%>
 OPENSHIFT_NODE_PLUGINS=""                                 # Extentions to load when customize/observe openshift-origin-node models
 CARTRIDGE_BASE_PATH="/usr/libexec/openshift/cartridges"   # Locations where cartridges are installed
@@ -37,6 +37,6 @@ PLATFORM_LOG_LEVEL=DEBUG
 PLATFORM_TRACE_LOG_FILE=/var/log/openshift/node/platform-trace.log
 PLATFORM_TRACE_LOG_LEVEL=DEBUG
 
-OPENSHIFT_FRONTEND_HTTP_PLUGINS=openshift-origin-frontend-apache-mod-rewrite,openshift-origin-frontend-nodejs-websocket
+OPENSHIFT_FRONTEND_HTTP_PLUGINS=<%= scope.lookupvar('::openshift_origin::node_frontend_plugins').map{ |p| 'openshift-origin-frontend-' + p }.join(',') %>
 
-CONTAINERIZATION_PLUGIN=openshift-origin-container-<%= scope.lookupvar('::openshift_origin::node_container')%>
+CONTAINERIZATION_PLUGIN=openshift-origin-container-<%= scope.lookupvar('::openshift_origin::node_container_plugin') %>

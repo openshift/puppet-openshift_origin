@@ -1,0 +1,37 @@
+(
+  # Allow console application to access executable and writable memory
+  echo boolean -m --on httpd_execmem
+  
+  # Allow the broker to write files in the http file context.
+  echo boolean -m --on httpd_unified
+  
+  # Allow the broker and console to access the network.
+  echo boolean -m --on httpd_can_network_connect
+  echo boolean -m --on httpd_can_network_relay
+  
+  # Enable some passenger-related permissions.
+  #
+  # The name may change at some future point, at which point we will
+  # need to delete the httpd_run_stickshift line below and enable the
+  # httpd_run_openshift line.
+  echo boolean -m --on httpd_run_stickshift
+  #echo boolean -m --on httpd_run_openshift
+  
+  # Allow the broker to communicate with the named service.
+  echo boolean -m --on allow_ypbind
+  
+  
+  echo boolean -m --on httpd_verify_dns
+  echo boolean -m --on httpd_read_user_content
+  echo boolean -m --on httpd_enable_homedirs
+) | semanage -i -
+
+fixfiles -R ruby193-rubygem-passenger restore
+fixfiles -R ruby193-mod_passenger restore
+
+restorecon -rv /var/run
+# This should cover everything in the SCL, including passenger
+restorecon -rv /opt
+
+
+

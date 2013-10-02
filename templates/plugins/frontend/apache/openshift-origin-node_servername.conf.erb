@@ -1,0 +1,4 @@
+# Feel free to change this as desired. It serves to provide
+# a consistent default ServerName for all vhosts.
+
+ServerName <%= scope.lookupvar('::openshift_origin::node_hostname') %>

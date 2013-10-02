@@ -1,0 +1,30 @@
+LoadModule auth_basic_module modules/mod_auth_basic.so
+LoadModule authz_user_module modules/mod_authz_user.so
+LoadModule auth_kerb_module modules/mod_auth_kerb.so
+
+# Turn the authenticated remote-user into an Apache environment variable for the console security controller
+RewriteEngine On
+RewriteCond %{LA-U:REMOTE_USER} (.+)
+RewriteRule . - [E=RU:%1]
+RequestHeader set X-Remote-User "%{RU}e" env=RU
+
+<Location /console>
+    AuthName "OpenShift Developer Console"
+    AuthType Kerberos
+    KrbMethodNegotiate On
+    KrbMethodK5Passwd On
+    KrbServiceName HTTP/<%= scope.lookupvar('::openshift_origin::broker_krb_service_name') %>
+    KrbAuthRealms <%= scope.lookupvar('::openshift_origin::broker_krb_auth_realms') %>
+    Krb5KeyTab <%= scope.lookupvar('::openshift_origin::broker_krb_keytab') %>
+    require valid-user
+
+    SetEnvIfNoCase Authorization Bearer passthrough
+
+    # The node->broker auth is handled in the Ruby code
+    BrowserMatch OpenShift passthrough
+    Allow from env=passthrough
+
+    Order Deny,Allow
+    Deny from all
+    Satisfy any
+</Location>

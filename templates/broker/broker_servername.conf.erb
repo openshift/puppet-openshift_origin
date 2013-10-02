@@ -1,7 +1,7 @@
 # Feel free to change this as desired. It serves to provide
 # a consistent default ServerName for all vhosts.
 
-ServerName <%= scope.lookupvar('::openshift_origin::node_fqdn') %>
+ServerName <%= scope.lookupvar('::openshift_origin::broker_hostname') %>
 
 # If node functionality is installed as well,
 # /etc/httpd/conf.d/000001_openshift_origin_node_servername.conf

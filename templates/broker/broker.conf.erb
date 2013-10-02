@@ -1,5 +1,5 @@
 # Domain suffix to use for applications (Must match node config)
-CLOUD_DOMAIN="<%= scope.lookupvar('::openshift_origin::cloud_domain') %>"
+CLOUD_DOMAIN="<%= scope.lookupvar('::openshift_origin::domain') %>"
 # Comma-separated list of valid gear sizes
 # Eg: "small,medium,large"
 VALID_GEAR_SIZES="small,medium"
@@ -14,10 +14,11 @@ DEFAULT_GEAR_SIZE="small"
 #Broker datastore configuration
 MONGO_REPLICA_SETS=false
 # Replica set example: "<host-1>:<port-1> <host-2>:<port-2> ..."
-MONGO_HOST_PORT="<%= scope.lookupvar('::openshift_origin::mongodb_fqdn') %>:27017"
-MONGO_USER="<%= scope.lookupvar('::openshift_origin::mongo_auth_user') %>"
-MONGO_PASSWORD="<%= scope.lookupvar('::openshift_origin::mongo_auth_password') %>"
-MONGO_DB="<%= scope.lookupvar('::openshift_origin::mongo_db_name') %>"
+MONGO_HOST_PORT="<%= scope.lookupvar('::openshift_origin::datastore_hostname') %>:27017"
+MONGO_USER="<%= scope.lookupvar('::openshift_origin::mongodb_broker_user') %>"
+MONGO_PASSWORD="<%= scope.lookupvar('::openshift_origin::mongodb_broker_password') %>"
+MONGO_DB="<%= scope.lookupvar('::openshift_origin::mongodb_name') %>"
+MONGO_TEST_DB="<%= scope.lookupvar('::openshift_origin::mongodb_name') %>_test"
 MONGO_SSL="false"
 #Enables gear/filesystem resource usage tracking
 ENABLE_USAGE_TRACKING_DATASTORE="true"
@@ -35,9 +36,9 @@ USER_ACTION_LOG_FILE="/var/log/openshift/broker/user_action.log"
 # Whenever this value is changed all gear encryption tokens must be recreated.
 # It's recommended that you set this value using "openssl rand -base64 64".  It
 # must be the same across all Brokers.
-AUTH_SALT=<%= scope.lookupvar('::openshift_origin::broker_auth_salt') %>
+AUTH_SALT=<%= scope.lookupvar('::openshift_origin::conf_broker_auth_salt') %>
 AUTH_PRIV_KEY_FILE="/etc/openshift/server_priv.pem"
-AUTH_PRIV_KEY_PASS=<%= scope.lookupvar('::openshift_origin::broker_auth_key_password') %>
+AUTH_PRIV_KEY_PASS=<%= scope.lookupvar('::openshift_origin::conf_broker_auth_key_password') %>
 AUTH_PUB_KEY_FILE="/etc/openshift/server_pub.pem"
 AUTH_RSYNC_KEY_FILE="/etc/openshift/rsync_id_rsa"
 
@@ -81,7 +82,7 @@ AUTH_SCOPE_TIMEOUTS="session=1.days|7.days, *=1.months|6.months"
 # "openssl rand -hex 64" can be use to generate a unique value.
 #
 # SESSION_SECRET=
-SESSION_SECRET=<%= scope.lookupvar('::openshift_origin::broker_session_secret') %>
+SESSION_SECRET=<%= scope.lookupvar('::openshift_origin::conf_broker_session_secret') %>
 
 #Enable/disable maintenance mode
 ENABLE_MAINTENANCE_MODE="false"

@@ -1,0 +1,88 @@
+#!/usr/bin/ruby
+
+require 'curses'
+require 'highline'
+require 'socket'
+require 'httpclient'
+include Curses
+
+def setup_complete?
+  File.exist?('/etc/openshift/.mongo-setup-complete') and
+  File.exist?('/etc/openshift/.selinux-setup-complete')
+end
+
+def wait_for_init
+  chars = %w{ | / - \\ }
+
+  i = 0
+  while not setup_complete?
+    row = (lines()-10)/2
+    col = (cols())/2 - 30
+
+    setpos(row,col)
+    attron(color_pair(COLOR_RED)|A_NORMAL){
+      addstr("OpenShift Origin")
+    }
+    setpos(row+1,col)
+    attron(color_pair(COLOR_BLUE)|A_NORMAL){
+      addstr("----------------")
+    }
+    setpos(row+3,col)
+    addstr("Initializing...  #{chars[i]}")
+    sleep 0.1
+    i = (i+1) % chars.length
+    refresh
+  end
+  sleep 2
+end
+
+def login
+  row = (lines()-10)/2
+  col = (cols())/2 - 30
+  
+  clear
+  refresh
+
+  setpos(row,col)
+  attron(color_pair(COLOR_RED)|A_NORMAL){
+    addstr("OpenShift Origin")
+  }
+  setpos(row+1,col)
+  attron(color_pair(COLOR_BLUE)|A_NORMAL){
+    addstr("----------------")
+  }
+  setpos(row+3,col)
+  hostname = Socket.gethostname
+  ipaddr   = IPSocket.getaddress(hostname)
+  addstr("OpenShift console: https://#{hostname}/console")
+  setpos(row+4,col)
+  addstr("Console login:     admin")
+  setpos(row+5,col)
+  addstr("Console password:  admin")
+  setpos(row+7,col)
+  addstr("IP address: #{ipaddr}")
+  setpos(row+8,col)
+  addstr("SSH user:   openshift")
+  setpos(row+9,col)
+  addstr("Password:   openshift")
+  setpos(row+11,col)
+  addstr("Press any key for root console")
+  getch
+  refresh
+end
+
+init_screen
+begin
+  crmode
+  start_color
+  init_pair(COLOR_RED,COLOR_RED,COLOR_BLACK)
+  init_pair(COLOR_BLUE,COLOR_BLUE,COLOR_BLACK)
+  wait_for_init
+  login
+rescue SystemExit, Interrupt
+  exec '/usr/bin/login root'
+ensure
+  close_screen
+end
+
+exec '/usr/bin/login root'

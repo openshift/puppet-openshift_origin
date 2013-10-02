@@ -21,6 +21,7 @@ require 'logger'
 require 'open4'
 require 'socket'
 require 'digest/md5'
+require 'securerandom'
 
 $log = Logger.new(STDOUT)
 $log.level = Logger::INFO
@@ -138,14 +139,22 @@ else
 
   restart_mongo
   $log.info "......set db admin users"
-  run "/usr/bin/mongo localhost/openshift_broker_dev --eval 'db.addUser(\"openshift\", \"mooo\")'"
-  run "/usr/bin/mongo localhost/admin --eval 'db.addUser(\"openshift\", \"mooo\")'"
+  mongodb_admin_user = "<%= scope.lookupvar('openshift_origin::mongodb_admin_user') %>"
+  mongodb_admin_password = "<%= scope.lookupvar('openshift_origin::mongodb_admin_password') %>"
+  mongodb_broker_user = "<%= scope.lookupvar('openshift_origin::mongodb_broker_user') %>"
+  mongodb_broker_password = "<%= scope.lookupvar('openshift_origin::mongodb_broker_password') %>"
+  run "/usr/bin/mongo localhost/<%= scope.lookupvar("openshift_origin::mongodb_name") %> --eval 'db.addUser(\"<%= scope.lookupvar("::openshift_origin::mongodb_broker_user") %>\", \"<%= scope.lookupvar("::openshift_origin::mongodb_broker_password") %>\")'"
+  run "/usr/bin/mongo localhost/<%= scope.lookupvar("openshift_origin::mongodb_name") %>_test --eval 'db.addUser(\"<%= scope.lookupvar("::openshift_origin::mongodb_broker_user") %>\", \"<%= scope.lookupvar("::openshift_origin::mongodb_broker_password") %>\")'"
+
+  run "/usr/bin/mongo localhost/admin --eval 'db.addUser(\"#{mongodb_admin_user}\", \"#{mongodb_admin_password}\")'"
   $log.info "......register mongo auth admin user"
 
-  salt = "<%= scope.lookupvar("openshift_origin::broker_auth_salt") %>"
-  encoded_password = Digest::MD5.hexdigest(Digest::MD5.hexdigest("admin") + salt)
-  mongo_auth_password = "<%= scope.lookupvar("openshift_origin::mongo_auth_password") %>"
-  run "/usr/bin/mongo openshift_broker_dev --username openshift --password #{mongo_auth_password} --eval 'db.auth_user.update({\"_id\":\"admin\"}, {\"_id\":\"admin\",\"user\":\"admin\",\"password_hash\":\"#{encoded_password}\"}, true)'"
+  openshift_user = "<%= scope.lookupvar("openshift_origin::openshift_user1") %>"
+  salt = "<%= scope.lookupvar('::openshift_origin::conf_broker_auth_salt') %>"
+  encoded_password = Digest::MD5.hexdigest(Digest::MD5.hexdigest("<%= scope.lookupvar("openshift_origin::openshift_password1") %>") + salt)
+  encoded_test_password = Digest::MD5.hexdigest(Digest::MD5.hexdigest("admin") + salt)
+  run "/usr/bin/mongo <%= scope.lookupvar("openshift_origin::mongodb_name") %> --username #{mongodb_broker_user} --password #{mongodb_broker_password} --eval 'db.auth_user.update({\"_id\":\"#{openshift_user}\"}, {\"_id\":\"#{openshift_user}\",\"user\":\"#{openshift_user}\",\"password_hash\":\"#{encoded_password}\"}, true)'"
+  run "/usr/bin/mongo <%= scope.lookupvar("openshift_origin::mongodb_name") %>_test --username #{mongodb_broker_user} --password #{mongodb_broker_password} --eval 'db.auth_user.update({\"_id\":\"admin\"}, {\"_id\":\"admin\",\"user\":\"admin\",\"password_hash\":\"#{encoded_test_password}\"}, true)'"
 
   stop_mongo
   $log.info "......enable mongo auth"
@@ -154,4 +163,5 @@ else
     f.write("\n")
   end
   start_mongo
+  #FileUtils.rm_f("/usr/sbin/oo-mongo-setup")
 end
