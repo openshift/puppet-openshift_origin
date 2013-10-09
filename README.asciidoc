@@ -1,6 +1,6 @@
 == About
 
-This module helps install [OpenShift Origin](http://openshift.github.io)
+This module helps install http://openshift.github.io[OpenShift Origin]
 Platform As A Service.  Through the declaration of the `openshift_origin`
 class, you can configure the OpenShift Origin Broker, Node and support services
 including ActiveMQ, MongoDB, named and OS settings including firewall,
@@ -18,22 +18,22 @@ services, and ntp.
 * Puppet >= 3
 * Facter >= 1.6.17
 * Puppetlabs/stdlib module.  Can be obtained
-  [here](http://forge.puppetlabs.com/puppetlabs/stdlib) or with the command
+  http://forge.puppetlabs.com/puppetlabs/stdlib[here] or with the command
   `puppet module install puppetlabs/stdlib`
 * Puppetlabs/ntp module.  Can be obtained
-  [here](http://forge.puppetlabs.com/puppetlabs/ntp) or with the command
+  http://forge.puppetlabs.com/puppetlabs/ntp[here] or with the command
   `puppet module install puppetlabs/ntp`
 
 == Installation
 
 The module can be obtained from the
-[github repository](https://github.com/openshift/puppet-openshift_origin).
+https://github.com/openshift/puppet-openshift_origin[github repository].
 
-1. Download the [Zip file from github](https://github.com/openshift/puppet-openshift_origin/archive/master.zip)
+1. Download the https://github.com/openshift/puppet-openshift_origin/archive/master.zip[Zip file from github]
 1. Upload the Zip file to your Puppet Master.
 1. Unzip the file.  This will create a new directory called puppet-openshift_origin-{commit hash}
 1. Rename this directory to just `openshift_origin` and place it in your
-     [modulepath](http://docs.puppetlabs.com/learning/modules1.html#modules).
+     http://docs.puppetlabs.com/learning/modules1.html#modules[modulepath].
 
 == Configuration
 
@@ -43,38 +43,40 @@ this class.
 
 === Using Parameterized Classes
 
-[Using Parameterized Classes](http://docs.puppetlabs.com/guides/parameterized_classes.html)
+http://docs.puppetlabs.com/guides/parameterized_classes.html[Using Parameterized Classes]
 
-==== Example: Single host (broker+console+node) which uses the Avahi MDNS and mongo Auth plugin:
+.Example: Single host (broker+console+node) which uses the Avahi MDNS and mongo Auth plugin:
+----
+class { 'openshift_origin' :
+  domain                     => 'example.com',
+  node_unmanaged_users       => ['root'],
+  development_mode           => true,
+  conf_node_external_eth_dev => 'eth0',
+  install_method             => 'yum',
+  register_host_with_named   => true,
+  broker_auth_plugin         => 'mongo',
+  broker_dns_plugin          => 'avahi',
+}
+----
 
-    class { 'openshift_origin' :
-      domain                     => 'example.com',
-      node_unmanaged_users       => ['root'],
-      development_mode           => true,
-      conf_node_external_eth_dev => 'eth0',
-      install_method             => 'yum',
-      register_host_with_named   => true,
-      broker_auth_plugin         => 'mongo',
-      broker_dns_plugin          => 'avahi',
-    }
-
-==== Example: Single host (broker+console+node) which uses the **Kerberos** Auth plugin and GSS-TSIG. 
-
-    class { 'openshift_origin' :
-      domain                     => 'example.com',
-      node_unmanaged_users       => ['root'],
-      development_mode           => true,
-      conf_node_external_eth_dev => 'eth0',
-      install_method             => 'yum',
-      register_host_with_named   => true,
-      broker_auth_plugin         => 'remote-user',
-      broker_dns_plugin          => 'named',
-      bind_krb_principal         => $hostname,
-      bind_krb_keytab            => '/etc/dns.keytab'
-      broker_krb_keytab          => '/etc/http.keytab',
-      broker_krb_auth_realms     => 'EXAMPLE.COM',
-      broker_krb_service_name    => $hostname,
-    }
+.Example: Single host (broker+console+node) which uses the **Kerberos** Auth plugin and GSS-TSIG.
+----
+class { 'openshift_origin' :
+  domain                     => 'example.com',
+  node_unmanaged_users       => ['root'],
+  development_mode           => true,
+  conf_node_external_eth_dev => 'eth0',
+  install_method             => 'yum',
+  register_host_with_named   => true,
+  broker_auth_plugin         => 'remote-user',
+  broker_dns_plugin          => 'named',
+  bind_krb_principal         => $hostname,
+  bind_krb_keytab            => '/etc/dns.keytab'
+  broker_krb_keytab          => '/etc/http.keytab',
+  broker_krb_auth_realms     => 'EXAMPLE.COM',
+  broker_krb_service_name    => $hostname,
+}
+----
 
 Please note:
 
@@ -88,14 +90,15 @@ Please note:
 * After setup, to test:
 ** authentication: `kinit <user>` then `curl -Ik --negotiate -u : <node_fqdn>`
 ** GSS-TSIG (should return `nil`):
-
-    $ cd /var/www/openshift/broker
-    $ bundle --local
-    $ rails console
-    $ d = OpenShift::DnsService.instance
-    $ d.register_application "appname", "namespace", "node_fqdn"
-    => nil
-
++
+----
+$ cd /var/www/openshift/broker
+$ bundle --local
+$ rails console
+$ d = OpenShift::DnsService.instance
+$ d.register_application "appname", "namespace", "node_fqdn"
+=> nil
+----
 ** For any errors, on the Broker, check `/var/log/openshift/broker/httpd/error_log`.
 
 === Parameters
@@ -431,27 +434,34 @@ Unfortunately, it is constrained to setting up only a single host at a
 time. In an assumed multi-host setup, you will need to do the 
 following after the script has completed.
 
-1. Set up DNS entries for hosts
-   If you installed BIND with the script, then any other components
-   installed with the script on the same host received DNS entries.
-   Other hosts must all be defined manually, including at least your
-   node hosts. oo-register-dns may prove useful for this.
+1. Set up DNS entries for hosts.
++
+If you installed BIND with the script, then any other components
+installed with the script on the same host received DNS entries.
+Other hosts must all be defined manually, including at least your
+node hosts. oo-register-dns may prove useful for this.
 
-2. Copy public rsync key to enable moving gears
-   The broker rsync public key needs to go on nodes, but there is no
-   good way to script that generically. Nodes should not have
-   password-less access to brokers to copy the .pub key, so this must
-   be performed manually on each node host:
-      # scp root@broker:/etc/openshift/rsync_id_rsa.pub /root/.ssh/
-   (above step will ask for the root password of the broker machine)
-      # cat /root/.ssh/rsync_id_rsa.pub >> /root/.ssh/authorized_keys
-      # rm /root/.ssh/rsync_id_rsa.pub
-   If you skip this, each gear move will require typing root passwords
-   for each of the node hosts involved.
+2. Copy public rsync key to enable moving gears.
++
+The broker rsync public key needs to go on nodes, but there is no
+good way to script that generically. Nodes should not have
+password-less access to brokers to copy the .pub key, so this must
+be performed manually on each node host:
++
+----
+# scp root@broker:/etc/openshift/rsync_id_rsa.pub /root/.ssh/
+(above step will ask for the root password of the broker machine)
+# cat /root/.ssh/rsync_id_rsa.pub >> /root/.ssh/authorized_keys
+# rm /root/.ssh/rsync_id_rsa.pub
+----
++
+If you skip this, each gear move will require typing root passwords
+for each of the node hosts involved.
 
-3. Copy ssh host keys between the node hosts
-   All node hosts should identify as the same host, so that when gears
-   are moved between hosts, ssh and git don't give developers spurious
-   warnings about the host keys changing. So, copy /etc/ssh/ssh_* from
-   one node host to all the rest (or, if using the same image for all
-   hosts, just keep the keys from the image).
+3. Copy ssh host keys between the node hosts.
++
+All node hosts should identify as the same host, so that when gears
+are moved between hosts, ssh and git don't give developers spurious
+warnings about the host keys changing. So, copy /etc/ssh/ssh_* from
+one node host to all the rest (or, if using the same image for all
+hosts, just keep the keys from the image).
