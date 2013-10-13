@@ -18,6 +18,7 @@ class openshift_origin::broker {
       'openshift-origin-broker',
       'openshift-origin-broker-util',
       'rubygem-openshift-origin-msg-broker-mcollective',
+      'rubygem-openshift-origin-admin-console',      
       "rubygem-openshift-origin-dns-${::openshift_origin::broker_dns_plugin}",
     ], {
       ensure  => present,
@@ -159,4 +160,14 @@ class openshift_origin::broker {
   if $::openshift_origin::install_login_shell {
     include openshift_origin::login_shell
   }
+  
+  ensure_resource( 'firewall', 'http', {
+      service => 'http',
+    }
+  )
+  
+  ensure_resource( 'firewall', 'https', {
+      service => 'https',
+    }
+  )
 }

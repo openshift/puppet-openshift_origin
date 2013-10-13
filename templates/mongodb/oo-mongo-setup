@@ -106,13 +106,13 @@ def restart_mongo
   start_mongo
 end
 
-<% if scope.lookupvar("openshift_origin::mongodb_fqdn") == "localhost" %>
+<% if scope.lookupvar("openshift_origin::datastore_hostname") == "localhost" %>
   hostname = "localhost"
   ipaddr   = "127.0.0.1"
 <% else %>
 #ensure that the IP addr to bind to is correct
 begin
-  hostname = Socket.gethostname
+  hostname = "<%= scope.lookupvar("openshift_origin::datastore_hostname") %>"
   ipaddr   = Socket::getaddrinfo(hostname,nil,Socket::AF_INET)[0][3]
 rescue
   addresses = `ip addr`.scan(/inet ([\d]+\.[\d]+\.[\d]+\.[\d]+)/).flatten

@@ -72,12 +72,17 @@ class openshift_origin::mongo {
 
     exec { '/usr/sbin/oo-mongo-setup':
       command => $cmd,
-      require => File['mongo setup script']
+      require => [File['mongo setup script'],Class['openshift_origin::update_resolv_conf']]
     }
   }
 
   service { 'mongod':
     require   => [Package['mongodb'], Package['mongodb-server']],
     enable    => true,
+  }
+  
+  firewall{ 'mongo-firewall':
+    port      => '27017',
+    protocol  => 'tcp',
   }
 }

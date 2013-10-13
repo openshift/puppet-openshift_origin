@@ -81,4 +81,14 @@ class openshift_origin::console {
     require => Package['openshift-origin-console'],
     enable  => true,
   }
+  
+  ensure_resource( 'firewall', 'http', {
+      service => 'http',
+    }
+  )
+  
+  ensure_resource( 'firewall', 'https', {
+      service => 'https',
+    }
+  )
 }

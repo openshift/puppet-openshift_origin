@@ -153,17 +153,15 @@ class openshift_origin::node {
     mode    => '0755'
   }
   
-  firewall{ 'ssh':
-    service => 'ssh',
-  }
+  ensure_resource( 'firewall', 'http', {
+      service => 'http',
+    }
+  )
   
-  firewall{ 'http':
-    service => 'http',
-  }
-  
-  firewall{ 'https':
-    service => 'https',
-  }
+  ensure_resource( 'firewall', 'https', {
+      service => 'https',
+    }
+  )
   
   firewall{ 'node-http':
     port      => '8000',

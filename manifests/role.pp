@@ -15,11 +15,13 @@
 #
 define register_dns( $fqdn ) {
   if $::openshift_origin::register_host_with_named {
-    ensure_resource( 'exec', "Register ${fqdn}", {
-        command => template("openshift_origin/register_dns.erb"),
-        provider => 'shell'
-      }
-    )
+    if $fqdn != 'localhost' {
+      ensure_resource( 'exec', "Register ${fqdn}", {
+          command => template("openshift_origin/register_dns.erb"),
+          provider => 'shell'
+        }
+      )
+    }
   }
 }
 
@@ -33,6 +35,8 @@ class openshift_origin::install_method {
 }
 
 class openshift_origin::role {
+  include openshift_origin::params
+  
   if ( $::openshift_origin::configure_ntp ) {
     ensure_resource('package', 'ntpdate', {
         ensure => 'present',
@@ -45,6 +49,11 @@ class openshift_origin::role {
       }
     )
   }
+  
+  ensure_resource( 'firewall', 'ssh', {
+      service => 'ssh',
+    }
+  )
 
   ensure_resource( 'class', 'openshift_origin::install_method', {} )
 }
