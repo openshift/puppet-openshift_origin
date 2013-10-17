@@ -40,7 +40,7 @@ class openshift_origin::broker {
   
   case $::openshift_origin::broker_auth_plugin {
     'mongo'       : { include openshift_origin::plugins::auth::mongo }
-    'htpasswd'    : { include openshift_origin::plugins::auth::htpassed }    
+    'htpasswd'    : { include openshift_origin::plugins::auth::htpasswd }    
     'kerberos'    : { include openshift_origin::plugins::auth::kerberos }    
   }
 
