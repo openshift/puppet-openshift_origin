@@ -15,26 +15,26 @@
 #
 class openshift_origin::cartridges {
 
-  package { 'yum-plugin-versionlock':
-    ensure  => present,
-  }
+#  package { 'yum-plugin-versionlock':
+#    ensure  => present,
+#  }
 
   define openshiftCartridge  {
     case $name {
       'jenkins', 'jenkins-client': {
         ensure_resource( 'package', 'jenkins', {
-            ensure  => "1.510-1.1",
+            ensure  => present,
             require => Class['openshift_origin::install_method'],
           }
         )
             
-        ensure_resource( 'exec', '/usr/bin/yum versionlock jenkins', {
-            require => [
-              Package['jenkins'],
-              Package['yum-plugin-versionlock'],
-            ]
-          }
-        )
+#        ensure_resource( 'exec', '/usr/bin/yum versionlock jenkins', {
+#            require => [
+#              Package['jenkins'],
+#              Package['yum-plugin-versionlock'],
+#            ]
+#          }
+#        )
         
         ensure_resource( 'package', "openshift-origin-cartridge-${name}", {
             ensure  => present,
