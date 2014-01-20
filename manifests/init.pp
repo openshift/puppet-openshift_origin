@@ -560,22 +560,5 @@ class openshift_origin (
       enable => true,
     }
   }
-  $node_shmmax_default = $::architecture ? {
-    'x86_64' => 68719476736,
-    default  => 33554432,
-  }
-  $_node_shmmax = $node_shmax ? {
-    undef   => $node_shmmax_default,
-    default => $node_shmmax,
-  }
-
-  $node_shmall_default = $::architecture ? {
-    'x86_64' => 4294967296,
-    default  => 2097152,
-  }
-  $_node_shmall = $node_shmall ? {
-    undef   => $node_shmall_default,
-    default => $node_shmall,
-  }
 
 }
