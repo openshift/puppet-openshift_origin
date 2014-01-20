@@ -518,6 +518,8 @@ class openshift_origin (
   $broker_krb_auth_realms               = '',
   $broker_krb_keytab                    = '',
   $broker_ldap_uri                      = '',
+  $broker_ldap_bind_dn                  = '',
+  $broker_ldap_bind_password            = '',
   $node_shmmax                          = undef,
   $node_shmall                          = undef,
   $node_container_plugin                = 'selinux',
