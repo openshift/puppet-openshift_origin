@@ -1,5 +1,5 @@
 BIND_SERVER="<%= scope.lookupvar('::openshift_origin::named_ip_addr') %>"
 BIND_PORT=53
-BIND_KEYNAME="<%= scope.lookupvar('::openshift_origin::domain') %>"
+BIND_KEYNAME="<%= scope.lookupvar('::openshift_origin::bind_key_name') %>"
 BIND_KEYVALUE="<%= scope.lookupvar('::openshift_origin::bind_key') %>"
 BIND_ZONE="<%= scope.lookupvar('::openshift_origin::domain') %>"

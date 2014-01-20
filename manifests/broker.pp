@@ -1,12 +1,12 @@
 # Copyright 2013 Mojo Lingo LLC.
 # Modifications by Red Hat, Inc.
-# 
+#
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
-# 
+#
 #      http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 #  Unless required by applicable law or agreed to in writing, software
 #  distributed under the License is distributed on an "AS IS" BASIS,
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,14 +18,14 @@ class openshift_origin::broker {
       'openshift-origin-broker',
       'openshift-origin-broker-util',
       'rubygem-openshift-origin-msg-broker-mcollective',
-      'rubygem-openshift-origin-admin-console',      
+      'rubygem-openshift-origin-admin-console',
       "rubygem-openshift-origin-dns-${::openshift_origin::broker_dns_plugin}",
     ], {
       ensure  => present,
       require => Class['openshift_origin::install_method'],
     }
   )
-  
+
   # We combine these setsebool commands into a single semanage command
   # because separate commands take a long time to run.
   exec { 'broker selinux booleans':
@@ -38,11 +38,12 @@ class openshift_origin::broker {
     'avahi'    : { include openshift_origin::plugins::dns::avahi }
     'route53'  : { include openshift_origin::plugins::dns::route53 }
   }
-  
+
   case $::openshift_origin::broker_auth_plugin {
     'mongo'       : { include openshift_origin::plugins::auth::mongo }
-    'htpasswd'    : { include openshift_origin::plugins::auth::htpasswd }    
-    'kerberos'    : { include openshift_origin::plugins::auth::kerberos }    
+    'htpasswd'    : { include openshift_origin::plugins::auth::htpasswd }
+    'kerberos'    : { include openshift_origin::plugins::auth::kerberos }
+    'ldap'        : { include openshift_origin::plugins::auth::ldap }
   }
 
   include openshift_origin::mcollective_client
@@ -50,9 +51,9 @@ class openshift_origin::broker {
   if $::openshift_origin::conf_broker_auth_public_key == undef {
     exec { 'Generate self signed keys for broker auth':
       command => '/bin/mkdir -p /etc/openshift && \
-                 /usr/bin/openssl genrsa -out /etc/openshift/server_priv.pem 2048 && \
-                 /usr/bin/openssl rsa -in /etc/openshift/server_priv.pem -pubout > \
-                 /etc/openshift/server_pub.pem',
+                  /usr/bin/openssl genrsa -out /etc/openshift/server_priv.pem 2048 && \
+                  /usr/bin/openssl rsa -in /etc/openshift/server_priv.pem -pubout > \
+                  /etc/openshift/server_pub.pem',
       creates => '/etc/openshift/server_pub.pem',
     }
   } else {
@@ -76,7 +77,7 @@ class openshift_origin::broker {
       require => Package['openshift-origin-broker'],
     }
   }
-  
+
   file { 'broker servername config':
     ensure  => present,
     path    => '/etc/httpd/conf.d/000000_openshift_origin_broker_servername.conf',
@@ -96,7 +97,7 @@ class openshift_origin::broker {
     mode    => '0644',
     require => Package['openshift-origin-broker'],
   }
-  
+
   file { 'mcollective broker plugin config':
     ensure  => present,
     path    => '/etc/openshift/plugins.d/openshift-origin-msg-broker-mcollective.conf',
@@ -131,7 +132,7 @@ class openshift_origin::broker {
     provider  => 'shell',
     require   => Package['openshift-origin-broker'],
   }
-  
+
   $broker_bundle_show = $::operatingsystem ? {
     'Fedora' => '/usr/bin/bundle show',
     default  => '/usr/bin/scl enable ruby193 "bundle show"',
@@ -139,7 +140,7 @@ class openshift_origin::broker {
 
   # This File resource is to guarantee that the Gemfile.lock created
   # by the following Exec has the appropriate permissions (otherwise
-  # it is created as owned by root:root)  
+  # it is created as owned by root:root)
   file { '/var/www/openshift/broker/Gemfile.lock':
     ensure    => 'present',
     owner     => 'apache',
@@ -171,12 +172,12 @@ class openshift_origin::broker {
   if $::openshift_origin::install_login_shell {
     include openshift_origin::login_shell
   }
-  
+
   ensure_resource( 'firewall', 'http', {
       service => 'http',
     }
   )
-  
+
   ensure_resource( 'firewall', 'https', {
       service => 'https',
     }
