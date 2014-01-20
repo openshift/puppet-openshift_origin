@@ -18,7 +18,7 @@ class openshift_origin::plugins::auth::ldap {
     fail 'No LDAP URI specified (see ldap_uri).'
   }
   
-  ensure_resource('package', 'rubygem-openshift-origin-auth-remote-user', {
+  ensure_resource('package', ['rubygem-openshift-origin-auth-remote-user','mod_ldap'], {
       ensure  => present,
       require => Class['openshift_origin::install_method'],
     }
