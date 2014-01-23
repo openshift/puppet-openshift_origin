@@ -15,63 +15,63 @@
 #
 class openshift_origin::params {
   $os_init_provider     =  $::operatingsystem ? {
-    'Fedora' => 'systemd',
+   # 'Fedora' => 'systemd',
     'CentOS' => 'redhat',
     default  => 'redhat',
   }
   
   $service   = $::operatingsystem ? {
-    'Fedora' => '/usr/sbin/service',
+    'Fedora' => '/sbin/service',
     default  => '/sbin/service',
   }
 
   $rpm       = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/rpm',
+    'Fedora' => '/bin/rpm',
     default  => '/bin/rpm',
   }
 
   $rm        = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/rm',
+    'Fedora' => '/bin/rm',
     default  => '/bin/rm',
   }
 
   $touch     = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/touch',
+    'Fedora' => '/bin/touch',
     default  => '/bin/touch',
   }
 
   $chown     = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/chown',
+    'Fedora' => '/bin/chown',
     default  => '/bin/chown',
   }
 
   $httxt2dbm = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/httxt2dbm',
+    'Fedora' => '/bin/httxt2dbm',
     default  => '/usr/sbin/httxt2dbm',
   }
 
   $chmod     = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/chmod',
+    'Fedora' => '/bin/chmod',
     default  => '/bin/chmod',
   }
 
   $grep      = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/grep',
+    'Fedora' => '/bin/grep',
     default  => '/bin/grep',
   }
 
   $cat       = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/cat',
+    'Fedora' => '/bin/cat',
     default  => '/bin/cat',
   }
 
   $mv        = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/mv',
+    'Fedora' => '/bin/mv',
     default  => '/bin/mv',
   }
 
   $echo      = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/echo',
+    'Fedora' => '/bin/echo',
     default  => '/bin/echo',
   }
   
@@ -86,17 +86,17 @@ class openshift_origin::params {
   }
 
   $sysctl      = $::operatingsystem ? {
-    'Fedora' => '/usr/sbin/sysctl',
+    'Fedora' => '/sbin/sysctl',
     default  => '/sbin/sysctl',
   }
   
   $iptables    = $::operatingsystem ? {
-    'Fedora' => '/usr/sbin/iptables',
+    'Fedora' => '/sbin/iptables',
     default  => '/sbin/iptables',
   }
   
   $iptables_save_command = $operatingsystem ? {
-    'Fedora' => "/usr/libexec/iptables/iptables.init save",
+    'Fedora' => "/sbin/service iptables save",
     default  => "/sbin/service iptables save",
   }
   

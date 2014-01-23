@@ -49,11 +49,10 @@ class openshift_origin::role {
       }
     )
   }
+  origin_firewall{'role-ssh': 
+    svc  => 'ssh',
+  }
   
-  ensure_resource( 'firewall', 'ssh', {
-      service => 'ssh',
-    }
-  )
 
   ensure_resource( 'class', 'openshift_origin::install_method', {} )
 }

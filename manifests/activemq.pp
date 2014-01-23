@@ -85,7 +85,7 @@ class openshift_origin::activemq {
     }
   )
 
-  firewall{ 'activemq':
+  origin_firewall{'activemq': 
     port      => '61613',
     protocol  => 'tcp',
   }

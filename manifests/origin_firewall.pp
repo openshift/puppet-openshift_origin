@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-define firewall( $service=undef, $port=undef, $protocol=undef ) {
+define origin_firewall( $svc=undef, $port=undef, $protocol=undef ) {
   ensure_resource('package', 'iptables', {})
   ensure_resource('package', 'firewalld', {
       ensure => 'absent',
@@ -32,7 +32,7 @@ define firewall( $service=undef, $port=undef, $protocol=undef ) {
   )
   
   $lokkit = $::operatingsystem ? {
-    'Fedora' => '/usr/sbin/lokkit',
+    'Fedora' => '/sbin/lokkit',
     default  => '/sbin/lokkit',
   }
   
@@ -72,7 +72,7 @@ define firewall( $service=undef, $port=undef, $protocol=undef ) {
         Exec['initial iptables setup'] -> Exec['Create IPTables rhc-app-comm chain for port proxying'] -> Exec['final iptables setup']
       }
     
-      if $service == undef {
+      if $svc == undef {
         exec { "Open port ${port}:${protocol}":
           command => "${::openshift_origin::params::iptables} -D INPUT -m state --state NEW -m ${protocol} -p ${protocol} --dport ${port} -j ACCEPT;
                       ${::openshift_origin::params::iptables} -A INPUT -m state --state NEW -m ${protocol} -p ${protocol} --dport ${port} -j ACCEPT; 
@@ -81,21 +81,21 @@ define firewall( $service=undef, $port=undef, $protocol=undef ) {
           before  => Exec['final iptables setup'],
         }
       } else {
-        $sport = $service ? {
+        $sport = $svc ? {
           'http'  => '80',
           'https' => '443',
           'ssh'   => '22',
           'dns'   => '53',
         }
       
-        $sprotocol = $service ? {
+        $sprotocol = $svc ? {
           'http'  => 'tcp',
           'https' => 'tcp',
           'ssh'   => 'tcp',
           'dns'   => 'tcp',
         }
       
-        exec { "Open port ${sport}:${sprotocol} for service ${service}":
+        exec { "Open port ${sport}:${sprotocol} for service ${svc}":
           command => "${::openshift_origin::params::iptables} -D INPUT -m state --state NEW -m ${sprotocol} -p ${sprotocol} --dport ${sport} -j ACCEPT;
                       ${::openshift_origin::params::iptables} -A INPUT -m state --state NEW -m ${sprotocol} -p ${sprotocol} --dport ${sport} -j ACCEPT;
                       ${::openshift_origin::params::iptables_save_command};",
@@ -113,15 +113,15 @@ define firewall( $service=undef, $port=undef, $protocol=undef ) {
     
       ensure_resource('package', 'system-config-firewall-base', {})
       
-      if $service == undef {
+      if $svc == undef {
         exec { "Open port ${port}:${protocol}":
           command => "${lokkit} --port ${port}:${protocol}",
           require => Package['system-config-firewall-base'],
           before  => Exec['Create IPTables rhc-app-comm chain for port proxying']
         }
       } else {
-        exec { "Open port for service ${service}":
-          command => "${lokkit} --service ${service}",
+        exec { "Open port for service ${svc}":
+          command => "${lokkit} --service ${svc}",
           require => Package['system-config-firewall-base'],
           before  => Exec['Create IPTables rhc-app-comm chain for port proxying']
         }

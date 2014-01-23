@@ -81,7 +81,7 @@ class openshift_origin::mongo {
     enable    => true,
   }
   
-  firewall{ 'mongo-firewall':
+  origin_firewall{'mongod': 
     port      => '27017',
     protocol  => 'tcp',
   }

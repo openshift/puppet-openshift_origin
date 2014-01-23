@@ -202,23 +202,21 @@ class openshift_origin::node {
     group   => 'root',
     mode    => '0644',
   }
-  
-  ensure_resource( 'firewall', 'http', {
-      service => 'http',
+  if $::openshift_origin::node_hostname != $::openshift_origin::broker_hostname {
+    origin_firewall{'node-http': 
+      svc  => 'http',
     }
-  )
-  
-  ensure_resource( 'firewall', 'https', {
-      service => 'https',
-    }
-  )
-  
-  firewall{ 'node-http':
+    origin_firewall{'node-https': 
+      svc  => 'https',
+    } 
+  }
+ 
+  origin_firewall{'node-8080': 
     port      => '8000',
     protocol  => 'tcp',
   }
 
-  firewall{ 'node-https':
+  origin_firewall{'node-8443': 
     port      => '8443',
     protocol  => 'tcp',
   }
