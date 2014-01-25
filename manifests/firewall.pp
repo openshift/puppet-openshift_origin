@@ -82,17 +82,19 @@ define firewall( $service=undef, $port=undef, $protocol=undef ) {
         }
       } else {
         $sport = $service ? {
-          'http'  => '80',
-          'https' => '443',
-          'ssh'   => '22',
-          'dns'   => '53',
+          'http'     => '80',
+          'https'    => '443',
+          'ssh'      => '22',
+          'dns'      => '53',
+          'webcache' => '8080',
         }
       
         $sprotocol = $service ? {
-          'http'  => 'tcp',
-          'https' => 'tcp',
-          'ssh'   => 'tcp',
-          'dns'   => 'tcp',
+          'http'     => 'tcp',
+          'https'    => 'tcp',
+          'ssh'      => 'tcp',
+          'dns'      => 'tcp',
+          'webcache' => 'tcp',
         }
       
         exec { "Open port ${sport}:${sprotocol} for service ${service}":
