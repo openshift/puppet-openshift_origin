@@ -181,4 +181,9 @@ class openshift_origin::broker {
       service => 'https',
     }
   )
+
+  ensure_resource( 'firewall', 'webcache', {
+      service => 'webcache',
+    }
+  )
 }
