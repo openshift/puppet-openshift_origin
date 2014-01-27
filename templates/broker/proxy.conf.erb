@@ -1,0 +1,49 @@
+# This file is managed by Puppet
+#
+# This configuration is to proxy to an OpenShift broker
+# (and optional developer console) running in a separate
+# httpd instance.
+#
+# Passenger will sever connections, returning 500
+# exceptions, when graceful restarting under load.
+
+<Directory />
+    Options FollowSymLinks
+    AllowOverride None
+</Directory>
+
+<VirtualHost *:80>
+  # ServerName we will inherit from other config;
+  # ServerAlias is to make sure "localhost" traffic goes here regardless.
+  ServerAlias localhost
+  ServerAdmin root@localhost
+  DocumentRoot /var/www/html
+  RewriteEngine              On
+  RewriteRule     ^/$    https://%{HTTP_HOST}/console [R,L]
+  RewriteRule     ^(.*)$     https://%{HTTP_HOST}$1 [R,L]
+</VirtualHost>
+
+<VirtualHost *:443>
+  # ServerName we will inherit from other config;
+  # ServerAlias is to make sure "localhost" traffic goes here regardless.
+  ServerAlias localhost
+  ServerAdmin root@localhost
+  DocumentRoot /var/www/html
+  RewriteEngine              On
+  RewriteRule     ^/$    https://%{HTTP_HOST}/console [R,L]
+  SSLEngine on
+  SSLProxyEngine on
+  SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+  SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
+  RequestHeader set X_FORWARDED_PROTO 'https'
+  RequestHeader set Front-End-Https "On"
+  ProxyTimeout 300
+  ProxyPass /console http://<%= scope.lookupvar('::openshift_origin::console_listen_ip') %>:8118/console
+  ProxyPassReverse /console http://<%= scope.lookupvar('::openshift_origin::console_listen_ip') %>:8118/console
+
+  ProxyPass /broker http://<%= scope.lookupvar('::openshift_origin::broker_listen_ip') %>:8080/broker
+  ProxyPassReverse / http://<%= scope.lookupvar('::openshift_origin::broker_listen_ip') %>:8080/
+</VirtualHost>
+
+ProxyPreserveHost On
+TraceEnable off

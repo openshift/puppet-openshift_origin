@@ -228,6 +228,16 @@ List of upstream DNS servers to use when installing named on this node.
 
 Default: ['8.8.8.8']
 
+==== broker_listen_ip
+IP address the Broker API endpoint listens on.
+
+Default: '127.0.0.1'
+
+==== console_listen_ip
+IP address the Broker Web Console listens on.
+
+Default: $broker_listen_ip
+
 ==== broker_ip_addr
 This is used for the node to record its broker. Also is the default
 for the nameserver IP if none is given.
