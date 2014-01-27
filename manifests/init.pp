@@ -238,6 +238,10 @@
 #   List of all gear sizes that newly created users will be able to create
 #   Default: ['small']
 #
+# [*broker_listen_ip*]
+#   IP address used by the Broker API endpoint to listen on.
+#   Default: '127.0.0.1'
+#
 # [*broker_dns_plugin*]
 #   DNS plugin used by the broker to register application DNS entries.
 #   Options:
@@ -507,6 +511,7 @@ class openshift_origin (
   $conf_valid_gear_sizes                = ['small'],
   $conf_default_gear_capabilities       = ['small'],
   $conf_default_gear_size               = 'small',
+  $broker_listen_ip                     = '127.0.0.1',
   $broker_dns_plugin                    = 'nsupdate',
   $broker_auth_plugin                   = 'htpasswd',
   $broker_krb_service_name              = '',
