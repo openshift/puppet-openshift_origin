@@ -116,6 +116,26 @@ class openshift_origin::broker {
     require => Package['openshift-origin-broker'],
   }
 
+  file { 'openshift httpd broker.conf':
+    path    => '/var/www/openshift/broker/httpd/broker.conf',
+    content => template('openshift_origin/broker/httpd_broker.conf.erb'),
+    owner   => 'apache',
+    group   => 'apache',
+    mode    => '0644',
+    require => Package['openshift-origin-broker'],
+    notify  => Service['openshift-broker'],
+  }
+
+  file { 'openshift httpd broker proxy.conf':
+    path    => '/etc/httpd/conf.d/000002_openshift_origin_broker_proxy.conf',
+    content => template('openshift_origin/broker/proxy.conf.erb'),
+    owner   => 'apache',
+    group   => 'apache',
+    mode    => '0644',
+    require => Package['openshift-origin-broker'],
+    notify  => Service['openshift-broker'],
+  }
+
   if $::openshift_origin::development_mode == true {
     file { 'openshift broker-dev.conf':
       path    => '/etc/openshift/broker-dev.conf',
