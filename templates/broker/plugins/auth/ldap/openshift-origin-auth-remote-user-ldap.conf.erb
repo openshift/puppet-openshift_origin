@@ -14,7 +14,11 @@ LoadModule authnz_ldap_module modules/mod_authnz_ldap.so
   AuthName "OpenShift broker API"
   AuthType Basic
   AuthBasicProvider ldap
-  AuthLDAPURL "<%= scope.lookupvar('::openshift_origin::broker_ldap_uri') %>?uid?sub?(objectClass=*)"
+  AuthLDAPURL "<%= scope.lookupvar('::openshift_origin::broker_ldap_uri') %>"
+  <% if scope.lookupvar('::openshift_origin::broker_ldap_bind_dn') != '' %>
+  AuthLDAPBindDN "<%= scope.lookupvar('::openshift_origin::broker_ldap_bind_dn') %>"
+  AuthLDAPBindPassword <%= scope.lookupvar('::openshift_origin::broker_ldap_bind_password') %>
+  <% end %>
   require valid-user
 
   SetEnvIfNoCase Authorization Bearer passthrough
