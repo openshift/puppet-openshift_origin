@@ -19,6 +19,11 @@ class openshift_origin::plugins::dns::nsupdate {
     warning "Use the last field in the generated key file /var/named/K${openshift_origin::domain}*.key"
     fail 'bind_key is required.'
   }
+  if $::openshift_origin::hosts_domain != '' and $::openshift_origin::hosts_bind_key == '' {
+    warning "Generate the hosts domain key file with '/usr/sbin/dnssec-keygen -a HMAC-MD5 -b 512 -n USER -r /dev/urandom -K /var/named ${::openshift_origin::hosts_domain}'"
+    warning "Use the last field in the generated key file /var/named/K${openshift_origin::hosts_domain}*.key"
+    fail 'hosts_bind_key is required when hosts_domain is set.'
+  }
   if $::openshift_origin::bind_krb_principal and $::openshift_origin::bind_krb_keytab == '' {
     warning "Kerberos keytab for the DNS service was not found. Please generate a keytab for DNS/${::openshift_origin::named_hostname}"
     fail "bind_krb_keytab is required."

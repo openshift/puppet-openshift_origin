@@ -84,6 +84,27 @@ class openshift_origin::named {
     require => Package['bind'],
   }
 
+  # Create a dynamic zone for hosts if a hosts_domain is provided.
+  if "${openshift_origin::hosts_dns}" != '' {
+    file { 'hosts dynamic zone':
+      path    => "/var/named/dynamic/${openshift_origin::hosts_domain}.db",
+      content => template('openshift_origin/named/hosts-dynamic-zone.db.erb'),
+      owner   => 'named',
+      group   => 'named',
+      mode    => '0644',
+      require => File['/var/named/dynamic'],
+    }
+
+    file { 'hosts named key':
+      path    => "/var/named/${openshift_origin::hosts_domain}.key",
+      content => template('openshift_origin/named/hosts_named.key.erb'),
+      owner   => 'named',
+      group   => 'named',
+      mode    => '0444',
+      require => File['/var/named'],
+    }
+  }
+
   # create named/adddress mappings for infrastructure hosts
   if "${openshift_origin::dns_infrastructure_zone}" != '' {
 
