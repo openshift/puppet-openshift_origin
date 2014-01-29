@@ -25,7 +25,10 @@ define register_dns( $fqdn ) {
   }
 }
 
-define register_hosts_dns( $fqdn, $ip_addr ) {
+define register_hosts_dns {
+  $hostinfo = split($title, ':')
+  $fqdn = $hostinfo[0]
+  $ip_addr = $hostinfo[1]
   if $fqdn != 'localhost' {
     ensure_resource( 'exec', "Register ${fqdn}:${ip_addr}", {
         command => template("openshift_origin/register_hosts_dns.erb"),
@@ -106,9 +109,6 @@ class openshift_origin::role::datastore inherits openshift_origin::role {
   ensure_resource( 'class', 'openshift_origin::mongo', {} ) 
 }
 
-class openshift_origin::role::registered_host ( $fqdn = 'localhost', $ip_addr = '1.1.1.1' ) {
-  register_hosts_dns{ 'register host with DNS':
-    fqdn => $fqdn,
-    ip_addr => $ip_addr
-  }
+class openshift_origin::role::registered_host ( $hosts = [] ) {
+  register_hosts_dns{ $hosts: }
 }

@@ -496,7 +496,7 @@ class openshift_origin (
   $domain                               = 'example.com',
   $hosts_domain                         = '',
   $hosts_bind_key                       = '',
-  $hosts_dns_list                       = undef,
+  $hosts_dns_list                       = [],
   $broker_hostname                      = "broker.${domain}",
   $node_hostname                        = "node.${domain}",
   $named_hostname                       = "ns1.${domain}",
@@ -567,13 +567,9 @@ class openshift_origin (
     if member( $roles, 'activemq' )  { Class['openshift_origin::role::named']    -> Class['openshift_origin::role::activemq'] }
     if member( $roles, 'datastore' ) { Class['openshift_origin::role::named']    -> Class['openshift_origin::role::datastore'] }
 
-    if ($hosts_domain != '') and ($hosts_bind_key != '') and defined( $hosts_dns_list ) {
-      $hosts_dns_list.each { |$record|
-        $host_info = split($record, ':')
-        class{ 'openshift_origin::role::registered_host':
-          fqdn => $host_info[0],
-          ip_addr => $host_info[1]
-        }
+    if ($hosts_domain != '') and ($hosts_bind_key != '') {
+      class{ 'openshift_origin::role::registered_host':
+        hosts => $hosts_dns_list
       }
     }
   }
