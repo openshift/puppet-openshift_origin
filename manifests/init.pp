@@ -566,12 +566,23 @@ class openshift_origin (
     if member( $roles, 'node' )      { Class['openshift_origin::role::named']    -> Class['openshift_origin::role::node'] }
     if member( $roles, 'activemq' )  { Class['openshift_origin::role::named']    -> Class['openshift_origin::role::activemq'] }
     if member( $roles, 'datastore' ) { Class['openshift_origin::role::named']    -> Class['openshift_origin::role::datastore'] }
+
+    if ($hosts_domain != '') and ($hosts_bind_key != '') and defined( $hosts_dns_list ) {
+      $hosts_dns_list.each { |$record|
+        $host_info = split($record, ':')
+        class{ 'openshift_origin::role::registered_host':
+          fqdn => $host_info[0],
+          ip_addr => $host_info[1]
+        }
+      }
+    }
   }
   if member( $roles, 'broker' ) {    class{ 'openshift_origin::role::broker': require => Class['openshift_origin::update_resolv_conf'] } }
   if member( $roles, 'node' ) {      class{ 'openshift_origin::role::node': require => Class['openshift_origin::update_resolv_conf'] } }
   if member( $roles, 'activemq' ) {  class{ 'openshift_origin::role::activemq': require => Class['openshift_origin::update_resolv_conf'] } }
   if member( $roles, 'datastore' ) { class{ 'openshift_origin::role::datastore': require => Class['openshift_origin::update_resolv_conf'] } }
-  
+
+
   class{ 'openshift_origin::update_resolv_conf': }
 
   if $::operatingsystem == 'Fedora' {
