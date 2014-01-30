@@ -81,14 +81,13 @@ class openshift_origin::console {
     require => Package['openshift-origin-console'],
     enable  => true,
   }
-  
-  ensure_resource( 'firewall', 'http', {
-      service => 'http',
-    }
-  )
-  
-  ensure_resource( 'firewall', 'https', {
-      service => 'https',
-    }
-  )
+
+# duplicated in broker.pp as broker and console are deployed to same host
+#  origin_firewall{'console-http': 
+#    svc  => 'http',
+#  }
+#  origin_firewall{'console-https': 
+#    svc  => 'https',
+#  }
+ 
 }
