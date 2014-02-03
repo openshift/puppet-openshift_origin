@@ -42,7 +42,8 @@ class openshift_origin::broker {
   case $::openshift_origin::broker_auth_plugin {
     'mongo'       : { include openshift_origin::plugins::auth::mongo }
     'htpasswd'    : { include openshift_origin::plugins::auth::htpasswd }    
-    'kerberos'    : { include openshift_origin::plugins::auth::kerberos }    
+    'kerberos'    : { include openshift_origin::plugins::auth::kerberos }
+	'ldap'        : { include openshift_origin::plugins::auth::ldap }
   }
 
   include openshift_origin::mcollective_client

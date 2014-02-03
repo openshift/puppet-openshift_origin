@@ -58,5 +58,14 @@ class openshift_origin::plugins::dns::nsupdate {
       mode    => '0644',
       require => Package['rubygem-openshift-origin-dns-nsupdate'],
     }
+	file { 'plugin nsupdate_plugin.rb':
+      path    => '/usr/share/gems/gems/openshift-origin-dns-nsupdate-1.15.1/lib/openshift/nsupdate_plugin.rb',
+      content => template('openshift_origin/nsupdate_plugin.rb.erb'),
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      require => Package['rubygem-openshift-origin-dns-nsupdate'],
+    }
   }
+  
 }
