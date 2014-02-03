@@ -15,7 +15,7 @@
 #
 class openshift_origin::client_tools {
   # Install rhc tools. On RHEL/CentOS, this will install under ruby 1.8 environment
-  ensure_resource('package', 'rhc', {
+  ensure_resource('package', 'rubygem-rhc', {
       ensure  => present,
       require => Class['openshift_origin::install_method'],
     }
@@ -26,6 +26,6 @@ class openshift_origin::client_tools {
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
-    require => Package['rhc'],
+    require => Package['rubygem-rhc'],
   }
 }
