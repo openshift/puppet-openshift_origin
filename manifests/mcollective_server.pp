@@ -22,6 +22,10 @@ class openshift_origin::mcollective_server {
     } 
   )
 
+  # Ensure classes are run in order
+  Class['Openshift_origin::Role']               -> Class['Openshift_origin::Mcollective_server']
+  Class['Openshift_origin::Update_resolv_conf'] -> Class['Openshift_origin::Mcollective_server']
+
   file { 'mcollective server config':
     ensure  => present,
     path    => "${::openshift_origin::params::ruby_scl_path_prefix}/etc/mcollective/server.cfg",
@@ -30,9 +34,15 @@ class openshift_origin::mcollective_server {
     group   => 'root',
     mode    => '0644',
     require => Package['mcollective'],
+    notify  => Service["${::openshift_origin::params::ruby_scl_prefix}mcollective"],
   }
   
   if( $::operatingsystem == 'Fedora' ) {
+    $require_real = [
+      File['mcollective server config', '/usr/lib/systemd/system/mcollective.service'],
+      Exec['systemd-daemon-reload']
+    ]
+
     file { '/usr/lib/systemd/system/mcollective.service':
       content => template('openshift_origin/mcollective/mcollective.service'),
       require => Package['mcollective'],
@@ -42,15 +52,19 @@ class openshift_origin::mcollective_server {
     exec { 'systemd-daemon-reload':
       command     => '/bin/systemctl --system daemon-reload',
       refreshonly => true,
+      notify      => Service["${::openshift_origin::params::ruby_scl_prefix}mcollective"],
     }
+  } else {
+    $require_real = File['mcollective server config']
   }
-  
+
   service { "${::openshift_origin::params::ruby_scl_prefix}mcollective":
-    enable  => true,
-    require => [
-      Package['mcollective'],
-    ],
-    provider => $::openshift_origin::params::os_init_provider,
+    enable     => true,
+    ensure     => true,
+    hasstatus  => true,
+    hasrestart => true,
+    require    => $require_real,
+    provider   => $::openshift_origin::params::os_init_provider,
   }
   
   exec { 'openshift-facts':

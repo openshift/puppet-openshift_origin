@@ -37,7 +37,9 @@ class openshift_origin::cartridges {
         )
         
         ensure_resource( 'package', "openshift-origin-cartridge-${name}", {
+            ensure  => present,
             require => Class['openshift_origin::install_method'],
+            notify  => Service["${::openshift_origin::params::ruby_scl_prefix}mcollective"],
           }
         )
       }
@@ -53,15 +55,18 @@ class openshift_origin::cartridges {
         
         ensure_resource( 'package', $mariadb_cart, {
             ensure  => present,
-            require => [
-              Class['openshift_origin::install_method'],
-            ],
-            notify => Exec['oo-admin-cartridge'],
+            require => Class['openshift_origin::install_method'],
+            notify  => Service["${::openshift_origin::params::ruby_scl_prefix}mcollective"],
           } 
         )
       }
       default: {
-        ensure_resource( 'package', "openshift-origin-cartridge-${name}", {} )
+        ensure_resource( 'package', "openshift-origin-cartridge-${name}", {
+            ensure  => present,
+            require => Class['openshift_origin::install_method'],
+            notify  => Service["${::openshift_origin::params::ruby_scl_prefix}mcollective"],
+          }
+        )
       }
     }
   }
@@ -70,12 +75,5 @@ class openshift_origin::cartridges {
   
   if( $::openshift_origin::development_mode == true ) {
     openshiftCartridge { [ 'mock', 'mock-plugin' ]: }
-  }
-  
-  # Note, this does not handle cartridge uninstalls
-  exec { 'oo-admin-cartridge':
-    command     => '/usr/sbin/oo-admin-cartridge --recursive -a install -s /usr/libexec/openshift/cartridges/',
-    refreshonly => true,
-    notify      => Exec['openshift-facts']
   }
 }

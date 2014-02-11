@@ -27,6 +27,7 @@ class openshift_origin::console {
     group   => 'apache',
     mode    => '0644',
     require => Package['openshift-origin-console'],
+    notify  => Service['openshift-console'],
   }
 
   if $::openshift_origin::development_mode == true {
@@ -37,6 +38,7 @@ class openshift_origin::console {
       group   => 'apache',
       mode    => '0644',
       require => Package['openshift-origin-console'],
+      notify  => Service['openshift-console'],
     }
   }
 
@@ -58,8 +60,7 @@ class openshift_origin::console {
     owner     => 'apache',
     group     => 'apache',
     mode      => '0644',
-    subscribe => Exec ['Console gem dependencies'],
-    require   => Exec ['Console gem dependencies'],
+    require   => Package['openshift-origin-console'],
   }
 
   exec { 'Console gem dependencies':
@@ -70,16 +71,28 @@ class openshift_origin::console {
     ${::openshift_origin::params::rm} -rf tmp/cache/* && \
     ${console_asset_rake_cmd} && \
     ${::openshift_origin::params::chown} -R apache:apache /var/www/openshift/console",
+    require     => Package['openshift-origin-console'],
     subscribe   => [
       Package['openshift-origin-console'],
-      File['openshift console.conf'],
+      File['/var/www/openshift/console/Gemfile.lock'],
     ],
+    notify      => Service['openshift-console'],
     refreshonly => true,
   }
 
+  exec { 'console selinux booleans':
+    command  => template('openshift_origin/selinux/console.erb'),
+    provider => 'shell',
+    require  => Package['openshift-origin-console'],
+    notify   => Service['openshift-console'],
+  }
+
   service { 'openshift-console':
-    require => Package['openshift-origin-console'],
-    enable  => true,
+    require    => Package['openshift-origin-console'],
+    enable     => true,
+    ensure     => true,
+    hasstatus  => true,
+    hasrestart => true,
   }
   
   ensure_resource( 'firewall', 'http', {

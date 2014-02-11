@@ -21,8 +21,12 @@ class openshift_origin::plugins::frontend::apache {
   )
 
   service { 'httpd':
-    enable  => true,
-    require =>  Package['httpd'],
+    enable     => true,
+    ensure     => true,
+    hasstatus  => true,
+    hasrestart => true,
+    require    =>  Package['httpd'],
+    provider   => $openshift_origin::params::os_init_provider,
   }
   
   file { 'node servername config':

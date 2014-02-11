@@ -44,7 +44,7 @@ class openshift_origin::role {
     )
 
     ensure_resource('class', 'ntp', {
-        servers    => ['time.apple.com iburst', 'pool.ntp.org iburst', 'clock.redhat.com iburst'],
+        servers    => $::openshift_origin::ntp_servers,
         autoupdate => true,
       }
     )

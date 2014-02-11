@@ -25,11 +25,14 @@ class openshift_origin::plugins::frontend::nodejs_websocket {
   )
   
   service { 'openshift-node-web-proxy':
-    enable  => true,
-    require => [
+    enable     => true,
+    ensure     => true,
+    hasstatus  => true,
+    hasrestart => true,
+    require    => [
       Package['openshift-origin-node-proxy'],      
       Package['openshift-origin-node-util'],
     ],
-    provider => $openshift_origin::params::os_init_provider,
+    provider   => $openshift_origin::params::os_init_provider,
   }
 }

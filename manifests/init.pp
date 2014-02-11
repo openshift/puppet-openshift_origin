@@ -167,6 +167,12 @@
 #   synch.  However, NTP is not necessary if the clock will be kept in
 #   synch by some other means.
 #
+# [*ntp_servers*]
+#   Default: ['time.apple.com iburst', 'pool.ntp.org iburst', 'clock.redhat.com iburst']
+#   Specifies one or more servers for NTP clock syncronization.
+#   Note: Use iburst after every ntp server definition to speed up
+#         the initial synchronization.
+#
 # Passwords used to secure various services. You are advised to specify
 # only alphanumeric values in this script as others may cause syntax
 # errors depending on context. If non-alphanumeric values are required,
@@ -224,6 +230,15 @@
 #   same on all broker nodes.
 #   Default:  Self signed keys are generated. Will not work with multi-broker
 #             setup.
+#
+# [*conf_broker_multi_haproxy_per_node*]
+#   Default: false
+#   This setting is applied on a per-scalable-application basis. When set to true,
+#   OpenShift will allow multiple instances of the HAProxy gear for a given
+#   scalable app to be established on the same node. Otherwise, on a
+#   per-scalable-application basis, a maximum of one HAProxy gear can be created
+#   for every node in the deployment (this is the default behavior, which protects
+#   scalable apps from single points of failure at the Node level).
 #
 # [*conf_broker_session_secret*]
 # [*conf_console_session_secret*]
@@ -327,7 +342,8 @@
 #         creates/deletes/scale actions.
 #     * apache-vhost        - VHost based plugin for HTTP and HTTPS. Suited for
 #         installations with less app create/delete activity. Easier to
-#         customize.
+#         customize.  If apache-mod-rewrite is also selected, apache-vhost will be
+#         ignored
 #     * nodejs-websocket    - Web-socket proxy listening on ports 8000/8444
 #     * haproxy-sni-proxy   - TLS proxy using SNI routing on ports 2303 through 2308
 #         requires /usr/sbin/haproxy15 (haproxy-1.5-dev19 or later).
@@ -493,6 +509,7 @@ class openshift_origin (
   $broker_ip_addr                       = $ipaddress,
   $node_ip_addr                         = $ipaddress,
   $configure_ntp                        = true,
+  $ntp_servers                          = ['time.apple.com iburst', 'pool.ntp.org iburst', 'clock.redhat.com iburst'],
   $activemq_admin_password              = inline_template('<%= require "securerandom"; SecureRandom.base64 %>'),
   $mcollective_user                     = 'mcollective',
   $mcollective_password                 = 'marionette',
@@ -508,6 +525,7 @@ class openshift_origin (
   $conf_broker_auth_public_key          = undef,
   $conf_broker_auth_private_key         = undef,
   $conf_broker_session_secret           = undef,
+  $conf_broker_multi_haproxy_per_node   = false,
   $conf_console_session_secret          = undef,
   $conf_valid_gear_sizes                = ['small'],
   $conf_default_gear_capabilities       = ['small'],
@@ -559,23 +577,6 @@ class openshift_origin (
     service { 'NetworkManager-wait-online':
       enable => true,
     }
-  }
-  $node_shmmax_default = $::architecture ? {
-    'x86_64' => 68719476736,
-    default  => 33554432,
-  }
-  $_node_shmmax = $node_shmax ? {
-    undef   => $node_shmmax_default,
-    default => $node_shmmax,
-  }
-
-  $node_shmall_default = $::architecture ? {
-    'x86_64' => 4294967296,
-    default  => 2097152,
-  }
-  $_node_shmall = $node_shmall ? {
-    undef   => $node_shmall_default,
-    default => $node_shmall,
   }
 
 }

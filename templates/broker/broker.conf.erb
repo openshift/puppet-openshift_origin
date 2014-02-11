@@ -105,4 +105,8 @@ SSL_ENDPOINT="allow"
 
 # Config flag to allow scalable applications to become Highly Available
 ALLOW_HA_APPLICATIONS="true"
+
+# Determine whether or not multiple HA proxy gears for a given application can be spun up on the same node
+ALLOW_MULTIPLE_HAPROXY_ON_NODE=<%= scope.lookupvar('::openshift_origin::conf_broker_multi_haproxy_per_node') %>
+
 ROUTER_HOSTNAME="www.example.com"

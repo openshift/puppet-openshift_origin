@@ -72,7 +72,7 @@ class openshift_origin::plugins::auth::kerberos {
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
-    require => Package['rubygem-openshift-origin-auth-remote-user']
+    require => Package['rubygem-openshift-origin-auth-remote-user'],
     before  => Exec['Broker gem dependencies'],
   }
 }

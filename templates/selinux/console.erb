@@ -25,14 +25,10 @@
   echo boolean -m --on httpd_read_user_content
   echo boolean -m --on httpd_enable_homedirs
   
-  echo fcontext -a -t httpd_var_run_t '/var/www/openshift/broker/httpd/run(/.*)?'
-  echo fcontext -a -t httpd_tmp_t '/var/www/openshift/broker/tmp(/.*)?'
-  echo fcontext -a -t httpd_log_t '/var/log/openshift/broker(/.*)?'
+  echo fcontext -a -t httpd_log_t '/var/log/openshift/console(/.*)?'
+  echo fcontext -a -t httpd_log_t '/var/log/openshift/console/httpd(/.*)?'
+  echo fcontext -a -t httpd_var_run_t '/var/www/openshift/console/httpd/run(/.*)?'
 ) | semanage -i -
-
-chcon -R -t httpd_log_t /var/log/openshift/broker
-chcon -R -t httpd_tmp_t /var/www/openshift/broker/httpd/run
-chcon -R -t httpd_var_run_t /var/www/openshift/broker/httpd/run
 
 fixfiles -R ruby193-rubygem-passenger restore
 fixfiles -R ruby193-mod_passenger restore
@@ -41,5 +37,5 @@ fixfiles -R mod_passenger restore
 
 restorecon -rv /var/run
 restorecon -rv /opt
-restorecon -rv /var/www/openshift/broker/tmp
-restorecon -v '/var/log/openshift/broker/user_action.log'
+restorecon -R /var/log/openshift/console
+restorecon -R /var/www/openshift/console

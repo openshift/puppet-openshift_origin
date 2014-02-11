@@ -104,4 +104,22 @@ class openshift_origin::params {
     'Fedora' => ['iptables', 'iptables-services'],
     default  => ['iptables'],
   }
+
+  $node_shmmax_default = $::architecture ? {
+    'x86_64' => 68719476736,
+    default  => 33554432,
+  }
+  $_node_shmmax = $::openshift_origin::node_shmmax ? {
+    undef   => $node_shmmax_default,
+    default => $::openshift_origin::node_shmmax,
+  }
+
+  $node_shmall_default = $::architecture ? {
+    'x86_64' => 4294967296,
+    default  => 2097152,
+  }
+  $_node_shmall = $::openshift_origin::node_shmall ? {
+    undef   => $node_shmall_default,
+    default => $::openshift_origin::node_shmall,
+  }
 }

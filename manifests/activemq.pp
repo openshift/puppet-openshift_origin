@@ -35,6 +35,7 @@ class openshift_origin::activemq {
       group   => 'root',
       mode    => '0444',
       require => Package['activemq'],
+      notify  => Service['activemq'],
     }
   }
 
@@ -53,6 +54,7 @@ class openshift_origin::activemq {
     group   => 'root',
     mode    => '0444',
     require => Package['activemq'],
+    notify  => Service['activemq'],
   }
 
   file { 'jetty.xml config':
@@ -62,6 +64,7 @@ class openshift_origin::activemq {
     group   => 'root',
     mode    => '0444',
     require => Package['activemq'],
+    notify  => Service['activemq'],
   }
 
   file { 'jetty-realm.properties config':
@@ -71,6 +74,7 @@ class openshift_origin::activemq {
     group   => 'root',
     mode    => '0444',
     require => Package['activemq'],
+    notify  => Service['activemq'],
   }
 
   ensure_resource('service', 'activemq', {

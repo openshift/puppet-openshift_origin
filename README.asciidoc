@@ -258,6 +258,15 @@ only alphanumeric values in this script as others may cause syntax
 errors depending on context. If non-alphanumeric values are required,
 update them separately after installation.
 
+==== ntp_servers
+If configure_ntp is set to true (default), ntp_servers allows users to
+specify an array of NTP servers used for clock synchronization.
+
+Default: ['time.apple.com iburst', 'pool.ntp.org iburst', 'clock.redhat.com iburst']
+
+NOTE: Use iburst after every ntp server definition to speed up the
+initial synchronization.
+
 ==== activemq_admin_password
 This is the admin password for the ActiveMQ admin console, which is
 not needed by OpenShift but might be useful in troubleshooting.
@@ -393,7 +402,8 @@ Options:
     creates/deletes/scale actions.
 * apache-vhost        - VHost based plugin for HTTP and HTTPS. Suited for
     installations with less app create/delete activity. Easier to
-    customize.
+    customize.  If apache-mod-rewrite is also selected, apache-vhost will be
+    ignored
 * nodejs-websocket    - Web-socket proxy listening on ports 8000/8444
 * haproxy-sni-proxy   - TLS proxy using SNI routing on ports 2303 through 2308
     requires /usr/sbin/haproxy15 (haproxy-1.5-dev19 or later).

@@ -10,6 +10,13 @@ BROKER_URL=https://<%= scope.lookupvar('::openshift_origin::broker_hostname') %>
 DOMAIN_SUFFIX="<%= scope.lookupvar('::openshift_origin::domain') %>"
 
 #
+# A URL used when creating links to the OpenShift community sites
+#
+# Optional
+#
+COMMUNITY_URL=https://www.openshift.com/
+
+#
 # A proxy URL to use when connecting with the broker.
 #
 # Optional
