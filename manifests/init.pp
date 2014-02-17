@@ -106,7 +106,10 @@
 #   DNS entries for the hostnames of the other components being 
 #   installed on this host as well. If you are using a nameserver set
 #   up separately, you are responsible for all necessary DNS entries.
-# 
+#
+# [*node_public_hostname*]
+#   Default: node.example.com
+#
 # [*named_ip_addr*]
 #   Default: IP of a named instance or current IP if installing on this 
 #   node. This is used by every node to configure its primary name server.
@@ -491,6 +494,7 @@ class openshift_origin (
   $domain                               = 'example.com',
   $broker_hostname                      = "broker.${domain}",
   $node_hostname                        = "node.${domain}",
+  $node_public_hostname                 = $node_hostname,
   $named_hostname                       = "ns1.${domain}",
   $activemq_hostname                    = "activemq.${domain}",
   $datastore_hostname                   = "mongodb.${domain}",
