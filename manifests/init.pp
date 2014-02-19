@@ -572,6 +572,16 @@ class openshift_origin (
   
   class{ 'openshift_origin::update_resolv_conf': }
 
+  if $development_mode == true {
+    file { 'openshift development marker':
+      path    => '/etc/openshift/development',
+      content => '',
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+    }
+  }
+
   if $::operatingsystem == 'Fedora' {
     service { 'NetworkManager-wait-online':
       enable => true,
