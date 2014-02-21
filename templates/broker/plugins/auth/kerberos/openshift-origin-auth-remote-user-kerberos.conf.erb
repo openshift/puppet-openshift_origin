@@ -82,3 +82,12 @@ LoadModule auth_kerb_module modules/mod_auth_kerb.so
     Allow from all
   </IfVersion>
 </Location>
+
+<Location /broker/rest/quickstarts>
+  <IfVersion >= 2.4>
+    Require all granted
+  </IfVersion>
+  <IfVersion < 2.4>
+    Allow from all
+  </IfVersion>
+</Location>
