@@ -19,6 +19,11 @@ class openshift_origin::plugins::frontend::haproxy_sni_proxy {
     }
   )
   
+  exec { 'Generate haproxy config':
+    command    => '/usr/bin/oo-rebuild-haproxy-sni-proxy',
+    before  => Service['openshift-sni-proxy']
+  }
+
   service { 'openshift-sni-proxy':
     enable     => true,
     ensure     => true,
