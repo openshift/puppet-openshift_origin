@@ -1,5 +1,15 @@
+# Settings related to the nsupdate variant of an OpenShift DNS plugin
+# configured for GSS-TSIG (Kerberos) authentication.
+
+# The DNS server
 BIND_SERVER="<%= scope.lookupvar('::openshift_origin::named_ip_addr') %>"
+
+# The DNS server's port
 BIND_PORT=53
+
+# The base zone for the DNS server
 BIND_ZONE="<%= scope.lookupvar('::openshift_origin::domain') %>"
+
+# GSS-TSIG (Kerberos) Authentication
 BIND_KRB_PRINCIPAL="DNS/<%= scope.lookupvar('::openshift_origin::broker_krb_service_name') %>@<%= scope.lookupvar('::openshift_origin::broker_krb_auth_realms') %>"
 BIND_KRB_KEYTAB="<%= scope.lookupvar('::openshift_origin::bind_krb_keytab') %>"

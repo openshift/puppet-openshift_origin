@@ -7,14 +7,6 @@
 # Required
 #
 BROKER_URL=https://<%= scope.lookupvar('::openshift_origin::broker_hostname') %>/broker/rest
-DOMAIN_SUFFIX="<%= scope.lookupvar('::openshift_origin::domain') %>"
-
-#
-# A URL used when creating links to the OpenShift community sites
-#
-# Optional
-#
-COMMUNITY_URL=https://www.openshift.com/
 
 #
 # A proxy URL to use when connecting with the broker.
@@ -23,6 +15,22 @@ COMMUNITY_URL=https://www.openshift.com/
 #
 # BROKER_PROXY_URL=
 
+#
+# The base URL of the community wiki site.
+#
+# Optional
+#
+COMMUNITY_URL=https://www.openshift.com/
+
+# When set, any absolute URLs that are generated will use this host
+# DEFAULT_URL_OPTIONS_HOST=openshift.redhat.com
+
+# When set, any absolute URLs that are generated will use this port
+# When set to nothing no port will be specified on the URL
+# DEFAULT_URL_OPTIONS_PORT=
+
+# The server url hosting the static assets for the console
+# ASSET_HOST=https://openshift.redhat.com
 
 #
 # SSL settings for the connection between the console and broker.
@@ -30,7 +38,13 @@ COMMUNITY_URL=https://www.openshift.com/
 #
 # Optional, will use the default Ruby environment settings
 #
+# No certificate checking (INSECURE, use only in trusted networks):
 BROKER_API_SSL_OPTIONS={:verify_mode => OpenSSL::SSL::VERIFY_NONE}
+#
+# Perform cert checking and require SSLv3 (some Mac environments may
+# need this set):
+# BROKER_API_SSL_OPTIONS={:verify_mode => OpenSSL::SSL::VERIFY_PEER, :ssl_version => :SSLv3}
+
 
 #
 # The type of security mode that OpenShift should use.  There are
@@ -62,6 +76,7 @@ BROKER_API_SSL_OPTIONS={:verify_mode => OpenSSL::SSL::VERIFY_NONE}
 #
 CONSOLE_SECURITY=<%= scope.lookupvar('::openshift_origin::broker_auth_plugin') == 'mongo' ? 'basic' : 'remote_user' %>
 
+
 #
 # The name of the request env variable or header that indicates a 
 # user is authenticated.  This value will be used as the display 
@@ -80,6 +95,7 @@ CONSOLE_SECURITY=<%= scope.lookupvar('::openshift_origin::broker_auth_plugin') =
 # Required when CONSOLE_SECURITY=remote_user
 #
 REMOTE_USER_HEADER=REMOTE_USER
+
 
 #
 # When using remote_user security, the value of the authentication
@@ -104,5 +120,13 @@ REMOTE_USER_HEADER=REMOTE_USER
 # Required when CONSOLE_SECURITY=remote_user, may be empty
 #
 REMOTE_USER_COPY_HEADERS=X-Remote-User
+
+
+#
+# Should log messages be sent to syslog instead of a log file
+#
+# Optional
+#
+# SYSLOG_ENABLED=true
 
 SESSION_SECRET="<%= scope.lookupvar('::openshift_origin::conf_console_session_secret') %>"
