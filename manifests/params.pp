@@ -74,6 +74,11 @@ class openshift_origin::params {
     'Fedora' => '/usr/bin/echo',
     default  => '/bin/echo',
   }
+
+  $ruby_bundler_pkg = $::operatingsystem ? {
+    'Fedora' => 'rubygem-bundler',
+    default  => 'ruby193-rubygem-bundler',
+  }
   
   $ruby_scl_prefix = $::operatingsystem ? {
     'Fedora' => '',

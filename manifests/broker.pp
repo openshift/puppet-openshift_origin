@@ -17,6 +17,7 @@ class openshift_origin::broker {
   ensure_resource('package', [
       'openshift-origin-broker',
       'openshift-origin-broker-util',
+      $::openshift_origin::params::ruby_bundler_pkg,
       'rubygem-openshift-origin-msg-broker-mcollective',
       'rubygem-openshift-origin-admin-console',      
       "rubygem-openshift-origin-dns-${::openshift_origin::broker_dns_plugin}",
@@ -25,6 +26,9 @@ class openshift_origin::broker {
       require => Class['openshift_origin::install_method'],
     }
   )
+
+  include openshift_origin::params
+  include openshift_origin::plugins::frontend::apache
   
   # We combine these setsebool commands into a single semanage command
   # because separate commands take a long time to run.
@@ -136,7 +140,7 @@ class openshift_origin::broker {
     require   => Package['openshift-origin-broker'],
     notify    => Service['openshift-broker'],
   }
-  
+
   $broker_bundle_show = $::operatingsystem ? {
     'Fedora' => '/usr/bin/bundle show',
     default  => '/usr/bin/scl enable ruby193 "bundle show"',
@@ -150,7 +154,6 @@ class openshift_origin::broker {
     owner     => 'apache',
     group     => 'apache',
     mode      => '0644',
-    subscribe => Exec ['Broker gem dependencies'],
     require   => Exec ['Broker gem dependencies'],
   }
 
@@ -162,7 +165,7 @@ class openshift_origin::broker {
     ${::openshift_origin::params::rm} -rf tmp/cache/*",
     unless  => $broker_bundle_show,
     require => [
-      Package['openshift-origin-broker'],
+      Package['openshift-origin-broker', $::openshift_origin::params::ruby_bundler_pkg],
       File['openshift broker.conf'],
       File['mcollective broker plugin config'],
     ],
