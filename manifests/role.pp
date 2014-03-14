@@ -50,7 +50,7 @@ class openshift_origin::role {
     )
   }
   
-  ensure_resource( 'openshift::firewall', 'ssh', {
+  ensure_resource( 'openshift_origin::firewall', 'ssh', {
       service => 'ssh',
     }
   )

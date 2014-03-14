@@ -215,22 +215,22 @@ class openshift_origin::node {
     mode    => '0644',
   }
   
-  ensure_resource( 'openshift::firewall', 'http', {
+  ensure_resource( 'openshift_origin::firewall', 'http', {
       service => 'http',
     }
   )
   
-  ensure_resource( 'openshift::firewall', 'https', {
+  ensure_resource( 'openshift_origin::firewall', 'https', {
       service => 'https',
     }
   )
   
-  openshift::firewall{ 'node-http':
+  openshift_origin::firewall{ 'node-http':
     port      => '8000',
     protocol  => 'tcp',
   }
 
-  openshift::firewall{ 'node-https':
+  openshift_origin::firewall{ 'node-https':
     port      => '8443',
     protocol  => 'tcp',
   }

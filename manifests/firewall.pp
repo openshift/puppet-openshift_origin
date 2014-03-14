@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-define openshift::firewall( $service=undef, $port=undef, $protocol=undef ) {
+define openshift_origin::firewall( $service=undef, $port=undef, $protocol=undef ) {
   ensure_resource('package', 'iptables', {})
   ensure_resource('package', 'firewalld', {
       ensure => 'absent',
