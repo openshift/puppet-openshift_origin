@@ -95,12 +95,12 @@ class openshift_origin::console {
     hasrestart => true,
   }
   
-  ensure_resource( 'firewall', 'http', {
+  ensure_resource( 'openshift::firewall', 'http', {
       service => 'http',
     }
   )
   
-  ensure_resource( 'firewall', 'https', {
+  ensure_resource( 'openshift::firewall', 'https', {
       service => 'https',
     }
   )
