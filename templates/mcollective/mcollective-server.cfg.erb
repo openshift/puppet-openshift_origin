@@ -1,12 +1,10 @@
-topicprefix = /topic/
 main_collective = mcollective
 collectives = mcollective
 libdir = <%= scope.lookupvar('::openshift_origin::params::ruby_scl_path_prefix') %>/usr/libexec/mcollective
 logfile = /var/log/openshift/node/<%= scope.lookupvar('::openshift_origin::params::ruby_scl_prefix') %>mcollective.log
 loglevel = debug
 daemonize = <%= scope.lookupvar('::operatingsystem') == "Fedora" ? '0' : '1'%>
-direct_addressing = 1
-registerinterval = 30
+direct_addressing = 0
 
 # Plugins
 securityprovider = psk
