@@ -10,26 +10,30 @@ CLOUD_DOMAIN="<%= scope.lookupvar('::openshift_origin::domain') %>"             
 # You may want these, depending on the complexity of your networking:
 EXTERNAL_ETH_DEV='<%= scope.lookupvar('::openshift_origin::conf_node_external_eth_dev') %>'                                 # Specify the internet facing public ethernet device
 # INTERNAL_ETH_DEV='eth1'                                 # Specify the internal cluster facing ethernet device
-INSTANCE_ID="<%= scope.lookupvar('::openshift_origin::node_hostname') %>"                                      # Set by RH EC2 automation
+
+# Uncomment and use the following line if you want to gear users to be members of
+# additional groups besides the one with the same id as the uid. The other group
+# should be an existing group.
+#GEAR_SUPPLEMENTARY_GROUPS="another_group"  # Supplementary groups for gear UIDs (comma separated list)
+<% if scope.lookupvar('::openshift_origin::conf_node_supplementary_posix_groups') != "" -%>
+GEAR_SUPPLEMENTARY_GROUPS="<%= scope.lookupvar('::openshift_origin::conf_node_supplementary_posix_groups') %>"  # Supplementary groups for gear UIDs (comma separated list)
+<% end -%>
 
 # Generally the following should not be changed:
-ENABLE_CGROUPS='1'                                        # Enable cgroups for gears (0=off, 1=on)
-GEAR_BASE_DIR="/var/lib/openshift"                        # gear root directory
-GEAR_SKEL_DIR="/etc/openshift/skel"                       # skel files to use when building a gear
-GEAR_SHELL="/usr/bin/oo-trap-user"                        # shell to use for the gear
-GEAR_GECOS="OpenShift guest"                              # Gecos information to populate for the gear user
-GEAR_MIN_UID=1000                                         # Lower bound of UID used to create gears
-GEAR_MAX_UID=6500                                         # Upper bound of UID used to create gears
-<% if scope.lookupvar('::openshift_origin::conf_node_supplementary_posix_groups') != "" -%>
-GEAR_SUPL_GRPS="<%= scope.lookupvar('::openshift_origin::conf_node_supplementary_posix_groups') %>"  # Supplementary groups for gear UIDs (comma separated list)
-<% end -%>
-OPENSHIFT_NODE_PLUGINS=""                                 # Extentions to load when customize/observe openshift-origin-node models
-CARTRIDGE_BASE_PATH="/usr/libexec/openshift/cartridges"   # Locations where cartridges are installed
-LAST_ACCESS_DIR="/var/lib/openshift/.last_access"         # Location to maintain last accessed time for gears
-APACHE_ACCESS_LOG="/var/log/httpd/access_log"             # Localion of httpd for node
-PROXY_MIN_PORT_NUM=35531                                  # Lower bound of port numbers used to proxy ports externally
-PROXY_PORTS_PER_GEAR=5                                    # Number of proxy ports available per gear
-CREATE_APP_SYMLINKS=0                                     # If set to 1, creates gear-name symlinks to the UUID directories (debugging only)
+ENABLE_CGROUPS=1                                             # constrain gears in cgroups (1=yes, 0=no)
+GEAR_BASE_DIR="/var/lib/openshift"                           # gear root directory
+GEAR_SKEL_DIR="/etc/openshift/skel"                          # skel files to use when building a gear
+GEAR_SHELL="/usr/bin/oo-trap-user"                           # shell to use for the gear
+GEAR_GECOS="OpenShift guest"                                 # Gecos information to populate for the gear user
+GEAR_MIN_UID=1000                                            # Lower bound of UID used to create gears
+GEAR_MAX_UID=6999                                            # Upper bound of UID used to create gears
+OPENSHIFT_NODE_PLUGINS=""                                    # Extensions to load when customize/observe openshift-origin-node models
+CARTRIDGE_BASE_PATH="/usr/libexec/openshift/cartridges"      # Locations where cartridges are installed
+LAST_ACCESS_DIR="/var/lib/openshift/.last_access"            # Location to maintain last accessed time for gears
+APACHE_ACCESS_LOG="/var/log/httpd/openshift_log"             # Localion of httpd for node
+PROXY_MIN_PORT_NUM=35531                                     # Lower bound of port numbers used to proxy ports externally
+PROXY_PORTS_PER_GEAR=5                                       # Number of proxy ports available per gear
+CREATE_APP_SYMLINKS=0                                        # If set to 1, creates gear-name symlinks to the UUID directories (debugging only)
 OPENSHIFT_HTTP_CONF_DIR="/etc/httpd/conf.d/openshift"
 
 PLATFORM_LOG_FILE=/var/log/openshift/node/platform.log
@@ -37,6 +41,18 @@ PLATFORM_LOG_LEVEL=DEBUG
 PLATFORM_TRACE_LOG_FILE=/var/log/openshift/node/platform-trace.log
 PLATFORM_TRACE_LOG_LEVEL=DEBUG
 
-OPENSHIFT_FRONTEND_HTTP_PLUGINS=<%= scope.lookupvar('::openshift_origin::node_frontend_plugins').map{ |p| 'openshift-origin-frontend-' + p }.join(',') %>
+LIBVIRT_PRIVATE_IP_RANGE=172.16.0.0/12
+LIBVIRT_PRIVATE_IP_ROUTE=172.16.0.0/12
+LIBVIRT_PRIVATE_IP_GW=172.16.0.1
 
 CONTAINERIZATION_PLUGIN=openshift-origin-container-<%= scope.lookupvar('::openshift_origin::node_container_plugin') %>
+QUOTA_WARNING_PERCENT=90.0
+
+REPORT_BUILD_ANALYTICS=true
+
+# MOTD_FILE="/etc/openshift/welcome.rhcsh"                   # Change the default rhcs welcome message
+
+# Gems for managing the frontend http server
+# NOTE: Steps must be taken both before and after these values are changed.
+#       Run "oo-frontend-plugin-modify  --help" for more information.
+OPENSHIFT_FRONTEND_HTTP_PLUGINS=<%= scope.lookupvar('::openshift_origin::node_frontend_plugins').map{ |p| 'openshift-origin-frontend-' + p }.join(',') %>

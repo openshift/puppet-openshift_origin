@@ -1,5 +1,16 @@
-BIND_SERVER="<%= scope.lookupvar('::openshift_origin::named_ip_addr') %>"
+# Settings related to the nsupdate variant of an OpenShift DNS plugin
+# configured for TSIG authentication.
+
+# The DNS server
+BIND_SERVER="127.0.0.1"
+
+# The DNS server's port
 BIND_PORT=53
+
+# The base zone for the DNS server
+BIND_ZONE="<%= scope.lookupvar('::openshift_origin::domain') %>"
+
+# TSIG authentication
 BIND_KEYNAME="<%= scope.lookupvar('::openshift_origin::domain') %>"
 BIND_KEYVALUE="<%= scope.lookupvar('::openshift_origin::bind_key') %>"
-BIND_ZONE="<%= scope.lookupvar('::openshift_origin::domain') %>"
+BIND_KEYALGORITHM=HMAC-MD5 # TODO: Parameterize.

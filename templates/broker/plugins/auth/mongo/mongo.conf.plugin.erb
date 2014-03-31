@@ -1,7 +1,13 @@
-MONGO_REPLICA_SETS=false
-# Replica set example: "<host-1>:<port-1> <host-2>:<port-2> ..."
+# Settings related to the MongoDB variant of an OpenShift auth plugin
+
+# The host:port for your MongoDB server
 MONGO_HOST_PORT="<%= scope.lookupvar('::openshift_origin::datastore_hostname') %>:27017"
+
+# The user to connect to your MongoDB
 MONGO_USER="<%= scope.lookupvar('::openshift_origin::mongodb_broker_user') %>"
+
+# The password to connect to your MongoDB
 MONGO_PASSWORD="<%= scope.lookupvar('::openshift_origin::mongodb_broker_password') %>"
+
+# The database within your MongoDB to use for auth
 MONGO_DB="<%= scope.lookupvar('::openshift_origin::mongodb_name') %>"
-MONGO_COLLECTION="auth_user"

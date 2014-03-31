@@ -1,2 +1,2 @@
-KEY_NAME=<%= scope.lookupvar('::openshift_origin::named_hostname') %>
-KEY_VALUE=<%= scope.lookupvar('::openshift_origin::domain') %>
+KEY_NAME=<%= scope.lookupvar('::openshift_origin::domain') %>
+KEY_VALUE=<%= scope.lookupvar('::openshift_origin::bind_key') %>

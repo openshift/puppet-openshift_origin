@@ -4,22 +4,30 @@ CLOUD_DOMAIN="<%= scope.lookupvar('::openshift_origin::domain') %>"
 # Eg: "small,medium,large"
 VALID_GEAR_SIZES="<%= scope.lookupvar('::openshift_origin::conf_valid_gear_sizes').join(',') %>"
 
+# Comma-separated list of allowed types for ssh keys. krb5-principal keys are added to .k5login, instead of authorized_keys
+#VALID_SSH_KEY_TYPES="ssh-rsa,ssh-dss,ssh-rsa-cert-v01@openssh.com,ssh-dss-cert-v01@openssh.com,ssh-rsa-cert-v00@openssh.com,ssh-dss-cert-v00@openssh.com,krb5-principal"
+
+# Default number of domains to assign to a new user
+DEFAULT_MAX_DOMAINS="10"
 # Default number of gears to assign to a new user
 DEFAULT_MAX_GEARS="100"
 # Default gear sizes (comma-separated) allowed to a new user
 DEFAULT_GEAR_CAPABILITIES="<%= scope.lookupvar('::openshift_origin::conf_default_gear_capabilities').join(',') %>"
 # Default gear size for a new gear
 DEFAULT_GEAR_SIZE="<%= scope.lookupvar('::openshift_origin::conf_default_gear_size') %>"
+# Default user capability to create Highly Available applications
+DEFAULT_ALLOW_HA="true"
 
-#Broker datastore configuration
-MONGO_REPLICA_SETS=false
-# Replica set example: "<host-1>:<port-1> <host-2>:<port-2> ..."
+# For replica sets, use ',' delimiter for multiple servers
+# Eg: MONGO_HOST_PORT="<host1:port1>,<host2:port2>..."
 MONGO_HOST_PORT="<%= scope.lookupvar('::openshift_origin::datastore_hostname') %>:27017"
 MONGO_USER="<%= scope.lookupvar('::openshift_origin::mongodb_broker_user') %>"
 MONGO_PASSWORD="<%= scope.lookupvar('::openshift_origin::mongodb_broker_password') %>"
 MONGO_DB="<%= scope.lookupvar('::openshift_origin::mongodb_name') %>"
 MONGO_TEST_DB="<%= scope.lookupvar('::openshift_origin::mongodb_name') %>_test"
 MONGO_SSL="false"
+MONGO_WRITE_REPLICAS=1
+
 #Enables gear/filesystem resource usage tracking
 ENABLE_USAGE_TRACKING_DATASTORE="true"
 #Log resource usage information
@@ -96,6 +104,16 @@ MAX_DOWNLOAD_REDIRECTS="2"
 MAX_DOWNLOAD_TIME="10"
 # Maximum size for downloadable manifest file (in bytes)
 MAX_CART_SIZE="20480"
+# Maximum number of seconds for connection to be established when downloading
+# a cartridge.
+CART_DOWNLOAD_CONN_TIMEOUT="2"
+
+# Set a HTTP proxy server for downloading cartridges
+#
+# HTTP_PROXY="proxy.server.com:3128"
+
+# Team collaboration settings
+MAX_MEMBERS_PER_RESOURCE="100"
 
 # Whether cartridges that specify direct SSL connection to the gear
 # are allowed, denied or forced.
@@ -105,8 +123,38 @@ SSL_ENDPOINT="allow"
 
 # Config flag to allow scalable applications to become Highly Available
 ALLOW_HA_APPLICATIONS="true"
+# This is the public hostname that the HA DNS entries for an application point to
+# This allows setting up an external router and routing application traffic to the application's gears   
+ROUTER_HOSTNAME="www.example.com"
 
-# Determine whether or not multiple HA proxy gears for a given application can be spun up on the same node
+# Prefix/Suffix used for Highly Available application URL
+# http://${HA_DNS_PREFIX}${APP_NAME}-${DOMAIN_NAME}${HA_DNS_SUFFIX}.${CLOUD_DOMAIN}
+HA_DNS_PREFIX="ha-"
+HA_DNS_SUFFIX=""
+
+# This configuration determines if multiple haproxy gears can be hosted on the same node.
+# If allowed, the frontend apache will route the web traffic being sent to this node
+# using the app_dns or the alias to ONLY one of the haproxy gears that has the mapping.
+# To avoid this situation, this flag should be set to false in production environments.
 ALLOW_MULTIPLE_HAPROXY_ON_NODE=<%= scope.lookupvar('::openshift_origin::conf_broker_multi_haproxy_per_node') %>
 
-ROUTER_HOSTNAME="www.example.com"
+#Whether to allow obsolete cartridges to be instantiated for a new application or added to an existing application
+ALLOW_OBSOLETE_CARTRIDGES="false"
+
+# Whether to allow users to create aliases that are under the cloud domain. Note:
+# Aliases of the form word-word.<domain> are rejected to prevent conflicts with app names.
+# Also this still will not create any DNS entry for the alias; that is an external step.
+ALLOW_ALIAS_IN_DOMAIN="false"
+
+# Whether to send OpenShift log messages to syslog or to files.
+# If true, messages that normally end up in the Rails environment-specific log
+# (e.g. production.rb), usage.log, and user_action.log will instead go to syslog.
+# SYSLOG_ENABLED="true"
+
+# Customize default app templates for specified framework cartridges.
+# Space-separated list of elements <cartridge-name>|<git url> - URLs must be available for all nodes.
+# URL will be cloned as the git repository for the cartridge at app creation unless the user specifies their own.
+# e.g.: DEFAULT_APP_TEMPLATES=php-5.3|http://example.com/php.git perl-5.10|file:///etc/openshift/cart.conf.d/templates/perl.git
+# WARNING: do not include private credentials in any URL; they would be visible in every app's cloned repository.
+DEFAULT_APP_TEMPLATES=
+
