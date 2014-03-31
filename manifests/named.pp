@@ -131,12 +131,12 @@ class openshift_origin::named {
   
   }
   
-  firewall{ 'dns-tcp':
+  openshift_origin::firewall{ 'dns-tcp':
     port     => 53,
     protocol => 'tcp',
   }
 
-  firewall{ 'dns-udp':
+  openshift_origin::firewall{ 'dns-udp':
     port     => 53,
     protocol => 'udp',
   }

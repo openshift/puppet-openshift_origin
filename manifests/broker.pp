@@ -173,12 +173,12 @@ class openshift_origin::broker {
     include openshift_origin::login_shell
   }
   
-  ensure_resource( 'firewall', 'http', {
+  ensure_resource( 'openshift_origin::firewall', 'http', {
       service => 'http',
     }
   )
   
-  ensure_resource( 'firewall', 'https', {
+  ensure_resource( 'openshift_origin::firewall', 'https', {
       service => 'https',
     }
   )
