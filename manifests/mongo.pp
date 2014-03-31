@@ -33,13 +33,13 @@ class openshift_origin::mongo {
     ],
   }
 
+  $openshift_init_provider = $::operatingsystem ? {
+    'Fedora' => 'systemd',
+    'CentOS' => 'redhat',
+    default  => 'redhat',
+  }
+
   if $openshift_origin::configure_mongodb == 'delayed' {
-    $openshift_init_provider = $::operatingsystem ? {
-      'Fedora' => 'systemd',
-      'CentOS' => 'redhat',
-      default  => 'redhat',
-    }
-    
     if $openshift_init_provider == 'systemd' {
       file { 'mongo setup service':
         ensure  => present,

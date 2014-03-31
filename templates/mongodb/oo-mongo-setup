@@ -60,7 +60,11 @@ def run(cmd)
 end
 
 def stop_mongo
+<% if scope.lookupvar("openshift_origin::mongo::openshift_init_provider") == "systemd" %>
   unless File.exist?("/usr/bin/systemctl") && run("/usr/bin/systemctl stop mongod.service") == 0
+<% else %>
+  unless run("/sbin/service mongod stop") == 0
+<% end %>
     run "/usr/bin/pkill -u mongodb"
 
     $log.debug("Repair mongodb database if needed...")
@@ -86,7 +90,11 @@ end
 
 def start_mongo
   $log.debug "Initializing mongodb database"
+<% if scope.lookupvar("openshift_origin::mongo::openshift_init_provider") == "systemd" %>
   unless File.exist?("/usr/bin/systemctl") && run("/usr/bin/systemctl start mongod.service") == 0
+<% else %>
+  unless run("/sbin/service mongod start") == 0
+<% end %>
     run "/bin/su -c 'mongod -f /etc/mongodb.conf' --shell /bin/bash mongodb"
   end
   while run('/bin/fgrep "[initandlisten] waiting for connections" /var/log/mongodb/mongodb.log') != 0 do
