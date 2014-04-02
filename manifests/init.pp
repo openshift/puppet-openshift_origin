@@ -106,6 +106,11 @@
 #   DNS entries for the hostnames of the other components being 
 #   installed on this host as well. If you are using a nameserver set
 #   up separately, you are responsible for all necessary DNS entries.
+#
+# [*datastore1_ip|datastore2_ip_addr|datastore3_ip_addr*]
+#   Default: undef
+#   IP addresses of the first 3 MongoDB servers in a replica set.
+#   Add datastoreX_ip_addr parameters for larger clusters.
 # 
 # [*named_ip_addr*]
 #   Default: IP of a named instance or current IP if installing on this 
@@ -209,6 +214,41 @@
 #   This is the name of the database in MongoDB in which the broker will
 #   store data.
 # 
+# [*mongodb_port*]
+#   Default: '27017'
+#   The TCP port used for MongoDB to listen on.
+#
+# [*mongodb_replicasets*]
+#   Default: false
+#   Enable/disable MongoDB replica sets for database high-availability.
+#
+# [*mongodb_replica_name*]
+#   Default: 'openshift'
+#   The MongoDB replica set name when $mongodb_replicasets is true.
+#
+# [*mongodb_replica_primary*]
+#   Default: undef
+#   Set the host as the primary with true or secondary with false.
+#
+# [*mongodb_replica_primary_ip_addr*]
+#   Default: undef
+#   The IP address of the Primary host within the MongoDB replica set.
+#
+# [*mongodb_replicasets_members*]
+#   Default: undef
+#   An array of [host:port] of replica set hosts. Example:
+#   ['10.10.10.10:27017', '10.10.10.11:27017', '10.10.10.12:27017']
+#
+# [*mongodb_keyfile*]
+#   Default: '/etc/mongodb.keyfile'
+#   The file containing the $mongodb_key used to authenticate MongoDB
+#   replica set members.
+#
+# [*mongodb_key*]
+#   Default: 'changeme'
+#   The key used by members of a MongoDB replica set to authenticate
+#   one another.
+#
 # [*openshift_user1*]
 # [*openshift_password1*]
 #   Default: demo/changeme
@@ -494,6 +534,9 @@ class openshift_origin (
   $named_hostname                       = "ns1.${domain}",
   $activemq_hostname                    = "activemq.${domain}",
   $datastore_hostname                   = "mongodb.${domain}",
+  $datastore1_ip_addr                   = undef,
+  $datastore2_ip_addr                   = undef,
+  $datastore3_ip_addr                   = undef,
   $named_ip_addr                        = $ipaddress,
   $bind_key                             = '',
   $bind_krb_keytab                      = '',
@@ -513,6 +556,14 @@ class openshift_origin (
   $mongodb_broker_user                  = 'openshift',
   $mongodb_broker_password              = 'mongopass',
   $mongodb_name                         = 'openshift_broker',
+  $mongodb_port                         = '27017',
+  $mongodb_replicasets                  = false,
+  $mongodb_replica_name                 = 'openshift',
+  $mongodb_replica_primary              = undef,
+  $mongodb_replica_primary_ip_addr      = undef,
+  $mongodb_replicasets_members          = undef,
+  $mongodb_keyfile                      = '/etc/mongodb.keyfile',
+  $mongodb_key                          = 'changeme',
   $openshift_user1                      = 'demo',
   $openshift_password1                  = 'changeme',
   $conf_broker_auth_salt                = inline_template('<%= require "securerandom"; SecureRandom.base64 %>'),
