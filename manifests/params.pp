@@ -122,4 +122,18 @@ class openshift_origin::params {
     undef   => $node_shmall_default,
     default => $::openshift_origin::node_shmall,
   }
+
+  case $::operatingsystem {
+    'RedHat', 'CentOS': {
+      $user  = pick($user, 'mongod')
+      $group = pick($group, 'mongod')
+    }
+    'Fedora': {
+      $user  = pick($user, 'mongodb')
+      $group = pick($group, 'mongodb')
+    }
+    default: {
+      fail("${::operatingsystem} is not supported")
+    }
+  }
 }

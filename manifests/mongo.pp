@@ -20,6 +20,8 @@ class openshift_origin::mongo {
     }
   )
 
+  $port = $openshift_origin::mongodb_port
+
   file { 'mongo setup script':
     ensure  => present,
     path    => '/usr/sbin/oo-mongo-setup',
@@ -73,6 +75,46 @@ class openshift_origin::mongo {
     exec { '/usr/sbin/oo-mongo-setup':
       command => $cmd,
       require => [File['mongo setup script'],Class['openshift_origin::update_conf_files']]
+    }
+  }
+
+  if $openshift_origin::mongodb_replicasets {
+    file { $openshift_origin::mongodb_keyfile:
+      content => inline_template($openshift_origin::mongodb_key),
+      owner   => $openshift_origin::params::user,
+      group   => $openshift_origin::params::group,
+      mode    => '0400',
+      require => Exec['/usr/sbin/oo-mongo-setup'],
+      notify  => Service['mongod'],
+    }
+    exec { 'keyfile-mongo-conf':
+      path    => ['/bin/', '/usr/bin/', '/usr/sbin/'],
+      command => "echo -e \"\nkeyFile = $openshift_origin::mongodb_keyfile\n\" >> /etc/mongodb.conf",
+      unless  => "grep \"keyFile = $openshift_origin::mongodb_keyfile\" /etc/mongodb.conf",
+      require => File[$openshift_origin::mongodb_keyfile],
+      notify  => Service['mongod'],
+    }
+    exec { 'replset-mongo-conf':
+      path    => ['/bin/', '/usr/bin/', '/usr/sbin/'],
+      command => "echo -e \"\nreplSet = $openshift_origin::mongodb_replica_name\n\" >> /etc/mongodb.conf",
+      unless  => "grep \"replSet = $openshift_origin::mongodb_replica_name\" /etc/mongodb.conf",
+      require => [File[$openshift_origin::mongodb_keyfile],Exec['/usr/sbin/oo-mongo-setup']],
+      notify  => Service['mongod'],
+    }
+    if $openshift_origin::mongodb_replica_primary {
+      exec { 'replset-init':
+        path    => ['/bin/', '/usr/bin/', '/usr/sbin/'],
+        command => "mongo admin -u $openshift_origin::mongodb_admin_user -p $openshift_origin::mongodb_admin_password --quiet --eval printjson\"(rs.initiate({ _id: \'$openshift_origin::mongodb_replica_name\', members: [ { _id: 0, host: \'${ipaddress}:${port}\' } ] }))\"",
+        unless  => "mongo admin --host $ipaddress -u $openshift_origin::mongodb_admin_user -p $openshift_origin::mongodb_admin_password --quiet --eval \"printjson(rs.status())\" | grep '\"name\" : \"${ipaddress}:${port}\"'",
+        require => [Service['mongod'], Exec['keyfile-mongo-conf', 'replset-mongo-conf']],
+      }
+    } else {
+      exec { 'replset-add':
+        path    => ['/bin/', '/usr/bin/', '/usr/sbin/'],
+        command => "/bin/mongo admin --host $openshift_origin::mongodb_replica_primary_ip_addr -u $openshift_origin::mongodb_admin_user -p $openshift_origin::mongodb_admin_password --quiet --eval \"printjson(rs.add(\'${ipaddress}:${port}\'))\"",
+        unless  => "/bin/mongo admin --host $openshift_origin::mongodb_replica_primary_ip_addr -u $openshift_origin::mongodb_admin_user -p $openshift_origin::mongodb_admin_password --quiet --eval \"printjson(rs.status())\" | grep '\"name\" : \"${ipaddress}:${port}\"'",
+        require => [Service['mongod'], Exec['keyfile-mongo-conf', 'replset-mongo-conf']],
+      }
     }
   }
 
