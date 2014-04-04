@@ -263,6 +263,31 @@ Default: ['time.apple.com iburst', 'pool.ntp.org iburst', 'clock.redhat.com ibur
 NOTE: Use iburst after every ntp server definition to speed up the
 initial synchronization.
 
+==== activemq_cluster
+Default: false
+
+Set to true to cluster ActiveMQ for high-availability and scalability
+of OpenShift message queues.
+
+==== activemq_cluster_members
+Default: undef
+
+An array of ActiveMQ server hostnames to be included in the ActiveMQ
+cluster. Required when parameter activemq_cluster is set to true.
+
+==== mcollective_cluster_members
+Default: $activemq_cluster_members
+
+An array of ActiveMQ server hostnames to be included in the ActiveMQ
+cluster. Required when parameter activemq_cluster is set to true.
+
+==== activemq_password
+Default 'changeme'
+
+Password used by ActiveMQ's amquser.  The amquser is used to authenticate
+ActiveMQ inter-cluster communication.  Only used when activemq_cluster
+is true.
+
 ==== activemq_admin_password
 This is the admin password for the ActiveMQ admin console, which is
 not needed by OpenShift but might be useful in troubleshooting.

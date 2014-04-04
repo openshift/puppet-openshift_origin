@@ -174,6 +174,27 @@
 # errors depending on context. If non-alphanumeric values are required,
 # update them separately after installation.
 # 
+# [*activemq_cluster*]
+#   Default: false
+#   Set to true to cluster ActiveMQ for high-availability and scalability
+#   of OpenShift message queues.
+#
+# [*activemq_cluster_members*]
+#   Default: undef
+#   An array of ActiveMQ server hostnames.  Required when parameter
+#   activemq_cluster is set to true.
+#
+# [*mcollective_cluster_members*]
+#   Default: $activemq_cluster_members
+#   An array of ActiveMQ server hostnames.  Required when parameter
+#   activemq_cluster is set to true.
+#
+# [*activemq_password*]
+#   Default 'changeme'
+#   Password used by ActiveMQ's amquser.  The amquser is used to authenticate
+#   ActiveMQ inter-cluster communication.  Only used when activemq_cluster
+#   is true.
+#
 # [*activemq_admin_password*]
 #   Default: scrambled
 #   This is the admin password for the ActiveMQ admin console, which is
@@ -505,6 +526,10 @@ class openshift_origin (
   $node_ip_addr                         = $ipaddress,
   $configure_ntp                        = true,  
   $ntp_servers                          = ['time.apple.com iburst', 'pool.ntp.org iburst', 'clock.redhat.com iburst'],
+  $activemq_cluster                     = false,
+  $activemq_cluster_members             = undef,
+  $mcollective_cluster_members          = $activemq_cluster_members,
+  $activemq_password                    = 'changeme',
   $activemq_admin_password              = inline_template('<%= require "securerandom"; SecureRandom.base64 %>'),
   $mcollective_user                     = 'mcollective',
   $mcollective_password                 = 'marionette',
@@ -552,6 +577,11 @@ class openshift_origin (
   $update_conf_files                    = true,
 ){
   include openshift_origin::role
+
+  if $activemq_cluster and ! $activemq_cluster_members and ! $mcollective_cluster_members {
+    fail('activemq_cluster_members and mcollective_cluster_members parameters are required when setting activemq_cluster to true')
+  }
+
   if member( $roles, 'named' ) {
     class{ 'openshift_origin::role::named': 
       before => Class['openshift_origin::update_conf_files'],

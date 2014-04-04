@@ -21,6 +21,9 @@ class openshift_origin::activemq {
     }
   )
 
+  $cluster_members        = $::openshift_origin::activemq_cluster_members
+  $cluster_remote_members = delete($cluster_members, $::openshift_origin::activemq_hostname)
+
   ensure_resource('package', 'activemq-client', {
       ensure  => present,
       require => Class['openshift_origin::install_method'],
@@ -47,9 +50,15 @@ class openshift_origin::activemq {
     require => Package['activemq'],
   }
 
+  if $::openshift_origin::activemq_cluster {
+    $activemq_config_template_real = 'openshift_origin/activemq/activemq-network.xml.erb'
+  } else {
+    $activemq_config_template_real = 'openshift_origin/activemq/activemq.xml.erb'
+  }
+
   file { 'activemq.xml config':
     path    => '/etc/activemq/activemq.xml',
-    content => template('openshift_origin/activemq/activemq.xml.erb'),
+    content => template($activemq_config_template_real),
     owner   => 'root',
     group   => 'root',
     mode    => '0444',
@@ -92,5 +101,12 @@ class openshift_origin::activemq {
   firewall{ 'activemq':
     port      => '61613',
     protocol  => 'tcp',
+  }
+
+  if $::openshift_origin::activemq_cluster {
+    firewall{ 'activemq-openwire':
+      port      => '61616',
+      protocol  => 'tcp',
+    }
   }
 }
