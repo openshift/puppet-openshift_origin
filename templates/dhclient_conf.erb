@@ -1,3 +1,7 @@
+<% if scope.lookupvar('::openshift_origin::named_ha') -%>
+prepend domain-name-servers <%= scope.lookupvar('::openshift_origin::named_members').join(', ') %>;
+<% else -%>
 prepend domain-name-servers <%= scope.lookupvar('::openshift_origin::named_ip_addr') %>;
+<% end -%>
 supersede host-name "<%= @hostname %>";
 supersede domain-name "<%= scope.lookupvar('::openshift_origin::domain') %>";

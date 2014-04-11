@@ -1,0 +1,8 @@
+set PEERDNS no        
+<% if scope.lookupvar('::openshift_origin::named_ha') then
+scope.lookupvar('::openshift_origin::named_members').each_with_index do |named_member, index| -%>
+set DNS<%= index + 1%> <%= named_member %>
+<% end -%>
+<% else -%>
+set DNS1 <%= scope.lookupvar('::openshift_origin::named_ip_addr') -%>
+<% end -%>
