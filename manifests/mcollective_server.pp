@@ -22,6 +22,14 @@ class openshift_origin::mcollective_server {
     } 
   )
 
+  $cluster_members = $::openshift_origin::mcollective_cluster_members
+
+  if $cluster_members {
+    $pool_size = size($cluster_members)
+  } else {
+    $pool_size = '1'
+  }
+
   # Ensure classes are run in order
   Class['Openshift_origin::Role']               -> Class['Openshift_origin::Mcollective_server']
   Class['Openshift_origin::Update_conf_files'] -> Class['Openshift_origin::Mcollective_server']

@@ -11,9 +11,17 @@ securityprovider = psk
 plugin.psk = unset
 
 connector = activemq
-plugin.activemq.pool.size = 1
+plugin.activemq.pool.size = <%= @pool_size %>
+<% if scope.lookupvar('::openshift_origin::activemq_cluster') then
+@cluster_members.each_with_index do |cluster_member, index| -%>
+plugin.activemq.pool.<%= index + 1%>.host = <%= cluster_member %>
+plugin.activemq.pool.<%= index + 1%>.port = 61613
+plugin.activemq.pool.<%= index + 1%>.user = <%= scope.lookupvar('::openshift_origin::mcollective_user') %>
+plugin.activemq.pool.<%= index + 1%>.password = <%= scope.lookupvar('::openshift_origin::mcollective_password') %>
+<% end -%>
+<% else -%>
 plugin.activemq.pool.1.host = <%= scope.lookupvar('::openshift_origin::activemq_hostname') %>
 plugin.activemq.pool.1.port = 61613
 plugin.activemq.pool.1.user = <%= scope.lookupvar('::openshift_origin::mcollective_user') %>
 plugin.activemq.pool.1.password = <%= scope.lookupvar('::openshift_origin::mcollective_password') %>
-
+<% end -%>
