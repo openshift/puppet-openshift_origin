@@ -207,8 +207,32 @@ up separately, you are responsible for all necessary DNS entries.
 ==== named_ip_addr
 Default: IP of a named instance or current IP if installing on this 
 node. This is used by every node to configure its primary name server.
+This is also used by Named slave members to identify the primary
+(aka master) Named server when named_ha is set to true.
 
 Default: the current IP (at install)  
+
+==== named_ha
+Set to true to configure Named service high-availability (master/slave).
+
+Note: named_ha requires at least 2 broker servers for high-availability.
+
+Default: false
+
+==== named_members
+An array of Named server IP addresses. Requires setting named_ha to true.
+The array should start with the Named master IP address, followed by
+Named Slave IP address(es).
+
+Default: undef
+
+=== named_master
+Specifies whether the server is a Named master or slave. Available options
+are true for Named master and false for Named slave.
+
+Note: Requires setting named_ha to true.
+
+Default: false
 
 ==== bind_key
 When the nameserver is remote, use this to specify the HMAC-MD5 key

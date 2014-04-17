@@ -1,8 +1,15 @@
 // define a zone for infrastructure hosts
 
+include "<%= scope.lookupvar('::openshift_origin::dns_infrastructure_zone') %>.key";
+
 zone "<%= scope.lookupvar('::openshift_origin::dns_infrastructure_zone') %>" IN {
+<% if scope.lookupvar('::openshift_origin::named_master') or scope.lookupvar('::openshift_origin::named_ha') == false -%>
     type master;
     file "dynamic/<%= scope.lookupvar('::openshift_origin::dns_infrastructure_zone') %>.db";
     allow-update { key <%= scope.lookupvar('::openshift_origin::dns_infrastructure_zone') %> ; } ;
+<% else -%>
+    type slave;
+    file "slaves/<%= scope.lookupvar('::openshift_origin::dns_infrastructure_zone') %>.db";
+    masters { <%= scope.lookupvar('::openshift_origin::named_ip_addr') %>; };
+<% end -%>
 };
-

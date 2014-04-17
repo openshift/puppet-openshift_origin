@@ -7,10 +7,17 @@ $TTL 1800
                          1800       ; expire (30 minutes)
                          10         ; minimum (10 seconds)
                           )
-                     NS ns1.<%= scope.lookupvar('::openshift_origin::dns_infrastructure_zone') %>.
+<% if scope.lookupvar('::openshift_origin::named_ha') then
+scope.lookupvar('::openshift_origin::named_members').each_with_index do |named_member, index| -%>
+                     NS ns<%= index + 1%>.<%= scope.lookupvar('::openshift_origin::dns_infrastructure_zone') %>.
+<% end -%>
 $ORIGIN <%= scope.lookupvar('::openshift_origin::dns_infrastructure_zone') %>.
-ns1	IN	A        <%= scope.lookupvar('::ipaddress') %>
-
+<% scope.lookupvar('::openshift_origin::named_members').each_with_index do |named_member, index| -%>
+ns<%= index + 1%>     A        <%= named_member %>
+<% end -%>
+<% else -%>
+                     NS ns1.<%= scope.lookupvar('::openshift_origin::dns_infrastructure_zone') %>.
+<% end -%>
 ;; add the remaining hosts
 <%- scope.lookupvar('::openshift_origin::dns_infrastructure_names').each do |rr| -%>
 <%= rr['hostname'].gsub(/\.#{scope.lookupvar('::openshift_origin::dns_infrastructure_zone')}$/, '') -%>	IN	A	<%= rr['ipaddr'] %>

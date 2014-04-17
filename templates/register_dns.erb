@@ -4,3 +4,11 @@
   echo update add <%= scope.lookupvar('fqdn') %> 180 A <%= scope.lookupvar('::openshift_origin::node_ip_addr') %>
   echo send
 ) | nsupdate -y <%= scope.lookupvar('::openshift_origin::domain') %>:<%= scope.lookupvar('::openshift_origin::bind_key') %>
+<% if  scope.lookupvar('::openshift_origin::dns_infrastructure_zone') != '' %>
+(
+  echo server <%= scope.lookupvar('::openshift_origin::named_ip_addr') %>
+  echo update delete <%= @hostname %>.<%= scope.lookupvar('::openshift_origin::dns_infrastructure_zone') %> A
+  echo update add <%= @hostname %>.<%= scope.lookupvar('::openshift_origin::dns_infrastructure_zone') %> 180 A <%= scope.lookupvar('::openshift_origin::node_ip_addr') %>
+  echo send
+) | nsupdate -y <%= scope.lookupvar('::openshift_origin::dns_infrastructure_zone') %>:<%= scope.lookupvar('::openshift_origin::dns_infrastructure_key') %>
+<% end-%>

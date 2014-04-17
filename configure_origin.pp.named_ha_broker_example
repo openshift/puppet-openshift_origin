@@ -1,0 +1,40 @@
+class { 'openshift_origin' :
+  # Components to install on this host:
+  roles			 => ['broker','named','activemq','datastore'],
+
+  # BIND / named high-availability config
+  named_ha                   => true,
+  named_master               => true, # Only 1 named_master is allowed when deploying named_ha
+  named_members              => [<BROKER1_IP>, <BROKER2_IP>, <BROKER3_IP>], # Array of Named servers
+  named_ip_addr              => '<BROKER1_IP>', # Only needed on Named slaves and Node hosts.
+                                                # Specifies the Named master IP address
+
+  # BIND / named config
+  # This is the key for updating the OpenShift BIND server
+  bind_key                   => '<DNSSEC_BIND_KEY>',
+  # The domain under which applications should be created.
+  domain                     => 'example.com',
+  # Apps would be named <app>-<namespace>.example.com
+  # This also creates hostnames for local components under our domain
+  register_host_with_named   => true,
+  # Forward requests for other domains (to Google by default)
+  conf_named_upstream_dns    => ['<UPSTREAM_DNS_IP>'],
+
+  # NTP Servers for OpenShift hosts to sync time
+  ntp_servers                => ['<NTP_SERVER_FQDN> iburst'],
+
+  # The FQDNs of the OpenShift component hosts
+  broker_hostname            => '<BROKER_HOSTNAME>.example.com',
+  named_hostname             => '<BROKER_HOSTNAME>.example.com',
+  datastore_hostname         => '<BROKER_HOSTNAME>.example.com',
+  activemq_hostname          => '<BROKER_HOSTNAME>.example.com',
+
+  # Auth OpenShift users created with htpasswd tool in /etc/openshift/htpasswd
+  broker_auth_plugin         => 'htpasswd',
+  # Username and password for initial openshift user
+  openshift_user1            => 'openshift',
+  openshift_password1        => 'password',
+
+  #Enable development mode for more verbose logs
+  development_mode           => true,
+}

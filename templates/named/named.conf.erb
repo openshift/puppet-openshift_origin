@@ -12,6 +12,9 @@ options {
     dump-file "/var/named/data/cache_dump.db";
     statistics-file "/var/named/data/named_stats.txt";
     memstatistics-file "/var/named/data/named_mem_stats.txt";
+<% if scope.lookupvar('::openshift_origin::named_ha') and scope.lookupvar('::openshift_origin::named_master') -%>
+    allow-transfer {<%= scope.lookupvar('::openshift_origin::named_members').join('; ') %>; };
+<% end -%>
     allow-query { any; };
     recursion yes;
 
@@ -43,9 +46,15 @@ include "/etc/named.rfc1912.zones";
 include "<%= scope.lookupvar('::openshift_origin::domain') %>.key";
 
 zone "<%= scope.lookupvar('::openshift_origin::domain') %>" IN {
+<% if scope.lookupvar('::openshift_origin::named_master') or scope.lookupvar('::openshift_origin::named_ha') == false -%>
     type master;
     file "dynamic/<%= scope.lookupvar('::openshift_origin::domain') %>.db";
     allow-update { key <%= scope.lookupvar('::openshift_origin::domain') %> ; } ;
+<% else -%>
+    type slave;
+    file "slaves/<%= scope.lookupvar('::openshift_origin::domain') %>.db";
+    masters { <%= scope.lookupvar('::openshift_origin::named_ip_addr') %>; };
+<% end -%>
 };
 
 // create a place for openshift infrastructure ip/name mapping

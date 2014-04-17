@@ -17,17 +17,34 @@ class openshift_origin::named {
   include openshift_origin::params
 
   package { ['bind', 'bind-utils']:
-    ensure => present,
+    ensure  => present,
     require => Class['openshift_origin::install_method'],
   }
 
-  file { 'dynamic zone':
-    path    => "/var/named/dynamic/${openshift_origin::domain}.db",
-    content => template('openshift_origin/named/dynamic-zone.db.erb'),
-    owner   => 'named',
-    group   => 'named',
-    mode    => '0644',
-    require => File['/var/named/dynamic'],
+  if ! $::openshift_origin::named_ha or $::openshift_origin::named_ha and $::openshift_origin::named_master {
+    file { '/var/named/dynamic':
+      ensure  => directory,
+      owner   => 'named',
+      group   => 'named',
+      mode    => '0750',
+      require => File['/var/named'],
+    }
+    file { 'dynamic zone':
+      ensure  => present,
+      path    => "/var/named/dynamic/${openshift_origin::domain}.db",
+      content => template('openshift_origin/named/dynamic-zone.db.erb'),
+      owner   => 'named',
+      group   => 'named',
+      mode    => '0644',
+      require => File['/var/named/dynamic'],
+    }
+    exec { 'zone-reload':
+      path        => ['/bin/', '/usr/bin/', '/usr/sbin/'],
+      command     => "rndc freeze ${openshift_origin::domain}; rndc reload ${openshift_origin::domain}; rndc thaw ${openshift_origin::domain}",
+      refreshonly => true,
+      subscribe   => File['dynamic zone'],
+      require     => [File['/etc/rndc.key'],Service['named']],
+    }
   }
 
   exec { 'create rndc.key':
@@ -58,12 +75,14 @@ class openshift_origin::named {
     require => Package['bind'],
   }
 
-  file { '/var/named/dynamic':
-    ensure  => directory,
-    owner   => 'named',
-    group   => 'named',
-    mode    => '0750',
-    require => File['/var/named'],
+  if $::openshift_origin::named_ha and ! $::openshift_origin::named_master {
+    file { '/var/named/slaves':
+      ensure  => directory,
+      owner   => 'named',
+      group   => 'named',
+      mode    => '0770',
+      require => File['/var/named'],
+    }
   }
 
   file { 'named key':
@@ -85,16 +104,16 @@ class openshift_origin::named {
   }
 
   # create named/adddress mappings for infrastructure hosts
-  if "${openshift_origin::dns_infrastructure_zone}" != '' {
+  if $::openshift_origin::dns_infrastructure_zone != '' {
 
     file { 'infrastructure host configuration':
-      path => '/var/named/oo_infrastructure.conf',
-      owner => 'root',
-      group => 'named',
-      mode => '644',
+      path    => '/var/named/oo_infrastructure.conf',
+      owner   => 'root',
+      group   => 'named',
+      mode    => '644',
       content => template('openshift_origin/named/oo_infrastructure.conf.erb'),
-      replace => false,
-      require => File['/var/named']
+      notify  => Service['named'],
+      require => File['/var/named'],
     }
 
     file { 'named infrastructure key':
@@ -106,25 +125,31 @@ class openshift_origin::named {
       require => File['/var/named'],
     }
 
-    file { 'infrastructure zone contents':
-      path => "/var/named/dynamic/${openshift_origin::dns_infrastructure_zone}.db",
-      owner => 'named',
-      group => 'named',
-      mode => '664',
-      content => template('openshift_origin/named/oo_infrastructure.db.erb'),
-      replace => false,
-      require => File['infrastructure host configuration']
+    if ! $::openshift_origin::named_ha or $::openshift_origin::named_ha and $::openshift_origin::named_master {
+      file { 'infrastructure zone contents':
+        path    => "/var/named/dynamic/${openshift_origin::dns_infrastructure_zone}.db",
+        owner   => 'named',
+        group   => 'named',
+        mode    => '664',
+        content => template('openshift_origin/named/oo_infrastructure.db.erb'),
+        require => File['infrastructure host configuration'],
+      }
+      exec { 'infrastructure-zone-reload':
+        path        => ['/bin/', '/usr/bin/', '/usr/sbin/'],
+        command     => "rndc freeze ${openshift_origin::dns_infrastructure_zone}; rndc reload ${openshift_origin::dns_infrastructure_zone}; rndc thaw ${openshift_origin::dns_infrastructure_zone}",
+        refreshonly => true,
+        subscribe   => File['infrastructure zone contents'],
+        require     => [File['/etc/rndc.key'],Service['named']],
+      }
     }
-
   } else {
   
     file { 'infrastructure host configuration (empty)':
-      ensure => present,
-      replace => false,
-      path => '/var/named/oo_infrastructure.conf',
-      owner => 'root',
-      group => 'named',
-      mode => '644',
+      ensure  => present,
+      path    => '/var/named/oo_infrastructure.conf',
+      owner   => 'root',
+      group   => 'named',
+      mode    => '644',
       content => '// no openshift infrastructure zone',
       require => File['/var/named']
     }
@@ -141,25 +166,40 @@ class openshift_origin::named {
     protocol => 'udp',
   }
 
+  if $::openshift_origin::named_ha and ! $::openshift_origin::named_master {
+    $restorecon_files_real = [
+                              '/etc/rndc.key',
+                              '/var/named/forwarders.conf',
+                              '/etc/named.conf',
+                              '/var/named',
+                              '/var/named/slaves',
+                              'named key',
+                              'Named configs',
+                             ]
+  } else {
+    $restorecon_files_real = [
+                              '/etc/rndc.key',
+                              '/var/named/forwarders.conf',
+                              '/etc/named.conf',
+                              '/var/named',
+                              '/var/named/dynamic',
+                              'dynamic zone',
+                              'named key',
+                              'Named configs',
+                             ]
+  }
+
   exec { 'named restorecon':
     command => '/sbin/restorecon -rv /etc/rndc.* /etc/named.* /var/named /var/named/forwarders.conf',
-    require => [
-      File['/etc/rndc.key'],
-      File['/var/named/forwarders.conf'],
-      File['/etc/named.conf'],
-      File['/var/named'],
-      File['/var/named/dynamic'],
-      File['dynamic zone'],
-      File['named key'],
-      File['Named configs'],
-      Exec['create rndc.key'],
-    ],
+    require => [File[$restorecon_files_real],Exec['create rndc.key']],
   }
 
   service { 'named':
-    ensure    => running,
-    subscribe => File['/etc/named.conf'],
-    enable    => true,
-    require   => Exec['named restorecon'],
+    ensure     => running,
+    subscribe  => File['/etc/named.conf'],
+    enable     => true,
+    hasstatus  => true,
+    hasrestart => true,
+    require    => Exec['named restorecon'],
   }
 }

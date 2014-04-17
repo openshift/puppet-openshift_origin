@@ -110,7 +110,26 @@
 # [*named_ip_addr*]
 #   Default: IP of a named instance or current IP if installing on this 
 #   node. This is used by every node to configure its primary name server.
+#   This is also used by Named slave members to identify the primary
+#   (aka master) Named server when named_ha is set to true.
 #   Default: the current IP (at install)  
+#
+# [*named_ha*]
+#   Default: false
+#   Set to true to configure Named service high-availability (master/slave).
+#   Note: named_ha requires at least 2 servers for high-availability.
+#
+# [*named_members*]
+#   Default: undef
+#   An array of Named server IP addresses. The array should start with the
+#   Named master IP address, followed by Named Slave IP address(es).
+#   Requires setting named_ha to true.
+#
+# [*named_master*]
+#   Default: false
+#   Specifies whether the server is a Named master or slave. Available options
+#   are true for Named master and false Named slave. Requires setting named_ha
+#   to true.
 #   
 # [*bind_key*]
 #   When the nameserver is remote, use this to specify the HMAC-MD5 key
@@ -495,6 +514,9 @@ class openshift_origin (
   $activemq_hostname                    = "activemq.${domain}",
   $datastore_hostname                   = "mongodb.${domain}",
   $named_ip_addr                        = $ipaddress,
+  $named_ha                             = false,
+  $named_members                        = undef,
+  $named_master                         = false,
   $bind_key                             = '',
   $bind_krb_keytab                      = '',
   $bind_krb_principal                   = '',
@@ -576,6 +598,14 @@ class openshift_origin (
       require => Package['NetworkManager'],
       enable  => true,
     }
+  }
+
+  if $named_ha and ! $named_members {
+    fail('named_members parameter is required when setting named_ha to true')
+  }
+
+  if $named_ha and $named_master == false and $named_ip_addr == $ipaddress {
+    fail('named_ip_addr parameter must be set to the Named master IP address when named_master is false')
   }
 
 }

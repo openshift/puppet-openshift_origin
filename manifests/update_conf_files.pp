@@ -1,10 +1,11 @@
 class openshift_origin::update_conf_files {
-  augeas { 'network-scripts':
-    context => "/files/etc/sysconfig/network-scripts/ifcfg-${::openshift_origin::conf_node_external_eth_dev}",
-    changes => [
-      'set PEERDNS no',
-      "set DNS1 ${::openshift_origin::named_ip_addr}",
-    ],
+  file { 'network-scripts':
+    ensure  => present,
+    path    => "/etc/sysconfig/network-scripts/ifcfg-${::openshift_origin::conf_node_external_eth_dev}",
+    content => template('openshift_origin/sysconfig_conf.erb'),
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
   }
 
   file { 'dhcpclient':
@@ -17,6 +18,11 @@ class openshift_origin::update_conf_files {
   }
 
   file { '/etc/resolv.conf':
-    content => "search ${::openshift_origin::domain}\nnameserver ${::openshift_origin::named_ip_addr}"
+    ensure  => present,
+    path    => '/etc/resolv.conf',
+    content => template('openshift_origin/resolv_conf.erb'),
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
   }
 }
