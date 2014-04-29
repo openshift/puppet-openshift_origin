@@ -1,0 +1,4 @@
+:rhc-app-comm - [0:0]
+-A INPUT -m tcp -p tcp --dport 35531:65535 -m state --state NEW -j ACCEPT
+-A INPUT -j rhc-app-comm
+-A OUTPUT -j rhc-app-comm

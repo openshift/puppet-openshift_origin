@@ -1,3 +1,5 @@
+# [*use_v2_carts*]
+#   True if an OpenShift Origin node should be configured to use v2 cartridges. (Alpha)
 # Copyright 2013 Mojo Lingo LLC.
 # Modifications by Red Hat, Inc.
 #
