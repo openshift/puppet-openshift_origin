@@ -67,7 +67,7 @@ class openshift_origin::mongo {
   } else {
     $cmd = $::operatingsystem ? {
       'Fedora' => '/usr/sbin/oo-mongo-setup',
-      default => '/usr/bin/scl enable ruby193 /usr/sbin/oo-mongo-setup',
+      default => '/usr/bin/scl enable ruby193 v8314 /usr/sbin/oo-mongo-setup',
     }
 
     exec { '/usr/sbin/oo-mongo-setup':

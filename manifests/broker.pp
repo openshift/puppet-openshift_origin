@@ -139,7 +139,7 @@ class openshift_origin::broker {
   
   $broker_bundle_show = $::operatingsystem ? {
     'Fedora' => '/usr/bin/bundle show',
-    default  => '/usr/bin/scl enable ruby193 "bundle show"',
+    default  => '/usr/bin/scl enable ruby193 v8314 "bundle show"',
   }
 
   # This File resource is to guarantee that the Gemfile.lock created
