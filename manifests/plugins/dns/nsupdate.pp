@@ -15,7 +15,10 @@
 #
 class openshift_origin::plugins::dns::nsupdate {
   if $::openshift_origin::bind_key == '' and !$::openshift_origin::bind_krb_principal {
-    warning "Generate the Key file with '/usr/sbin/dnssec-keygen -a HMAC-MD5 -b 512 -n USER -r /dev/urandom -K /var/named ${::openshift_origin::domain}'"
+    # 128 bit keys were chosen only because it is compatible with different key
+    # algorithms. The user should use a key size appropriate to their
+    # deployment.
+    warning "Generate the Key file with '/usr/sbin/dnssec-keygen -a ${::openshift_origin::bind_key_algorithm} -b 128 -n USER -r /dev/urandom -K /var/named ${::openshift_origin::domain}'"
     warning "Use the last field in the generated key file /var/named/K${openshift_origin::domain}*.key"
     fail 'bind_key is required.'
   }
