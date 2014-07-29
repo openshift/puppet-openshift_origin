@@ -191,4 +191,13 @@ class openshift_origin::node {
     group   => 'root',
     mode    => '0644',
   }
+
+  file { '/etc/openshift/env/OPENSHIFT_BROKER_HOST':
+    ensure  => present,
+    content => $::openshift_origin::broker_hostname,
+    require => File['/etc/openshift/env/'],
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+  }
 }
