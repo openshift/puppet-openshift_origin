@@ -73,6 +73,7 @@ class openshift_origin::datastore {
   } else {
     exec { '/usr/sbin/oo-mongo-setup':
       command => '/usr/sbin/oo-mongo-setup',
+      timeout => 1800,
       require => [
         File['mongo setup script'],
         Class['openshift_origin::update_conf_files'],
