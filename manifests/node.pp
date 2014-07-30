@@ -176,6 +176,27 @@ class openshift_origin::node {
     ],
     provider => $::openshift_origin::params::os_init_provider,
   }
+  
+    if $openshift_origin::conf_node_watchman_service {
+      service { ['openshift-watchman']:
+        ensure   => running,
+        enable   => true,
+        require  => [
+          Package['rubygem-openshift-origin-node'],
+          Package['openshift-origin-node-util'],
+          Service['openshift-gears'],
+        ],
+        provider => $::openshift_origin::params::os_init_provider,
+      }
+      
+      file { '/etc/sysconfig/watchman':
+        content => template('openshift_origin/node/watchman.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0640',
+        notify  => Service['openshift-watchman']
+        }
+    }
 
   file { ['/var/lib/openshift/.settings','/etc/openshift/env/']:
     ensure  => 'directory',

@@ -480,6 +480,30 @@
 # [*conf_node_supplementary_posix_groups*]
 #   Name of supplementary UNIX group to add a gear to.
 #
+# [*conf_node_watchman_service*]
+#   Enable/Disable the OpenShift Node watchman service
+#   Default: true
+#
+#  [*conf_node_watchman_gearretries*]
+#   Number of restarts to attempt before waiting RETRY_PERIOD
+#   Default: 3
+#
+#  [*conf_node_watchman_retrydelay*]
+#   Number of seconds to wait before accepting another gear restart
+#   Default: 300
+#
+#  [*conf_node_watchman_retryperiod*]
+#   Number of seconds to wait before resetting retries
+#   Default: 28800
+#
+#  [*conf_node_watchman_statechangedelay*]
+#   Number of seconds a gear must remain inconsistent with it's state before Watchman attempts to reset state
+#   Default: 900
+#
+#  [*conf_node_watchman_statecheckperiod*]
+#   Wait at least this number of seconds since last check before checking gear state on the Node. Use this to reduce Watchman's GearStatePlugin's impact on the system.
+#   Default:  0
+#
 # [*development_mode*]
 #   Set development mode and extra logging.
 #   Default: false
@@ -690,6 +714,12 @@ class openshift_origin (
   $node_unmanaged_users                 = [],
   $conf_node_external_eth_dev           = 'eth0',
   $conf_node_supplementary_posix_groups = '',
+  $conf_node_watchman_service           = true,
+  $conf_node_watchman_gearretries       = '3',
+  $conf_node_watchman_retrydelay        = '300',
+  $conf_node_watchman_retryperiod       = '28800',
+  $conf_node_watchman_statechangedelay  = '900',
+  $conf_node_watchman_statecheckperiod  = '0',
   $development_mode                     = false,
   $conf_nameserver_upstream_dns         = ['8.8.8.8'],
   $install_login_shell                  = false,
