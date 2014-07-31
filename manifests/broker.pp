@@ -35,6 +35,7 @@ class openshift_origin::broker {
     'htpasswd' : { include openshift_origin::plugins::auth::htpasswd }
     'kerberos' : { include openshift_origin::plugins::auth::kerberos }
     'ldap'     : { include openshift_origin::plugins::auth::ldap }
+    'reverseproxy' : { include openshift_origin::plugins::auth::reverseproxy }
     default    : { include openshift_origin::plugins::auth::htpasswd }
   }
 

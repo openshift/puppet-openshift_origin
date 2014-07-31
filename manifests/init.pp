@@ -376,6 +376,7 @@
 #                       broker_krb_keytab values.
 #     * htpasswd      - Stores username/password in a htaccess file.
 #     * ldap          - LDAP based authentication. Uses broker_ldap_uri
+#     * reverseproxy  - Relies on the reverse proxy for authentication and to pass through REMOTE_USER to the backend.
 #   Default: htpasswd
 #
 # [*broker_krb_service_name*]
