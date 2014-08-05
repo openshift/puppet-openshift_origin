@@ -112,8 +112,10 @@ end
 <% else %>
 #ensure that the IP addr to bind to is correct
 begin
-  hostname = "<%= scope.lookupvar("openshift_origin::datastore_hostname") %>"
-  ipaddr   = Socket::getaddrinfo(hostname,nil,Socket::AF_INET)[0][3]
+  hostname  = "<%= scope.lookupvar("openshift_origin::datastore_hostname") %>"
+  ipaddr    = Socket::getaddrinfo(hostname,nil,Socket::AF_INET)[0][3]
+  local_ips = %x{ip addr show | awk '/inet / { print $2 }' | cut -d/ -f1}.split(/\n/)
+  ipaddr    = "0.0.0.0" unless local_ips.include? ipaddr
 rescue
   addresses = `ip addr`.scan(/inet ([\d]+\.[\d]+\.[\d]+\.[\d]+)/).flatten
   ipaddr = (addresses - ["127.0.0.1"]).first
@@ -122,6 +124,8 @@ end
 
 if(ipaddr == '127.0.0.1' or ipaddr.nil? or ipaddr.empty?)
   find_and_replace("/etc/mongodb.conf", /^#?bind_ip = .*$/, "bind_ip = 127.0.0.1")
+elsif(ipaddr == '0.0.0.0')
+  find_and_replace("/etc/mongodb.conf", /^#?bind_ip = .*$/, "bind_ip = #{ipaddr}")
 else
   find_and_replace("/etc/mongodb.conf", /^#?bind_ip = .*$/, "bind_ip = 127.0.0.1,#{ipaddr}")
 end
