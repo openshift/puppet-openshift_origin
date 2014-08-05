@@ -435,7 +435,17 @@ same on all broker nodes.
 
 Default:  Self signed keys are generated. Will not work with multi-broker 
           setup.
-  
+
+==== conf_console_product_logo
+Relative path to product logo URL
+
+Default: '/assets/logo-origin.svg'
+
+==== conf_console_product_title
+OpenShift Instance Name
+
+Default: 'OpenShift Origin'
+
 ==== conf_broker_session_secret
 ==== conf_console_session_secret
 Session secrets used to encode cookies used by console and broker. This 

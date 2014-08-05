@@ -342,6 +342,14 @@
 #   for every node in the deployment (this is the default behavior, which protects
 #   scalable apps from single points of failure at the Node level).
 #
+# [*conf_console_product_logo*]
+#   Relative path to product logo URL
+#   Default: '/assets/logo-origin.svg'
+#
+# [*conf_console_product_title*]
+#   OpenShift Instance Name
+#   Default: 'OpenShift Origin'
+#
 # [*conf_broker_session_secret*]
 # [*conf_console_session_secret*]
 #   Session secrets used to encode cookies used by console and broker. This
@@ -661,6 +669,8 @@ class openshift_origin (
   $conf_broker_auth_private_key         = undef,
   $conf_broker_session_secret           = undef,
   $conf_broker_multi_haproxy_per_node   = false,
+  $conf_console_product_logo            = '/assets/logo-origin.svg',
+  $conf_console_product_title           = 'OpenShift Origin',
   $conf_console_session_secret          = undef,
   $conf_valid_gear_sizes                = ['small'],
   $conf_default_gear_capabilities       = ['small'],
