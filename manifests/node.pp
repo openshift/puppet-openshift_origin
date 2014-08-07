@@ -137,12 +137,23 @@ class openshift_origin::node {
 
   # Fedora already has cgroups as systemd uses  them.
   if $::operatingsystem != 'Fedora' {
-    file { '/etc/cgconfig.conf':
-      content => template('openshift_origin/plugins/container/cgconfig.conf.erb'),
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      notify  => Exec['prepare cgroups']
+    augeas { 'openshift cgconfig':
+      context => '/files/etc/cgconfig.conf/mount',
+      incl    => '/etc/cgconfig.conf',
+      lens    => 'Cgconfig.lns',
+      changes => [
+        'set blkio /cgroup/blkio',
+        'set cpu /cgroup/cpu',
+        'set cpuacct /cgroup/cpuacct',
+        'set cpuset /cgroup/cpuset',
+        'set devices /cgroup/devices',
+        'set freezer /cgroup/freezer',
+        'set memory /cgroup/memory',
+        'set net_cls /cgroup/net_cls',
+        'set #comment \'Managed by puppet:openshift_origin\'',
+      ],
+      onlyif  => 'match *[#comment=\'Managed by puppet:openshift_origin\'] size == 0',
+      notify  => Exec['prepare cgroups'],
     }
 
     # TODO: Investigate if restorecons are necessary
