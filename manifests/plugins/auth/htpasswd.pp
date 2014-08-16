@@ -26,13 +26,8 @@ class openshift_origin::plugins::auth::htpasswd {
     require => Package['openshift-origin-broker'],
   }
 
-  $mkdir = $::operatingsystem ? {
-    'Fedora' => '/usr/bin/mkdir',
-    default  => '/bin/mkdir',
-  }
-
-  exec { 'create /etc/openshift dir and set first OpenShift user password':
-    command  => "${mkdir} -p /etc/openshift && /usr/bin/htpasswd -bc /etc/openshift/htpasswd ${::openshift_origin::openshift_user1} ${::openshift_origin::openshift_password1}",
+  exec { 'Set first OpenShift user password':
+    command  => "/usr/bin/htpasswd -b /etc/openshift/htpasswd ${::openshift_origin::openshift_user1} ${::openshift_origin::openshift_password1}",
     require  => [
       Package['httpd-tools'],
       File['htpasswd'],

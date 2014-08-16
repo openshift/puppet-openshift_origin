@@ -117,7 +117,7 @@ class openshift_origin::console {
   # while still invoking ruby commands in the correct context
   $console_asset_rake_cmd = $::operatingsystem ? {
     'Fedora' => '/usr/bin/rake assets:precompile',
-    default  => 'LD_LIBRARY_PATH=/opt/rh/ruby193/root/usr/lib64 GEM_PATH=/opt/rh/ruby193/root/usr/local/share/gems:/opt/rh/ruby193/root/usr/share/gems /opt/rh/ruby193/root/usr/bin/rake assets:precompile',
+    default  => 'LD_LIBRARY_PATH=/opt/rh/ruby193/root/usr/lib64:/opt/rh/v8314/root/usr/lib64 GEM_PATH=/opt/rh/ruby193/root/usr/local/share/gems:/opt/rh/ruby193/root/usr/share/gems /opt/rh/ruby193/root/usr/bin/rake assets:precompile',
   }
 
   $console_bundle_show    = $::operatingsystem ? {

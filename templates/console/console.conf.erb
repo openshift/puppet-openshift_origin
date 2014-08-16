@@ -7,7 +7,7 @@
 # Required
 #
 BROKER_URL=http://localhost:8080/broker/rest
-DOMAIN_SUFFIX="<%= scope.lookupvar('::openshift_origin::domain') %>"
+
 
 #
 # A URL used when creating links to the OpenShift community sites
@@ -30,7 +30,8 @@ COMMUNITY_URL=https://www.openshift.com/
 #
 # Optional, will use the default Ruby environment settings
 #
-BROKER_API_SSL_OPTIONS={:verify_mode => OpenSSL::SSL::VERIFY_NONE}
+# BROKER_API_SSL_OPTIONS={:verify_mode => OpenSSL::SSL::VERIFY_NONE}
+
 
 #
 # The type of security mode that OpenShift should use.  There are
@@ -62,6 +63,7 @@ BROKER_API_SSL_OPTIONS={:verify_mode => OpenSSL::SSL::VERIFY_NONE}
 #
 CONSOLE_SECURITY=<%= scope.lookupvar('::openshift_origin::broker_auth_plugin') == 'mongo' ? 'basic' : 'remote_user' %>
 
+
 #
 # The name of the request env variable or header that indicates a 
 # user is authenticated.  This value will be used as the display 
@@ -80,6 +82,7 @@ CONSOLE_SECURITY=<%= scope.lookupvar('::openshift_origin::broker_auth_plugin') =
 # Required when CONSOLE_SECURITY=remote_user
 #
 REMOTE_USER_HEADER=REMOTE_USER
+
 
 #
 # When using remote_user security, the value of the authentication
@@ -104,5 +107,44 @@ REMOTE_USER_HEADER=REMOTE_USER
 # Required when CONSOLE_SECURITY=remote_user, may be empty
 #
 REMOTE_USER_COPY_HEADERS=X-Remote-User
+
+#
+# Community settings
+# Uncomment following lines and change default values if you want to customize settings
+#
+
+#IRC_WEB_URL=http://webchat.freenode.net/?randomnick=1&channels=openshift&uio=d4
+
+#OPENSHIFT_TWITTER_HASHTAG_URL=http://twitter.com/search/%23OpenShift
+
+#OPENSHIFT_TWITTER_URL=http://twitter.com/openshift
+
+#OPENSHIFT_OPS_TWITTER_URL=http://twitter.com/openshift_ops
+
+#OPEN_BUG_URL=https://bugzilla.redhat.com/enter_bug.cgi?product=OpenShift%20Origin
+
+#OPENSHIFT_GITHUB_URL=https://github.com/openshift
+
+#STACK_OVERFLOW_URL=http://stackoverflow.com/questions/tagged/openshift/
+
+#GITHUB_CLIENT_TOOLS_REPO=rhc
+
+#GITHUB_ORIGIN_SERVER_REPO=origin-server
+
+#ORIGIN_SERVER_SRPM_URL=http://mirror.openshift.com/pub/openshift-origin/nightly/fedora-latest/latest/SRPMS/
+
+#RED_HAT_ACCOUNT_URL=https://www.redhat.com/wapps/ugc
+
+#CONTACT_MAIL=openshift@redhat.com
+
+
+#product logo, change it if you want a custom logo.
+PRODUCT_LOGO=<%= scope.lookupvar('::openshift_origin::conf_console_product_logo') %>
+
+#Openshift instance name, change it if you want a custom name.
+PRODUCT_TITLE=<%= scope.lookupvar('::openshift_origin::conf_console_product_title') %>
+
+# Direct logs to syslog rather than log files:
+#SYSLOG_ENABLED="true"
 
 SESSION_SECRET="<%= scope.lookupvar('::openshift_origin::conf_console_session_secret') %>"

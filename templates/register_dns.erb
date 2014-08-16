@@ -3,12 +3,12 @@
   echo update delete <%= scope.lookupvar('fqdn') %> A
   echo update add <%= scope.lookupvar('fqdn') %> 180 A <%= scope.lookupvar('::openshift_origin::node_ip_addr') %>
   echo send
-) | nsupdate -y <%= scope.lookupvar('::openshift_origin::domain') %>:<%= scope.lookupvar('::openshift_origin::bind_key') %>
+) | nsupdate -y <%= @key_argument %>
 <% if scope.lookupvar('::openshift_origin::load_balancer_master') and scope.lookupvar('::openshift_origin::broker_virtual_ip_address')%>
 (
   echo server <%= scope.lookupvar('::openshift_origin::nameserver_ip_addr') %>
   echo update delete <%= scope.lookupvar('::openshift_origin::broker_virtual_hostname') %> A
   echo update add <%= scope.lookupvar('::openshift_origin::broker_virtual_hostname') %> 180 A <%= scope.lookupvar('::openshift_origin::broker_virtual_ip_address') %>
   echo send
-) | nsupdate -y <%= scope.lookupvar('::openshift_origin::domain') %>:<%= scope.lookupvar('::openshift_origin::bind_key') %>
+) | nsupdate -y <%= @key_argument %>
 <% end-%>

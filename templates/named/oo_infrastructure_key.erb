@@ -1,4 +1,4 @@
 key <%= scope.lookupvar('::openshift_origin::dns_infrastructure_zone') %> {
-  algorithm HMAC-MD5;
+  algorithm <%= scope.lookupvar('::openshift_origin::dns_infrastructure_key_algorithm') %>;
   secret "<%= scope.lookupvar('::openshift_origin::dns_infrastructure_key') %>";
 };
