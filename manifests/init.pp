@@ -205,6 +205,54 @@
 #   This is used for the node to give a public IP, if different from the
 #   one on its NIC.
 #
+# [*node_profile*]
+#   This is the specific node's gear profile
+#
+#   Default: small
+#
+# [*node_quota_files*]
+#   The max number of files allowed in each gear.
+#   
+#   Default: 80000
+#
+# [*node_quota_blocks*]
+#   The max storage capacity allowed in each gear (1 block = 1024 bytes)
+#
+#   Default: 1048576
+#
+# [*node_max_active_gears*]
+#   max_active_gears is used for limiting/guiding gear placement.
+#   For no over-commit, should be (Total System Memory - 1G) / memory_limit_in_bytes
+#   
+#   Default: 100
+#   
+# [*node_no_overcommit_active*]
+#   no_overcommit_active enforces max_active_gears in a more stringent manner than normal,
+#   however it also adds overhead to gear creation, so should only be set to true
+#   when needed, like in the case of enforcing single tenancy on a node.
+#   
+#   Default: false
+# 
+# [*node_resource_limits*]
+#   Resource limit options per node, these values must be the same across
+#   districts. eg. district-small should all be using the same values.
+#
+#   node_limits_nproc=250                       # max number of processes
+#   node_tc_max_bandwidth=800                   # mbit/sec - Total bandwidth allowed for Libra
+#   node_tc_user_share=2                        # mbit/sec - one user is allotted...
+#   node_cpu_shares=128                         # cpu share percentage for each gear
+#   node_cpu_cfs_quota_us=100000                # cpu 
+#   node_memory_limit_in_bytes=536870912        # gear memory limit in bytes (512MB)
+#   node_memsw_limit_in_bytes=641728512  # gear max memory limit including swap (512M + 100M swap)
+#   node_memory_oom_control=1                   # kill processes when hitting out of memory
+#   node_throttle_cpu_shares=128                # cpu share percentage each gear gets at throttle   
+#   node_throttle_cpu_cfs_quota_us=30000        #
+#   node_throttle_apply_period=120              # 
+#   node_throttle_apply_percent=30              # 
+#   node_throttle_restore_percent=70            #
+#   node_boosted_cpu_shares=256                 # cpu share percentage each gear gets while boosted
+#   node_boosted_cpu_cfs_quota_us=200000        #
+#
 # [*configure_ntp*]
 #   Default: true
 #   Enabling this option configuresNTP.  It is important that the time
@@ -663,6 +711,26 @@ class openshift_origin (
   $load_balancer_master                 = false,
   $load_balancer_auth_password          = 'changeme',
   $node_ip_addr                         = $ipaddress,
+  $node_profile                         = 'small',
+  $node_quota_files                     = '8000',
+  $node_quota_blocks                    = '1048576',
+  $node_max_active_gears                = '100',
+  $node_no_overcommit_active            = false,
+  $node_limits_nproc                    = '250',
+  $node_tc_max_bandwidth                = '800',
+  $node_tc_user_share                   = '2',
+  $node_cpu_shares                      = '128',
+  $node_cpu_cfs_quota_us                = '100000',
+  $node_memory_limit_in_bytes           = '536870912',
+  $node_memsw_limit_in_bytes            = '641728512',
+  $node_memory_oom_control              = '1',
+  $node_throttle_cpu_shares             = '128',
+  $node_throttle_cpu_cfs_quota_us       = '30000',
+  $node_throttle_apply_period           = '120',
+  $node_throttle_apply_percent          = '30',
+  $node_throttle_restore_percent        = '70',
+  $node_boosted_cpu_shares              = '256',
+  $node_boosted_cpu_cfs_quota_us        = '200000',
   $configure_ntp                        = true,
   $ntp_servers                          = ['time.apple.com iburst', 'pool.ntp.org iburst', 'clock.redhat.com iburst'],
   $msgserver_cluster                    = false,

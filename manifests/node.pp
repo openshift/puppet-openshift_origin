@@ -53,6 +53,21 @@ class openshift_origin::node {
     mode    => '0644',
     notify  => Service["${::openshift_origin::params::ruby_scl_prefix}mcollective"],
   }
+  file { 'openshift node resource limit config':
+    ensure  => present,
+    path    => '/etc/openshift/resource_limits.conf',
+    content => template('openshift_origin/node/resource_limits.conf.erb'),
+    require => Package['rubygem-openshift-origin-node'],
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+    notify  => Exec['restart resource limiting services'],
+  }
+  exec { 'restart resource limiting services':
+    command     => 'oo-cgroup-enable --with-all-containers; oo-pam-enable --with-all-containers; oo-admin-ctl-tc restart',
+    notify      => Service["${::openshift_origin::params::ruby_scl_prefix}mcollective"], 
+    refreshonly => true,
+  }
   exec { 'Initialize quota DB':
     command => '/usr/sbin/oo-init-quota',
     require => Package['openshift-origin-node-util'],
