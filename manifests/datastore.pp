@@ -110,8 +110,8 @@ class openshift_origin::datastore {
     if $openshift_origin::mongodb_replica_primary {
       exec { 'replset-init':
         path      => ['/bin/', '/usr/bin/', '/usr/sbin/'],
-        command   => "mongo admin -u ${openshift_origin::mongodb_admin_user} -p ${openshift_origin::mongodb_admin_password} --quiet --eval printjson\"(rs.initiate({ _id: \'${openshift_origin::mongodb_replica_name}\', members: [ { _id: 0, host: \'${::ipaddress}:${::port}\' } ] }))\"",
-        unless    => "mongo admin --host ${::ipaddress} -u ${openshift_origin::mongodb_admin_user} -p ${openshift_origin::mongodb_admin_password} --quiet --eval \"printjson(rs.status())\" | grep '\"name\" : \"${::ipaddress}:${::port}\"'",
+        command   => "mongo admin -u ${openshift_origin::mongodb_admin_user} -p ${openshift_origin::mongodb_admin_password} --quiet --eval printjson\"(rs.initiate({ _id: \'${openshift_origin::mongodb_replica_name}\', members: [ { _id: 0, host: \'${::ipaddress}:${port}\' } ] }))\"",
+        unless    => "mongo admin --host ${::ipaddress} -u ${openshift_origin::mongodb_admin_user} -p ${openshift_origin::mongodb_admin_password} --quiet --eval \"printjson(rs.status())\" | grep '\"name\" : \"${::ipaddress}:${port}\"'",
         tries     => 3,
         try_sleep => 5,
         require   => [
@@ -124,8 +124,8 @@ class openshift_origin::datastore {
       # Only run the replset-add command if we are not in the middle of instantiating multiple hosts at once.
       exec { 'replset-add':
         path      => ['/bin/', '/usr/bin/', '/usr/sbin/'],
-        command   => "mongo admin --host ${openshift_origin::mongodb_replica_primary_ip_addr} -u ${openshift_origin::mongodb_admin_user} -p ${openshift_origin::mongodb_admin_password} --quiet --eval \"printjson(rs.add(\'${::ipaddress}:${::port}\'))\"",
-        unless    => "mongo admin --host ${openshift_origin::mongodb_replica_primary_ip_addr} -u ${openshift_origin::mongodb_admin_user} -p ${openshift_origin::mongodb_admin_password} --quiet --eval \"printjson(rs.status())\" | grep '\"name\" : \"${::ipaddress}:${::port}\"'",
+        command   => "mongo admin --host ${openshift_origin::mongodb_replica_primary_ip_addr} -u ${openshift_origin::mongodb_admin_user} -p ${openshift_origin::mongodb_admin_password} --quiet --eval \"printjson(rs.add(\'${::ipaddress}:${port}\'))\"",
+        unless    => "mongo admin --host ${openshift_origin::mongodb_replica_primary_ip_addr} -u ${openshift_origin::mongodb_admin_user} -p ${openshift_origin::mongodb_admin_password} --quiet --eval \"printjson(rs.status())\" | grep '\"name\" : \"${::ipaddress}:${port}\"'",
         tries     => 3,
         try_sleep => 5,
         require   => [
