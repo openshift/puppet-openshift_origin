@@ -13,7 +13,15 @@
 #  limitations under the License.
 #
 class openshift_origin::firewall::apache {
-  lokkit::services { 'Apache':
-    services => ['http','https'],
+
+  if ($::openshift_origin::broker_auth_plugin == 'reverseproxy') and ('broker' in $::openshift_origin::roles) {
+    lokkit::ports_from_ip4 { 'Apache reverseproxy':
+      tcpPorts => ['80','443'],
+      source_ips => $::openshift_origin::broker_reverseproxy_ips,
+    }
+  } else {
+    lokkit::services { 'Apache':
+      services => ['http','https'],
+    }
   }
 }

@@ -436,6 +436,11 @@
 #                       broker_krb_keytab values.
 #     * htpasswd      - Stores username/password in a htaccess file.
 #     * ldap          - LDAP based authentication. Uses broker_ldap_uri
+#     * reverseproxy  - Relies on a reverse proxy to do authentication.
+#                       For this to work properly, following headers must 
+#                       be passed through to the backend:
+#                       REMOTE_USER, Authorization, broker_key
+#
 #   Default: htpasswd
 #
 # [*broker_krb_service_name*]
@@ -460,6 +465,12 @@
 # [*broker_ldap_bind_password*]
 # Password of bind user set in broker_ldap_bind_dn.
 # Default is anonymous bind with a blank password.
+#
+# [*broker_reverseproxy_ips*]
+#  Array of IP Addresses of the proxy servers which are allowed to connect to the broker and console. Only these IPs will be allowed
+#  to communicate directly to the API. Everything else must go through the reverseproxy.
+#
+#  Default: ['']
 #
 # [*node_shmmax*]
 #   kernel.shmmax sysctl setting for /etc/sysctl.conf
@@ -774,6 +785,7 @@ class openshift_origin (
   $broker_ldap_uri                      = '',
   $broker_ldap_bind_dn                  = '',
   $broker_ldap_bind_password            = '',
+  $broker_reverseproxy_ips              = [''],
   $node_shmmax                          = undef,
   $node_shmall                          = undef,
   $node_container_plugin                = 'selinux',
