@@ -26,6 +26,7 @@ class openshift_origin::plugins::auth::reverseproxy {
       Package['rubygem-openshift-origin-auth-remote-user','openshift-origin-broker'],
     ],
     notify  => Service['openshift-broker'],
+    before  => Exec['Broker gem dependencies'],
   }
 
   file {'Console reverseproxy config':
@@ -39,11 +40,12 @@ class openshift_origin::plugins::auth::reverseproxy {
       File['Broker reverseproxy config'],
     ],
     notify  => Service['openshift-console'],
+    before  => Exec['Console gem dependencies'],
   }
 
   file { 'Auth plugin config':
     path    => '/etc/openshift/plugins.d/openshift-origin-auth-remote-user.conf',
-    content => template('openshift_origin/broker/plugins/auth/reverseproxy/remote-user.conf.plugin.erb'),
+    content => template('openshift_origin/broker/plugins/auth/basic/remote-user.conf.plugin.erb'),
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
@@ -51,5 +53,6 @@ class openshift_origin::plugins::auth::reverseproxy {
       Package['rubygem-openshift-origin-auth-remote-user'],
     ],
     notify  => Service['openshift-broker'],
+    before  => Exec['Console gem dependencies'],
   }
 }
