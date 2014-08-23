@@ -53,6 +53,21 @@ class openshift_origin::node {
     mode    => '0644',
     notify  => Service["${::openshift_origin::params::ruby_scl_prefix}mcollective"],
   }
+  file { 'openshift node resource limit config':
+    ensure  => present,
+    path    => '/etc/openshift/resource_limits.conf',
+    content => template('openshift_origin/node/resource_limits.conf.erb'),
+    require => Package['rubygem-openshift-origin-node'],
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+    notify  => Exec['restart resource limiting services'],
+  }
+  exec { 'restart resource limiting services':
+    command     => 'oo-cgroup-enable --with-all-containers; oo-pam-enable --with-all-containers; oo-admin-ctl-tc restart',
+    notify      => Service["${::openshift_origin::params::ruby_scl_prefix}mcollective"], 
+    refreshonly => true,
+  }
   exec { 'Initialize quota DB':
     command => '/usr/sbin/oo-init-quota',
     require => Package['openshift-origin-node-util'],
@@ -137,12 +152,23 @@ class openshift_origin::node {
 
   # Fedora already has cgroups as systemd uses  them.
   if $::operatingsystem != 'Fedora' {
-    file { '/etc/cgconfig.conf':
-      content => template('openshift_origin/plugins/container/cgconfig.conf.erb'),
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      notify  => Exec['prepare cgroups']
+    augeas { 'openshift cgconfig':
+      context => '/files/etc/cgconfig.conf/mount',
+      incl    => '/etc/cgconfig.conf',
+      lens    => 'Cgconfig.lns',
+      changes => [
+        'set blkio /cgroup/blkio',
+        'set cpu /cgroup/cpu',
+        'set cpuacct /cgroup/cpuacct',
+        'set cpuset /cgroup/cpuset',
+        'set devices /cgroup/devices',
+        'set freezer /cgroup/freezer',
+        'set memory /cgroup/memory',
+        'set net_cls /cgroup/net_cls',
+        'set #comment \'Managed by puppet:openshift_origin\'',
+      ],
+      onlyif  => 'match *[#comment=\'Managed by puppet:openshift_origin\'] size == 0',
+      notify  => Exec['prepare cgroups'],
     }
 
     # TODO: Investigate if restorecons are necessary
@@ -165,6 +191,27 @@ class openshift_origin::node {
     ],
     provider => $::openshift_origin::params::os_init_provider,
   }
+  
+    if $openshift_origin::conf_node_watchman_service {
+      service { ['openshift-watchman']:
+        ensure   => running,
+        enable   => true,
+        require  => [
+          Package['rubygem-openshift-origin-node'],
+          Package['openshift-origin-node-util'],
+          Service['openshift-gears'],
+        ],
+        provider => $::openshift_origin::params::os_init_provider,
+      }
+      
+      file { '/etc/sysconfig/watchman':
+        content => template('openshift_origin/node/watchman.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0640',
+        notify  => Service['openshift-watchman']
+        }
+    }
 
   file { ['/var/lib/openshift/.settings','/etc/openshift/env/']:
     ensure  => 'directory',
@@ -186,6 +233,15 @@ class openshift_origin::node {
   file { '/etc/openshift/env/OPENSHIFT_CLOUD_DOMAIN':
     ensure  => present,
     content => $::openshift_origin::domain,
+    require => File['/etc/openshift/env/'],
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+  }
+
+  file { '/etc/openshift/env/OPENSHIFT_BROKER_HOST':
+    ensure  => present,
+    content => $::openshift_origin::broker_hostname,
     require => File['/etc/openshift/env/'],
     owner   => 'root',
     group   => 'root',

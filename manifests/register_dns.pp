@@ -15,6 +15,13 @@
 define openshift_origin::register_dns($fqdn) {
   if $::openshift_origin::register_host_with_nameserver {
     if $fqdn != 'localhost' {
+
+      $key_algorithm=pick($::openshift_origin::dns_infrastructure_key_algorithm,
+        $::openshift_origin::bind_key_algorithm)
+      $key_secret=pick($::openshift_origin::dns_infrastructure_key,
+        $::openshift_origin::bind_key)
+      $key_argument="${key_algorithm}:${::openshift_origin::domain}:${key_secret}"
+
       ensure_resource( 'exec', "Register ${fqdn}", {
           command  => template('openshift_origin/register_dns.erb'),
           provider => 'shell'
