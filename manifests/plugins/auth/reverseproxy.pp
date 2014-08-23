@@ -55,4 +55,11 @@ class openshift_origin::plugins::auth::reverseproxy {
     notify  => Service['openshift-broker'],
     before  => Exec['Console gem dependencies'],
   }
+  
+  exec { 'Reverse proxy handles auth':
+    path      => ['/bin/', '/usr/bin/', '/usr/sbin/'],
+    command   => "sed -i -e 's/RequestHeader unset X-Remote-User/#RequestHeader unset X-Remote-User/' /etc/httpd/conf.d/000002_openshift_origin_broker_proxy.conf",
+    unless    => "grep '#RequestHeader unset X-Remote-User' /etc/httpd/conf.d/000002_openshift_origin_broker_proxy.conf",
+    require   => Service['httpd'],
+  }
 }
