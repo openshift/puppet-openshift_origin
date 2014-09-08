@@ -22,6 +22,8 @@ class openshift_origin::plugins::frontend::apache {
   if 'broker' in $::openshift_origin::roles {
     $httpd_servername_path    = '/etc/httpd/conf.d/000002_openshift_origin_broker_servername.conf'
     $servername_conf_template = 'openshift_origin/plugins/frontend/apache/broker_servername.conf.erb'
+    $httpd_proxy_path         = '/etc/httpd/conf.d/000002_openshift_origin_broker_proxy.conf'
+    $proxy_conf_template      = 'openshift_origin/plugins/frontend/apache/broker_proxy.conf.erb'
   } elsif 'node' in $::openshift_origin::roles {
     $httpd_servername_path    = '/etc/httpd/conf.d/000001_openshift_origin_node_servername.conf'
     $servername_conf_template = 'openshift_origin/plugins/frontend/apache/node_servername.conf.erb'
@@ -64,6 +66,19 @@ class openshift_origin::plugins::frontend::apache {
     notify  => Service['httpd'],
   }
 
+  if 'broker' in $::openshift_origin::roles {
+    file { 'proxy config':
+      ensure  => present,
+      path    => $httpd_proxy_path,
+      content => template($proxy_conf_template),
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      require => Package['httpd'],
+      notify  => Service['httpd'],
+    }
+  }
+  
   if $::operatingsystem == 'Fedora' and 'node' in $::openshift_origin::roles {
     file { 'allow cartridge files through apache':
       ensure  => present,
