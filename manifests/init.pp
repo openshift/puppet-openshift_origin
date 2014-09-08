@@ -630,14 +630,15 @@
 #   * ruby
 #   * jenkins
 #   * jenkins-client
-#   * mariadb         (will install mysql on RHEL)
+#   * mariadb         (for Fedora deployments)
+#   * mysql           (for CentOS / RHEL deployments)
 #   * jbossews
 #   * jbossas
 #   * jbosseap
 #
 #   Default: ['10gen-mms-agent','cron','diy','haproxy','mongodb',
 #             'nodejs','perl','php','phpmyadmin','postgresql',
-#             'python','ruby','jenkins','jenkins-client','mariadb']
+#             'python','ruby','jenkins','jenkins-client','mysql']
 #
 # == Manual Tasks
 #
@@ -797,7 +798,7 @@ class openshift_origin (
   $dns_infrastructure_names             = [],
   $install_cartridges                   = ['10gen-mms-agent','cron','diy','haproxy','mongodb',
                                           'nodejs','perl','php','phpmyadmin','postgresql',
-                                          'python','ruby','jenkins','jenkins-client','mariadb'],
+                                          'python','ruby','jenkins','jenkins-client','myql'],
   $update_conf_files                    = true,
   $manage_firewall                      = true,
 ){
