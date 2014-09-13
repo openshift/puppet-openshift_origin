@@ -611,6 +611,11 @@
 # [*manage_firewall*]
 #   Indicate whether or not this module will configure the firewall for you
 #
+# [*update_conf_files*]
+#   Indicate whether or not this module will configure resolv.conf and
+#   network for you. In some cases, especially in enterprise, dns and network 
+#   are defined through other mechanisms
+#
 # [*install_cartridges*]
 #   List of cartridges to be installed on the node. Options:
 #
