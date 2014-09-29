@@ -19,6 +19,21 @@
 # installations.
 #
 # === Parameters
+# [*ose_version*]
+#   If this is an Openshift Enterprise install this should be set according
+#   to the X.Y version, ie: '2.2'. Currently 2.2 is the only version for
+#   which a puppet module is supported by Red Hat. This sets various defaults
+#   to values appropriate for OSE installs and attempts to avoid unsupported
+#   configurations.
+#
+#   Default: undef
+#
+# [*ose_unsupported*]
+#   If you want to use OSE defaults but still allow an unsupported config, for instance
+#   in your test environment, set this to true to turn unsupported configs into warnings.
+#
+#   Default: false
+#
 # [*roles*]
 #   Choose from the following roles to be configured on this node.
 #     * broker        - Installs the broker and console.
@@ -584,6 +599,8 @@
 #    one node host to all the rest (or, if using the same image for all
 #    hosts, just keep the keys from the image).
 class openshift_origin (
+  $ose_version                          = undef,
+  $ose_unsupported                      = false,
   $roles                                = ['broker','node','msgserver','datastore','nameserver'],
   $install_method                       = 'yum',
   $parallel_deployment                  = false,
@@ -687,6 +704,11 @@ class openshift_origin (
   $manage_firewall                      = true,
 ){
   include openshift_origin::role
+
+  # Check for various unsupported OSE configs
+  if $ose_version != undef {
+    class { 'openshift_origin::ose_supported_config': }
+  }
 
   if $msgserver_cluster and ! $msgserver_cluster_members and ! $mcollective_cluster_members {
     fail('msgserver_cluster_members and mcollective_cluster_members parameters are required when msgserver_cluster is set')

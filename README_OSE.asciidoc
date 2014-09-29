@@ -1,0 +1,24 @@
+== Openshift Enterprise Specific notes
+
+If you wish to perform an Openshift Enterprise install you should set ose_version appropriately as this will
+assist in ensuring supported configurations.
+
+While this module will assist in providing supported configruations please refer to Openshift Enterprise
+Deployment Guide for current prerequisites and supported configuration details.
+
+=== Constraints imposed :
+  * Red Hat Enterprise Linux 6 version 6.5 or later
+  * Broker and Node roles are mutually exclusive
+  * Broker HA load balancing must be external to OSE nodes and therefore can not be configured via this module
+  * Avahi and Route53 DNS plugins are not supported
+  * ActiveMQ, if clustered, requires 2+ nodes
+  * MongoDB replicasets must 3+(2*n) nodes
+
+=== Yum repositories
+Configuring yum repositories via this module is not currently supported. Please ensure subscriptions and/or
+yum repositories are configured per the deployment guide. https://access.redhat.com/documentation/en-US/OpenShift_Enterprise/2/html/Deployment_Guide/Red_Hat_Subscription_Requirements.html
+
+=== TODO
+  * Use stored configs to push node dns changes from broker without sharing secrets to nodes
+  * Stored configs for districts
+  * Broker API key, rsync key?
