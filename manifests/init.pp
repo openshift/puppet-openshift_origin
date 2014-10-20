@@ -42,10 +42,11 @@
 #     * datastore     - Installs MongoDB (not sharded/replicated)
 #     * nameserver    - Installs a BIND dns server configured with a TSIG key for updates.
 #     * load_balancer - Installs HAProxy and Keepalived for Broker API high-availability.
+#     * routing       - Installs a routing server depending on routing_plugin defined
 #   Default: ['broker','node','msgserver','datastore','nameserver']
 #
-#   Note: Multiple servers are required when using the load_balancer role.
-#
+#   Note: Multiple servers are required when using the load_balancer or nginx role.
+# 
 # [*install_method*]
 #   Choose from the following ways to provide packages:
 #     none - install sources are already set up when the script executes (default)
@@ -327,6 +328,27 @@
 # [*msgserver_tls_key*]
 #   Default: /var/lib/puppet/ssl/private_keys/#{fqdn.downcase}.pem
 #   Location for certificate key
+
+# [*msgserver_routing*]
+#   Default: false
+#   Determines whether the HA application deployment will be configured.
+#   This requires the use of an external loadbalancer. 
+#
+# [*msgserver_routing_password*]
+#   Default: 
+#   This is the password used for the routing information to be passed
+#   through the ActiveMQ network
+#
+# [*routing_plugin*]
+#   Determines the routing plugin to be provisioned within the routing
+#   for application HA deployment.
+#
+#   Options:
+#     * nginx - Provisions the nginx14-nginx packages.
+#
+# [*routing_hostname*]
+#   Default: routing.${domain}
+#   This is the external hostname for your loadbalancer.
 #
 # [*mcollective_user*]
 # [*mcollective_password*]
@@ -881,6 +903,10 @@ class openshift_origin (
   $msgserver_tls_ca                     = '/var/lib/puppet/ssl/certs/ca.pem',
   $msgserver_tls_cert                   = inline_template('<%= "/var/lib/puppet/ssl/certs/#{fqdn.downcase}.pem" %>'),
   $msgserver_tls_key                    = inline_template('<%= "/var/lib/puppet/ssl/private_keys/#{fqdn.downcase}.pem" %>'),
+  $msgserver_routing                    = false,
+  $msgserver_routing_password           = '',
+  $routing_plugin                       = '',
+  $routing_hostname                     = "routing.${domain}",
   $mcollective_user                     = 'mcollective',
   $mcollective_password                 = 'marionette',
   $mongodb_admin_user                   = 'admin',
@@ -1040,7 +1066,7 @@ class openshift_origin (
       $real_msgserver_cluster_members = $msgserver_cluster_members
     }
   }
-
+  
   Exec { path => '/usr/bin:/usr/sbin:/bin:/sbin' }
 
   include openshift_origin::update_conf_files
@@ -1082,5 +1108,9 @@ class openshift_origin (
   if member( $roles, 'load_balancer' ) {
     Class['openshift_origin::update_conf_files'] ->
     class { 'openshift_origin::role::load_balancer': }
+  }
+  if member( $roles, 'nginx' ) {
+    Class['openshift_origin::update_conf_files'] ->
+    class { 'openshift_origin::role::nginx': }
   }
 }
