@@ -674,6 +674,36 @@
 #             'nodejs','perl','php','phpmyadmin','postgresql',
 #             'python','ruby','jenkins','jenkins-client','mysql']
 #
+# [*install_cartridges_recommended_deps*]
+#   List of cartridge recommended dependencies to be installed on the node. Options:
+#     
+#   * all
+#   * jbossas
+#   * jbosseap
+#   * jbossews
+#   * nodejs
+#   * perl
+#   * php
+#   * python
+#   * ruby
+#
+#   Default: ['all']
+#
+# [*install_cartridges_optional_deps*]
+#   List of cartridge optional dependencies to be installed on the node. Options:
+#
+#   * all
+#   * jbossas
+#   * jbosseap
+#   * jbossews
+#   * nodejs
+#   * perl
+#   * php
+#   * python
+#   * ruby
+#
+#   Default: undef
+#
 # == Manual Tasks
 #
 # This script attempts to automate as many tasks as it reasonably can.
@@ -838,6 +868,8 @@ class openshift_origin (
   $install_cartridges                   = ['10gen-mms-agent','cron','diy','haproxy','mongodb',
                                           'nodejs','perl','php','phpmyadmin','postgresql',
                                           'python','ruby','jenkins','jenkins-client','mysql'],
+  $install_cartridges_recommended_deps  = ['all'],
+  $install_cartridges_optional_deps     = undef,
   $update_conf_files                    = true,
   $manage_firewall                      = true,
 ){
