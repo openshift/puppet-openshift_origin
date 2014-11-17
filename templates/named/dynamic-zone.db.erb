@@ -10,5 +10,6 @@ $TTL 1800
                      NS <%= scope.lookupvar('::openshift_origin::nameserver_hostname') %>.
 $ORIGIN <%= scope.lookupvar('::openshift_origin::domain') %>.
 <% if scope.lookupvar('::openshift_origin::nameserver_hostname').end_with?(scope.lookupvar('::openshift_origin::domain')) %>
-<%= scope.lookupvar('::openshift_origin::nameserver_hostname').split('.').first %>	              A        <%= scope.lookupvar('::openshift_origin::nameserver_ip_addr') %>
+<%= scope.lookupvar('::openshift_origin::nameserver_hostname') %>.  A <%= scope.lookupvar('::openshift_origin::nameserver_ip_addr') %>
 <% end %>
+
