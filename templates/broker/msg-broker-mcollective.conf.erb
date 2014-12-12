@@ -28,7 +28,7 @@ NODE_PROFILE_ENABLED=true
 
 # Require new gears to be placed in a Region/Zone; when true, placement will fail
 # if there isn't a region/zone with right gear profile.
-ZONES_REQUIRE_FOR_APP_CREATE=false
+ZONES_REQUIRE_FOR_APP_CREATE=<%= scope.lookupvar('::openshift_origin::conf_zones_require_for_app_create') %>
 
 # Minimum zones required for gears in application gear group to be distributed.
 ZONES_MIN_PER_GEAR_GROUP=1

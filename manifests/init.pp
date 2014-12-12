@@ -486,6 +486,11 @@
 #   if there isn't a district with capacity and the right gear profile.
 #   Default: false
 #
+# [*conf_zones_require_for_app_create*]
+#   Require new gears to be placed in a Region/Zone; when true, placement will fail
+#   if there isn't a region/zone with right gear profile.
+#   Default: false
+#
 # [*broker_dns_plugin*]
 #   DNS plugin used by the broker to register application DNS entries.
 #   Options:
@@ -921,6 +926,7 @@ class openshift_origin (
   $broker_ldap_bind_dn                  = '',
   $broker_ldap_bind_password            = '',
   $conf_districts_require_for_app_create= false,
+  $conf_zones_require_for_app_create    = false,
   $node_shmmax                          = $openshift_origin::params::node_shmmax,
   $node_shmall                          = $openshift_origin::params::node_shmall,
   $node_container_plugin                = 'selinux',

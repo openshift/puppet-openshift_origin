@@ -683,6 +683,12 @@ if there isn't a district with capacity and the right gear profile.
 
 Default: false
 
+=== conf_zones_require_for_app_create
+Require new gears to be placed in a Region/Zone; when true, placement will fail
+if there isn't a region/zone with right gear profile.
+
+Default: false
+
 === broker_dns_plugin
 
 DNS plugin used by the broker to register application DNS entries.
