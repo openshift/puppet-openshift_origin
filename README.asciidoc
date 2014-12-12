@@ -639,6 +639,14 @@ This allows setting up an external router and routing application traffic to the
 
 Default: 'www.example.com'
 
+=== conf_ha_dns_prefix
+=== conf_ha_dns_suffix
+Prefix/Suffix used for Highly Available application URL
+http://${HA_DNS_PREFIX}${APP_NAME}-${DOMAIN_NAME}${HA_DNS_SUFFIX}.${CLOUD_DOMAIN}
+
+Default prefix: 'ha-'
+Default suffix: ''
+
 === conf_valid_gear_sizes
 List of all gear sizes this will be used in this OpenShift installation.
 

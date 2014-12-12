@@ -156,8 +156,8 @@ ROUTER_HOSTNAME="<%= scope.lookupvar('::openshift_origin::conf_router_hostname')
 
 # Prefix/Suffix used for Highly Available application URL
 # http://${HA_DNS_PREFIX}${APP_NAME}-${DOMAIN_NAME}${HA_DNS_SUFFIX}.${CLOUD_DOMAIN}
-HA_DNS_PREFIX="ha-"
-HA_DNS_SUFFIX=""
+HA_DNS_PREFIX="<%= scope.lookupvar('::openshift_origin::conf_ha_dns_prefix') %>"
+HA_DNS_SUFFIX="<%= scope.lookupvar('::openshift_origin::conf_ha_dns_suffix') %>"
 
 # Determine whether or not multiple HA proxy gears for a given application can be spun up on the same node
 ALLOW_MULTIPLE_HAPROXY_ON_NODE=<%= scope.lookupvar('::openshift_origin::conf_broker_multi_haproxy_per_node') %>

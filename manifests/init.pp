@@ -442,6 +442,13 @@
 #   This allows setting up an external router and routing application traffic to the application's gears
 #   Default: 'www.example.com'
 #
+# [*conf_ha_dns_prefix*]
+# [*conf_ha_dns_suffix*]
+#   Prefix/Suffix used for Highly Available application URL
+#   http://${HA_DNS_PREFIX}${APP_NAME}-${DOMAIN_NAME}${HA_DNS_SUFFIX}.${CLOUD_DOMAIN}
+#   Default prefix: 'ha-'
+#   Default suffix: ''
+#
 # [*conf_broker_manage_ha_dns*]
 #   Should OpenShift handle the registration and deregistration of HA DNS entries pointing to the external router?
 #   This flag applies in cases where an external router is using to route application traffic to the gears
@@ -886,6 +893,8 @@ class openshift_origin (
   $conf_broker_auth_private_key         = undef,
   $conf_broker_allow_ha_applications    = true,
   $conf_router_hostname                 = 'www.example.com',
+  $conf_ha_dns_prefix                   = 'ha-',
+  $conf_ha_dns_suffix                   = '',
   $conf_broker_manage_ha_dns            = false,
   $conf_broker_session_secret           = undef,
   $conf_broker_multi_haproxy_per_node   = false,
