@@ -689,6 +689,11 @@ if there isn't a region/zone with right gear profile.
 
 Default: false
 
+=== conf_zones_min_per_gear_group
+Minimum zones required for gears in application gear group to be distributed.
+
+Default: 1
+
 === broker_dns_plugin
 
 DNS plugin used by the broker to register application DNS entries.

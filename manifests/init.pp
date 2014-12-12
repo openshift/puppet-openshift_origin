@@ -491,6 +491,10 @@
 #   if there isn't a region/zone with right gear profile.
 #   Default: false
 #
+# [*conf_zones_min_per_gear_group*]
+#   Minimum zones required for gears in application gear group to be distributed.
+#   Default: 1
+#
 # [*broker_dns_plugin*]
 #   DNS plugin used by the broker to register application DNS entries.
 #   Options:
@@ -927,6 +931,7 @@ class openshift_origin (
   $broker_ldap_bind_password            = '',
   $conf_districts_require_for_app_create= false,
   $conf_zones_require_for_app_create    = false,
+  $conf_zones_min_per_gear_group        = '1',
   $node_shmmax                          = $openshift_origin::params::node_shmmax,
   $node_shmall                          = $openshift_origin::params::node_shmall,
   $node_container_plugin                = 'selinux',

@@ -31,4 +31,4 @@ NODE_PROFILE_ENABLED=true
 ZONES_REQUIRE_FOR_APP_CREATE=<%= scope.lookupvar('::openshift_origin::conf_zones_require_for_app_create') %>
 
 # Minimum zones required for gears in application gear group to be distributed.
-ZONES_MIN_PER_GEAR_GROUP=1
+ZONES_MIN_PER_GEAR_GROUP=<%= scope.lookupvar('::openshift_origin::conf_zones_min_per_gear_group') %>
