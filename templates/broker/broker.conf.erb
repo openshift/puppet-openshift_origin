@@ -23,7 +23,7 @@ DEFAULT_GEAR_CAPABILITIES="<%= scope.lookupvar('::openshift_origin::conf_default
 # Default gear size for a new gear
 DEFAULT_GEAR_SIZE="<%= scope.lookupvar('::openshift_origin::conf_default_gear_size') %>"
 # Default user capability to create Highly Available applications
-DEFAULT_ALLOW_HA="false"
+DEFAULT_ALLOW_HA="<%= scope.lookupvar('::openshift_origin::conf_default_allow_ha') %>"
 # Default maximum number of teams a user can create
 DEFAULT_MAX_TEAMS="0"
 # Default whether a user can search and view all global teams

@@ -441,6 +441,10 @@
 #   Default gear size if one is not specified
 #   Default: 'small'
 #
+# [*conf_default_allow_ha*]
+#   Default user capability to create Highly Available applications
+#   Default: false
+#
 # [*conf_default_max_domains*]
 #   Default max number of domains a user is allowed to use
 #   Default: 10
@@ -871,6 +875,7 @@ class openshift_origin (
   $conf_valid_gear_sizes                = ['small'],
   $conf_default_gear_capabilities       = ['small'],
   $conf_default_gear_size               = 'small',
+  $conf_default_allow_ha                = false,
   $conf_default_max_domains             = '10',
   $conf_default_max_gears               = '100',
   $broker_dns_plugin                    = 'nsupdate',
