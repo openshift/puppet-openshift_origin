@@ -633,6 +633,12 @@ Failure to do that could prevent the application from receiving traffic through 
 
 Default: false
 
+=== conf_router_hostname
+This is the public hostname that the HA DNS entries for an application point to
+This allows setting up an external router and routing application traffic to the application's gears
+
+Default: 'www.example.com'
+
 === conf_valid_gear_sizes
 List of all gear sizes this will be used in this OpenShift installation.
 

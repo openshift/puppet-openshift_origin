@@ -437,6 +437,11 @@
 #   Config flag to allow scalable applications to become Highly Available
 #   Default: true
 #
+# [*conf_router_hostname*]
+#   This is the public hostname that the HA DNS entries for an application point to
+#   This allows setting up an external router and routing application traffic to the application's gears
+#   Default: 'www.example.com'
+#
 # [*conf_broker_manage_ha_dns*]
 #   Should OpenShift handle the registration and deregistration of HA DNS entries pointing to the external router?
 #   This flag applies in cases where an external router is using to route application traffic to the gears
@@ -880,6 +885,7 @@ class openshift_origin (
   $conf_broker_auth_salt                = inline_template('<%= require "securerandom"; SecureRandom.base64 %>'),
   $conf_broker_auth_private_key         = undef,
   $conf_broker_allow_ha_applications    = true,
+  $conf_router_hostname                 = 'www.example.com',
   $conf_broker_manage_ha_dns            = false,
   $conf_broker_session_secret           = undef,
   $conf_broker_multi_haproxy_per_node   = false,

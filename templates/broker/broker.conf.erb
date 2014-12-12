@@ -152,7 +152,7 @@ MANAGE_HA_DNS="<%= scope.lookupvar('::openshift_origin::conf_broker_manage_ha_dn
 
 # This is the public hostname that the HA DNS entries for an application point to
 # This allows setting up an external router and routing application traffic to the application's gears
-ROUTER_HOSTNAME="www.example.com"
+ROUTER_HOSTNAME="<%= scope.lookupvar('::openshift_origin::conf_router_hostname') %>"
 
 # Prefix/Suffix used for Highly Available application URL
 # http://${HA_DNS_PREFIX}${APP_NAME}-${DOMAIN_NAME}${HA_DNS_SUFFIX}.${CLOUD_DOMAIN}
