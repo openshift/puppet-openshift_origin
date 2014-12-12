@@ -437,6 +437,14 @@
 #   Config flag to allow scalable applications to become Highly Available
 #   Default: true
 #
+# [*conf_broker_manage_ha_dns*]
+#   Should OpenShift handle the registration and deregistration of HA DNS entries pointing to the external router?
+#   This flag applies in cases where an external router is using to route application traffic to the gears
+#   Set this to "true" if you want OpenShift to create/delete HA DNS entries upon application creation/deletion.
+#   When using an external router, if this flag is set to "false", the HA DNS entries will need to be created externally.
+#   Failure to do that could prevent the application from receiving traffic through the external router
+#   Default: false
+#
 # [*conf_valid_gear_sizes*]
 #   List of all gear sizes this will be used in this OpenShift installation.
 #   Default: ['small']
@@ -872,6 +880,7 @@ class openshift_origin (
   $conf_broker_auth_salt                = inline_template('<%= require "securerandom"; SecureRandom.base64 %>'),
   $conf_broker_auth_private_key         = undef,
   $conf_broker_allow_ha_applications    = true,
+  $conf_broker_manage_ha_dns            = false,
   $conf_broker_session_secret           = undef,
   $conf_broker_multi_haproxy_per_node   = false,
   $conf_console_product_logo            = undef,

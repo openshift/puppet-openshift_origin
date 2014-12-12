@@ -148,7 +148,7 @@ ALLOW_HA_APPLICATIONS="<%= scope.lookupvar('::openshift_origin::conf_broker_allo
 # Set this to "true" if you want OpenShift to create/delete HA DNS entries upon application creation/deletion.
 # When using an external router, if this flag is set to "false", the HA DNS entries will need to be created externally.
 # Failure to do that could prevent the application from receiving traffic through the external router
-MANAGE_HA_DNS="false"
+MANAGE_HA_DNS="<%= scope.lookupvar('::openshift_origin::conf_broker_manage_ha_dns') %>"
 
 # This is the public hostname that the HA DNS entries for an application point to
 # This allows setting up an external router and routing application traffic to the application's gears
