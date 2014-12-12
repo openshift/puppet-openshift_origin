@@ -619,6 +619,11 @@ value must be the same on all broker nodes.
 
 Default: undef
 
+=== conf_broker_allow_ha_applications
+Config flag to allow scalable applications to become Highly Available
+
+Default: true
+
 === conf_valid_gear_sizes
 List of all gear sizes this will be used in this OpenShift installation.
 
