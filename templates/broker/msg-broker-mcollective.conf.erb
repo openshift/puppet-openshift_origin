@@ -8,7 +8,7 @@ DISTRICTS_ENABLED=true
 
 # Require new gears to be placed in a district; when true, placement will fail
 # if there isn't a district with capacity and the right gear profile.
-DISTRICTS_REQUIRE_FOR_APP_CREATE=false
+DISTRICTS_REQUIRE_FOR_APP_CREATE=<%= scope.lookupvar('::openshift_origin::conf_districts_require_for_app_create') %>
 
 # Used as the default max gear capacity when creating a district.
 DISTRICTS_MAX_CAPACITY=6000

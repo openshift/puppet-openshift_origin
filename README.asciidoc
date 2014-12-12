@@ -677,6 +677,12 @@ Default max number of gears a user is allowed to use
 
 Default: 100
 
+=== conf_districts_require_for_app_create
+Require new gears to be placed in a district; when true, placement will fail
+if there isn't a district with capacity and the right gear profile.
+
+Default: false
+
 === broker_dns_plugin
 
 DNS plugin used by the broker to register application DNS entries.
