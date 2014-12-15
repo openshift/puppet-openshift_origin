@@ -300,11 +300,11 @@ class openshift_origin::broker {
     require => Package['openshift-origin-broker'],
   }
 
-  if $::openshift_origin::msgserver_routing {  
+  if $::openshift_origin::msgserver_routing {
     package { 'rubygem-openshift-origin-routing-activemq':
       ensure  => present,
     }
-    
+
     file { 'openshift-origin-routing-activemq':
       ensure  => present,
       path    => '/etc/openshift/plugins.d/openshift-origin-routing-activemq.conf',
@@ -315,7 +315,7 @@ class openshift_origin::broker {
       require => Package['rubygem-openshift-origin-routing-activemq'],
       notify  => Service['openshift-broker'],
     }
-    
+
   }
   
   if $::openshift_origin::install_login_shell {
