@@ -433,6 +433,30 @@
 #   Session secrets used to encode cookies used by console and broker. This
 #   value must be the same on all broker nodes.
 #
+# [*conf_broker_allow_ha_applications*]
+#   Config flag to allow scalable applications to become Highly Available
+#   Default: true
+#
+# [*conf_router_hostname*]
+#   This is the public hostname that the HA DNS entries for an application point to
+#   This allows setting up an external router and routing application traffic to the application's gears
+#   Default: 'www.example.com'
+#
+# [*conf_ha_dns_prefix*]
+# [*conf_ha_dns_suffix*]
+#   Prefix/Suffix used for Highly Available application URL
+#   http://${HA_DNS_PREFIX}${APP_NAME}-${DOMAIN_NAME}${HA_DNS_SUFFIX}.${CLOUD_DOMAIN}
+#   Default prefix: 'ha-'
+#   Default suffix: ''
+#
+# [*conf_broker_manage_ha_dns*]
+#   Should OpenShift handle the registration and deregistration of HA DNS entries pointing to the external router?
+#   This flag applies in cases where an external router is using to route application traffic to the gears
+#   Set this to "true" if you want OpenShift to create/delete HA DNS entries upon application creation/deletion.
+#   When using an external router, if this flag is set to "false", the HA DNS entries will need to be created externally.
+#   Failure to do that could prevent the application from receiving traffic through the external router
+#   Default: false
+#
 # [*conf_valid_gear_sizes*]
 #   List of all gear sizes this will be used in this OpenShift installation.
 #   Default: ['small']
@@ -440,6 +464,10 @@
 # [*conf_default_gear_size*]
 #   Default gear size if one is not specified
 #   Default: 'small'
+#
+# [*conf_default_allow_ha*]
+#   Default user capability to create Highly Available applications
+#   Default: false
 #
 # [*conf_default_max_domains*]
 #   Default max number of domains a user is allowed to use
@@ -452,6 +480,20 @@
 # [*conf_default_gear_capabilities*]
 #   List of all gear sizes that newly created users will be able to create
 #   Default: ['small']
+#
+# [*conf_districts_require_for_app_create*]
+#   Require new gears to be placed in a district; when true, placement will fail
+#   if there isn't a district with capacity and the right gear profile.
+#   Default: false
+#
+# [*conf_zones_require_for_app_create*]
+#   Require new gears to be placed in a Region/Zone; when true, placement will fail
+#   if there isn't a region/zone with right gear profile.
+#   Default: false
+#
+# [*conf_zones_min_per_gear_group*]
+#   Minimum zones required for gears in application gear group to be distributed.
+#   Default: 1
 #
 # [*broker_dns_plugin*]
 #   DNS plugin used by the broker to register application DNS entries.
@@ -863,6 +905,11 @@ class openshift_origin (
   $openshift_password1                  = 'changeme',
   $conf_broker_auth_salt                = inline_template('<%= require "securerandom"; SecureRandom.base64 %>'),
   $conf_broker_auth_private_key         = undef,
+  $conf_broker_allow_ha_applications    = true,
+  $conf_router_hostname                 = 'www.example.com',
+  $conf_ha_dns_prefix                   = 'ha-',
+  $conf_ha_dns_suffix                   = '',
+  $conf_broker_manage_ha_dns            = false,
   $conf_broker_session_secret           = undef,
   $conf_broker_multi_haproxy_per_node   = false,
   $conf_console_product_logo            = undef,
@@ -871,6 +918,7 @@ class openshift_origin (
   $conf_valid_gear_sizes                = ['small'],
   $conf_default_gear_capabilities       = ['small'],
   $conf_default_gear_size               = 'small',
+  $conf_default_allow_ha                = false,
   $conf_default_max_domains             = '10',
   $conf_default_max_gears               = '100',
   $broker_dns_plugin                    = 'nsupdate',
@@ -881,6 +929,9 @@ class openshift_origin (
   $broker_ldap_uri                      = '',
   $broker_ldap_bind_dn                  = '',
   $broker_ldap_bind_password            = '',
+  $conf_districts_require_for_app_create= false,
+  $conf_zones_require_for_app_create    = false,
+  $conf_zones_min_per_gear_group        = '1',
   $node_shmmax                          = $openshift_origin::params::node_shmmax,
   $node_shmall                          = $openshift_origin::params::node_shmall,
   $node_container_plugin                = 'selinux',

@@ -623,6 +623,34 @@ value must be the same on all broker nodes.
 
 Default: undef
 
+=== conf_broker_allow_ha_applications
+Config flag to allow scalable applications to become Highly Available
+
+Default: true
+
+=== conf_broker_manage_ha_dns
+Should OpenShift handle the registration and deregistration of HA DNS entries pointing to the external router?
+This flag applies in cases where an external router is using to route application traffic to the gears
+Set this to "true" if you want OpenShift to create/delete HA DNS entries upon application creation/deletion.
+When using an external router, if this flag is set to "false", the HA DNS entries will need to be created externally.
+Failure to do that could prevent the application from receiving traffic through the external router
+
+Default: false
+
+=== conf_router_hostname
+This is the public hostname that the HA DNS entries for an application point to
+This allows setting up an external router and routing application traffic to the application's gears
+
+Default: 'www.example.com'
+
+=== conf_ha_dns_prefix
+=== conf_ha_dns_suffix
+Prefix/Suffix used for Highly Available application URL
+http://${HA_DNS_PREFIX}${APP_NAME}-${DOMAIN_NAME}${HA_DNS_SUFFIX}.${CLOUD_DOMAIN}
+
+Default prefix: 'ha-'
+Default suffix: ''
+
 === conf_valid_gear_sizes
 List of all gear sizes this will be used in this OpenShift installation.
 
@@ -638,15 +666,37 @@ List of all gear sizes that newly created users will be able to create.
 
 Default: ['small']
 
-=== conf_default_max_domains
-Default max number of domains a user is allowed to use
+=== conf_default_allow_ha
+Default user capability to create Highly Available applications
 
-Default: 10
+default: false
+
+=== conf_default_max_domains
+default max number of domains a user is allowed to use
+
+default: 10
 
 === conf_default_max_gears
 Default max number of gears a user is allowed to use
 
 Default: 100
+
+=== conf_districts_require_for_app_create
+Require new gears to be placed in a district; when true, placement will fail
+if there isn't a district with capacity and the right gear profile.
+
+Default: false
+
+=== conf_zones_require_for_app_create
+Require new gears to be placed in a Region/Zone; when true, placement will fail
+if there isn't a region/zone with right gear profile.
+
+Default: false
+
+=== conf_zones_min_per_gear_group
+Minimum zones required for gears in application gear group to be distributed.
+
+Default: 1
 
 === broker_dns_plugin
 
