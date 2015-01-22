@@ -1109,8 +1109,8 @@ class openshift_origin (
     Class['openshift_origin::update_conf_files'] ->
     class { 'openshift_origin::role::load_balancer': }
   }
-  if member( $roles, 'nginx' ) {
+  if member( $roles, 'routing' ) {
     Class['openshift_origin::update_conf_files'] ->
-    class { 'openshift_origin::role::nginx': }
+    class { 'openshift_origin::role::routing': }
   }
 }
