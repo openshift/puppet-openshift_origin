@@ -303,9 +303,12 @@
 #   is true.
 #
 # [*msgserver_admin_password*]
-#   Default: scrambled
-#   This is the admin password for the ActiveMQ admin console, which is
-#   not needed by OpenShift but might be useful in troubleshooting.
+#   Default: 16 character random string
+#   This is the admin password for the ActiveMQ admin console, which is not needed
+#   by OpenShift but might be useful in troubleshooting.  Because this value need
+#   not be uniform across hosts it is generated randomly by default and stored in
+#   your puppet master's vardir ie:
+#   /var/lib/puppet/secretbox/$::fqdn/msgserver_admin_password
 #
 # [*msgserver_tls_enabled*]
 #   Default: 'disabled'
@@ -406,6 +409,11 @@
 #   tokens for Application to Broker communication. Requests like scale up/down
 #   and jenkins builds use these authentication tokens. This value must be the
 #   same on all broker nodes.
+#
+#   By default conf_broker_auth_salt is generated randomly once and stored in your
+#   puppet master's vardir ie:
+#   /var/lib/puppet/secretbox/$::fqdn/conf_broker_auth_salt
+#
 #   Default:  Self signed keys are generated. Will not work with multi-broker
 #             setup.
 #
@@ -875,7 +883,7 @@ class openshift_origin (
   $msgserver_cluster_members            = undef,
   $mcollective_cluster_members          = undef,
   $msgserver_password                   = 'changeme',
-  $msgserver_admin_password             = inline_template('<%= require "securerandom"; SecureRandom.base64 %>'),
+  $msgserver_admin_password             = secretbox('msgserver_admin_password',16,'base64'),
   $msgserver_tls_enabled                = 'disabled',
   $msgserver_tls_keystore_password      = 'password',
   $msgserver_tls_ca                     = '/var/lib/puppet/ssl/certs/ca.pem',
@@ -898,7 +906,7 @@ class openshift_origin (
   $mongodb_key                          = 'changeme',
   $openshift_user1                      = 'demo',
   $openshift_password1                  = 'changeme',
-  $conf_broker_auth_salt                = inline_template('<%= require "securerandom"; SecureRandom.base64 %>'),
+  $conf_broker_auth_salt                = secretbox('conf_broker_auth_salt',16,'base64'),
   $conf_broker_auth_private_key         = undef,
   $conf_broker_session_secret           = undef,
   $conf_broker_default_region_name      = '',

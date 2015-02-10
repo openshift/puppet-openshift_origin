@@ -462,10 +462,13 @@ is true.
 Default "changeme"
 
 === msgserver_admin_password
-This is the admin password for the ActiveMQ admin console, which is
-not needed by OpenShift but might be useful in troubleshooting.
+This is the admin password for the ActiveMQ admin console, which is not needed
+by OpenShift but might be useful in troubleshooting.  Because this value need
+not be uniform across hosts it is generated randomly by default and stored in
+your puppet master's vardir ie:
+/var/lib/puppet/secretbox/$::fqdn/msgserver_admin_password
 
-Default: scrambled
+Default: 16 character random string
 
 === msgserver_tls_enabled
 This configures mcollective and activemq to use end-to-end encryption over TLS.
@@ -588,8 +591,12 @@ Default: demo/changeme
 === conf_broker_auth_private_key
 Salt and private keys used when generating secure authentication
 tokens for Application to Broker communication. Requests like scale up/down
-and jenkins builds use these authentication tokens. This value must be the
+and jenkins builds use these authentication tokens. These values must be the
 same on all broker nodes.
+
+By default conf_broker_auth_salt is generated randomly once and stored in your
+puppet master's vardir ie:
+/var/lib/puppet/secretbox/$::fqdn/conf_broker_auth_salt
 
 Default: Self signed keys are generated. Will not work with multi-broker
 setup.
