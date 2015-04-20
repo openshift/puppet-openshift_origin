@@ -481,6 +481,12 @@
 #   List of all gear sizes that newly created users will be able to create
 #   Default: ['small']
 #
+# [*broker_external_access_admin_console*]
+#   When true, enable access to the administration console.
+#   Authentication for the Administration Console is only handled via the
+#   ldap Broker Auth Plugin, using <code>broker_ldap_admin_console_uri</code>
+#   Default: false
+#
 # [*broker_dns_plugin*]
 #   DNS plugin used by the broker to register application DNS entries.
 #   Options:
@@ -528,6 +534,10 @@
 # [*broker_ldap_bind_password*]
 # Password of bind user set in broker_ldap_bind_dn.
 # Default is anonymous bind with a blank password.
+#
+# [*broker_admin_console_ldap_uri*]
+# URI to the LDAP server for admin console access (e.g. ldap://ldap.example.com:389/ou=People,dc=my-domain,dc=com?uid?sub?(objectClass=*)).
+# Set <code>broker_external_access_admin_console</code> to enable this feature
 #
 # [*node_shmmax*]
 #   kernel.shmmax sysctl setting for /etc/sysctl.conf
@@ -919,6 +929,7 @@ class openshift_origin (
   $conf_default_gear_size               = 'small',
   $conf_default_max_domains             = '10',
   $conf_default_max_gears               = '100',
+  $broker_external_access_admin_console = false,
   $broker_dns_plugin                    = 'nsupdate',
   $broker_auth_plugin                   = 'htpasswd',
   $broker_krb_service_name              = '',
@@ -927,6 +938,7 @@ class openshift_origin (
   $broker_ldap_uri                      = '',
   $broker_ldap_bind_dn                  = '',
   $broker_ldap_bind_password            = '',
+  $broker_admin_console_ldap_uri        = '',
   $node_shmmax                          = $openshift_origin::params::node_shmmax,
   $node_shmall                          = $openshift_origin::params::node_shmall,
   $node_container_plugin                = 'selinux',
@@ -953,6 +965,7 @@ class openshift_origin (
   $install_cartridges                   = undef,
   $install_cartridges_recommended_deps  = undef,
   $install_cartridges_optional_deps     = undef,
+  $quickstarts_json                     = undef,
   $manage_firewall                      = true,
   $syslog_enabled                       = false,
   $syslog_central_server_hostname       = undef,

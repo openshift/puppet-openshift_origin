@@ -76,3 +76,17 @@ LoadModule authnz_ldap_module modules/mod_authnz_ldap.so
     Allow from all
   </IfVersion>
 </LocationMatch>
+
+<% if scope.lookupvar('::openshift_origin::broker_admin_console_ldap_uri') != '' %>
+<Location /admin-console>
+    AuthName "OpenShift Administration Console"
+    AuthType Basic
+    AuthBasicProvider ldap
+    AuthLDAPURL "<%= scope.lookupvar('::openshift_origin::broker_admin_console_ldap_uri') %>"
+    require valid-user
+
+    Order Deny,Allow
+    Deny from all
+    Satisfy any
+</Location>
+<% end %>

@@ -26,8 +26,20 @@ class openshift_origin::plugins::frontend::apache {
   }
 
   if 'broker' in $::openshift_origin::roles {
+    file { 'broker proxy config':
+      ensure  => present,
+      path    => '/etc/httpd/conf.d/000002_openshift_origin_broker_proxy.conf',
+      content => template('openshift_origin/plugins/frontend/apache/broker_proxy.conf.erb'),
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      require => Package['httpd'],
+      notify  => Service['httpd'],
+    }
+
     $httpd_servername_path    = '/etc/httpd/conf.d/000002_openshift_origin_broker_servername.conf'
     $servername_conf_template = 'openshift_origin/plugins/frontend/apache/broker_servername.conf.erb'
+
   } elsif 'node' in $::openshift_origin::roles {
     $httpd_servername_path    = '/etc/httpd/conf.d/000001_openshift_origin_node_servername.conf'
     $servername_conf_template = 'openshift_origin/plugins/frontend/apache/node_servername.conf.erb'

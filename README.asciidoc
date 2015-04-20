@@ -676,6 +676,13 @@ gear groups are distributed.
 
 Default: 1
 
+=== broker_external_access_admin_console
+When true, enable access to the administration console.
+Authentication for the Administration Console is only handled via the
+ldap Broker Auth Plugin, using <code>broker_ldap_admin_console_uri</code>
+
+Default: false
+
 === broker_dns_plugin
 
 DNS plugin used by the broker to register application DNS entries.
@@ -729,6 +736,10 @@ Default is anonymous bind.
 === broker_ldap_bind_password
 Password of bind user set in broker_ldap_bind_dn.
 Default is anonymous bind with a blank password.
+
+=== broker_admin_console_ldap_uri
+URI to the LDAP server for admin console access (e.g. ldap://ldap.example.com:389/ou=People,dc=my-domain,dc=com?uid?sub?(objectClass=*)).
+Set <code>broker_external_access_admin_console</code> to enable this feature
 
 === node_shmmax
 kernel.shmmax sysctl setting for /etc/sysctl.conf
