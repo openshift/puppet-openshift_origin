@@ -38,7 +38,7 @@ DEFAULT_MAX_TRACKED_ADDTL_STORAGE_PER_GEAR="0"
 <% if scope.lookupvar('::openshift_origin::mongodb_replicasets') == true %>
 MONGO_HOST_PORT="<%= scope.lookupvar('::openshift_origin::mongodb_replicasets_members').join(',') %>"
 <% else %>
- MONGO_HOST_PORT="<%= scope.lookupvar('::openshift_origin::datastore_fqdn') %>:<%= scope.lookupvar('::openshift_origin::mongodb_port') %>"
+MONGO_HOST_PORT="<%= scope.lookupvar('::openshift_origin::datastore_fqdn') %>:<%= scope.lookupvar('::openshift_origin::mongodb_port') %>"
 <% end %>
 MONGO_USER="<%= scope.lookupvar('::openshift_origin::mongodb_broker_user') %>"
 MONGO_PASSWORD="<%= scope.lookupvar('::openshift_origin::mongodb_broker_password') %>"
@@ -191,3 +191,12 @@ DEFAULT_REGION_NAME="<%= scope.lookupvar('::openshift_origin::conf_broker_defaul
 # Allow region selection when creating applications. Default is true
 ALLOW_REGION_SELECTION="<%= scope.lookupvar('::openshift_origin::conf_broker_allow_region_selection') %>"
 
+# Create new gear UUIDs (and thus gear usernames) with the format:
+#    <domain_namespace>­<app_name>­<gear_index>
+USE_PREDICTABLE_GEAR_UUIDS="<%= scope.lookupvar('::openshift_origin::conf_broker_use_predictable_gear_uuids') %>"
++<% if scope.lookupvar('::openshift_origin::conf_broker_use_predictable_gear_uuids') == true %>
+# Gear UUIDs that are too large to fit in 32 char limit will fall back to 24­hex chars.
+# Reject app creation if domain + app name larger 
+# (set to 26 to leave 2 chars for hyphens and 4 chars for up to 9999 gears.)
+LIMIT_APP_NAME_CHARS=26
+<% end %
