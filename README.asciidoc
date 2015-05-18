@@ -658,6 +658,12 @@ Should the user be allowed to select the region the application is placed in.
 
 Default: true
 
+=== conf_broker_use_predictable_gear_uuids
+When true, new gear UUIDs (and thus gear usernames) are created with the format:
+<domain_namespace>­<app_name>­<gear_index>
+
+Default: false
+
 === conf_broker_require_districts
 When true, gear placement will fail if there are no available districts
 with the correct gear profile.
