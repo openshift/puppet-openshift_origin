@@ -23,14 +23,14 @@ GEAR_GECOS="OpenShift guest"                              # Gecos information to
 GEAR_MIN_UID=1000                                         # Lower bound of UID used to create gears
 GEAR_MAX_UID=6500                                         # Upper bound of UID used to create gears
 <% if scope.lookupvar('::openshift_origin::conf_node_supplementary_posix_groups') != "" -%>
-GEAR_SUPL_GRPS="<%= scope.lookupvar('::openshift_origin::conf_node_supplementary_posix_groups') %>"  # Supplementary groups for gear UIDs (comma separated list)
+GEAR_SUPPLEMENTARY_GROUPS="<%= scope.lookupvar('::openshift_origin::conf_node_supplementary_posix_groups') %>"  # Supplementary groups for gear UIDs (comma separated list)
 <% end -%>
 OPENSHIFT_NODE_PLUGINS=""                                 # Extentions to load when customize/observe openshift-origin-node models
 CARTRIDGE_BASE_PATH="/usr/libexec/openshift/cartridges"   # Locations where cartridges are installed
 LAST_ACCESS_DIR="/var/lib/openshift/.last_access"         # Location to maintain last accessed time for gears
 APACHE_ACCESS_LOG="/var/log/httpd/openshift_log"          # Localion of httpd for node
-PROXY_MIN_PORT_NUM=35531                                  # Lower bound of port numbers used to proxy ports externally
-PROXY_PORTS_PER_GEAR=<%= scope.lookupvar('::openshift_origin::conf_node_proxy_ports_per_gear') %>                            # Number of proxy ports available per gear
+PORT_BEGIN=35531                                          # Lower bound of port numbers used to proxy ports externally
+PORTS_PER_USER=<%= scope.lookupvar('::openshift_origin::conf_node_proxy_ports_per_gear') %>                            # Number of proxy ports available per gear
 CREATE_APP_SYMLINKS=0                                     # If set to 1, creates gear-name symlinks to the UUID directories (debugging only)
 OPENSHIFT_HTTP_CONF_DIR="/etc/httpd/conf.d/openshift"
 
