@@ -95,7 +95,10 @@ class openshift_origin::node {
   }
   exec { 'restart resource limiting services':
     command     => 'oo-cgroup-enable --with-all-containers; oo-pam-enable --with-all-containers; oo-admin-ctl-tc restart',
-    notify      => Service["${::openshift_origin::params::ruby_scl_prefix}mcollective"],
+    notify      => [
+        Service["${::openshift_origin::params::ruby_scl_prefix}mcollective"],
+        Service['openshift-watchman'],
+      ],
     require     => File['openshift node config'],
     refreshonly => true,
   }

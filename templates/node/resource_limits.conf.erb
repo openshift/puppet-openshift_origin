@@ -3,10 +3,11 @@
 # Limit resources for a new OpenShift guest user on a node
 #
 # NOTE: If you change these, please run the following commands:
-#       service mcollective restart
+#       service ruby193-mcollective restart
 #       oo-cgroup-enable --with-all-containers
 #       oo-pam-enable --with-all-containers
 #       oo-admin-ctl-tc restart
+#       service openshift-watchman restart
 #
 #
 # Standard Profile
