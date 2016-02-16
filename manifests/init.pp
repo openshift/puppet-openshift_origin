@@ -435,6 +435,11 @@
 #
 #   Default: ''
 #
+# [*conf_console_logout_link*]
+#   The URL to use for logging a user out of the console
+#   When set to nothing, no logout link is displayed
+#   Default: ''
+#
 # [*conf_console_product_logo*]
 #   Relative path to product logo URL
 #   Default: '/assets/logo-origin.svg'
@@ -956,6 +961,7 @@ class openshift_origin (
   $conf_broker_multi_haproxy_per_node   = false,
   $conf_broker_default_templates        = '',
   $conf_broker_valid_gear_cartridges    = '',
+  $conf_console_logout_link             = '',
   $conf_console_product_logo            = undef,
   $conf_console_product_title           = undef,
   $conf_console_session_secret          = undef,

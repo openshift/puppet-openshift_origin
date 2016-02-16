@@ -611,6 +611,11 @@ e.g.: VALID_GEAR_SIZES_FOR_CARTRIDGE="php-5.3|medium,large jbossews-2.0|large"
 
 Default: ''
 
+=== conf_console_logout_link
+The URL to use for logging a user out of the console
+When set to nothing, no logout link is displayed
+Default: ''
+
 === conf_console_product_logo
 Relative path to product logo URL
 

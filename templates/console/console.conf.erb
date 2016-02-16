@@ -1,5 +1,10 @@
 # Managed by puppet - module openshift-openshift_origin
 #
+# The URL to use for logging a user out of the console
+# When set to nothing, no logout link is displayed
+LOGOUT_LINK=<%= scope.lookupvar('::openshift_origin::conf_console_logout_link') %>
+
+
 # The base URL for the OpenShift REST API on the broker. If your
 # environment is configured with a virtual host security module that
 # bypasses normal authentication, be sure to set that virtual host
