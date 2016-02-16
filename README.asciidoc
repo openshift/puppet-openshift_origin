@@ -124,6 +124,7 @@ Choose from the following roles to be configured on this node.
 * datastore     - Installs MongoDB (not sharded/replicated)
 * nameserver    - Installs a BIND dns server configured with a TSIG key for updates.
 * load_balancer - Installs HAProxy and Keepalived for Broker API high-availability.
+* nginx         - Installs Nginx for application HA deployment
 
 Default: ['broker','node','msgserver','datastore','nameserver']
 
@@ -493,6 +494,26 @@ Location for certificate key
 
 Default: /var/lib/puppet/ssl/private_keys/${lower_fqdn}.pem
 
+=== msgserver_routing
+Default: false
+Determines whether the HA application deployment will be configured.
+This requires the use of an external loadbalancer.
+
+=== msgserver_routing_password
+Default: 
+This is the password used for the routing information to be passed
+through the ActiveMQ network
+
+=== routing_plugin
+Determines the routing plugin to be provisioned within the routing
+for application HA deployment.
+
+Options:
+* nginx - Provisions the nginx14-nginx packages.
+
+=== routing_hostname
+Default: routing.${domain}
+This is the external hostname for your loadbalancer.
 
 === mcollective_user
 === mcollective_password

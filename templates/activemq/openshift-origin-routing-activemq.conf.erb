@@ -1,0 +1,9 @@
+ACTIVEMQ_DESTINATION='/topic/routinginfo'
+ACTIVEMQ_USERNAME='routinginfo'
+ACTIVEMQ_PASSWORD='<%= scope.lookupvar('::openshift_origin::msgserver_routing_password') %>'
+<% if scope.lookupvar("openshift_origin::msgserver_cluster") == true %>
+ACTIVEMQ_HOST="<%= scope.lookupvar('::openshift_origin::msgserver_cluster_members').join(',') %>"
+<% else %>
+ACTIVEMQ_HOST="<%= scope.lookupvar('::openshift_origin::msgserver_hostname') %>"
+<% end %>
+ACTIVEMQ_PORT='61613'
