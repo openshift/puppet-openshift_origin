@@ -15,41 +15,46 @@ plugin.psk = unset
 
 connector = activemq
 plugin.activemq.pool.size = <%= @pool_size %>
-<% if scope.lookupvar('::openshift_origin::msgserver_cluster') then
-@cluster_members.each_with_index do |cluster_member, index| -%>
+
+<% if scope.lookupvar('::openshift_origin::msgserver_cluster') -%>
+<% @cluster_members.each_with_index do |cluster_member, index| -%>
 plugin.activemq.pool.<%= index + 1%>.host = <%= cluster_member %>
 plugin.activemq.pool.<%= index + 1%>.user = <%= scope.lookupvar('::openshift_origin::mcollective_user') %>
 plugin.activemq.pool.<%= index + 1%>.password = <%= scope.lookupvar('::openshift_origin::mcollective_password') %>
-
-  <% if (scope.lookupvar('::openshift_origin::msgserver_tls_enabled') == 'enabled' and @tls_certs_provided == true) or scope.lookupvar('::openshift_origin::msgserver_tls_enabled') == 'strict' -%>
-  plugin.activemq.pool.<%= index + 1%>.port = 61614
-  plugin.activemq.pool.<%= index + 1%>.ssl = true
-  plugin.activemq.pool.<%= index + 1%>.ssl.ca = <%= scope.lookupvar('::openshift_origin::msgserver_tls_ca') %>
-  plugin.activemq.pool.<%= index + 1%>.ssl.key = <%= scope.lookupvar('::openshift_origin::msgserver_tls_key') %>
-  plugin.activemq.pool.<%= index + 1%>.ssl.cert = <%= scope.lookupvar('::openshift_origin::msgserver_tls_cert') %>
-  <% else %>
-  plugin.activemq.pool.<%= index + 1%>.port = 61613
-  <% end %>
-  
+<% if (scope.lookupvar('::openshift_origin::msgserver_tls_enabled') == 'enabled' and @tls_certs_provided == true) or scope.lookupvar('::openshift_origin::msgserver_tls_enabled') == 'strict' -%>
+plugin.activemq.pool.<%= index + 1%>.port = 61614
+plugin.activemq.pool.<%= index + 1%>.ssl = true
+plugin.activemq.pool.<%= index + 1%>.ssl.ca = <%= scope.lookupvar('::openshift_origin::params::ruby_scl_path_prefix') %>/etc/mcollective/certs/ca.pem
+plugin.activemq.pool.<%= index + 1%>.ssl.key = <%= scope.lookupvar('::openshift_origin::params::ruby_scl_path_prefix') %>/etc/mcollective/certs/key.pem
+plugin.activemq.pool.<%= index + 1%>.ssl.cert = <%= scope.lookupvar('::openshift_origin::params::ruby_scl_path_prefix') %>/etc/mcollective/certs/cert.pem
+<% else -%>
+plugin.activemq.pool.<%= index + 1%>.port = 61613
 <% end -%>
+<% end %>
 <% else -%>
 plugin.activemq.pool.1.host = <%= scope.lookupvar('::openshift_origin::msgserver_fqdn') %>
 plugin.activemq.pool.1.user = <%= scope.lookupvar('::openshift_origin::mcollective_user') %>
 plugin.activemq.pool.1.password = <%= scope.lookupvar('::openshift_origin::mcollective_password') %>
-
- 
-  <% if (scope.lookupvar('::openshift_origin::msgserver_tls_enabled') == 'enabled' and @tls_certs_provided == true) or scope.lookupvar('::openshift_origin::msgserver_tls_enabled') == 'strict' -%>
-  plugin.activemq.pool.1.port = 61614
-  plugin.activemq.pool.1.ssl = true
-  plugin.activemq.pool.1.ssl.ca = <%= scope.lookupvar('::openshift_origin::msgserver_tls_ca') %>
-  plugin.activemq.pool.1.ssl.key = <%= scope.lookupvar('::openshift_origin::msgserver_tls_key') %>
-  plugin.activemq.pool.1.ssl.cert = <%= scope.lookupvar('::openshift_origin::msgserver_tls_cert') %>
-  <% else -%>  
-  plugin.activemq.pool.1.port = 61613
-  <% end -%>
-
+<% if (scope.lookupvar('::openshift_origin::msgserver_tls_enabled') == 'enabled' and @tls_certs_provided == true) or scope.lookupvar('::openshift_origin::msgserver_tls_enabled') == 'strict' -%>
+plugin.activemq.pool.1.port = 61614
+plugin.activemq.pool.1.ssl = true
+plugin.activemq.pool.1.ssl.ca = <%= scope.lookupvar('::openshift_origin::params::ruby_scl_path_prefix') %>/etc/mcollective/certs/ca.pem
+plugin.activemq.pool.1.ssl.key = <%= scope.lookupvar('::openshift_origin::params::ruby_scl_path_prefix') %>/etc/mcollective/certs/key.pem
+plugin.activemq.pool.1.ssl.cert = <%= scope.lookupvar('::openshift_origin::params::ruby_scl_path_prefix') %>/etc/mcollective/certs/cert.pem
+<% else -%>
+plugin.activemq.pool.1.port = 61613
+<% end -%>
 <% end -%>
 
 # Facts
 factsource = yaml
 plugin.yaml = <%= scope.lookupvar('::openshift_origin::params::ruby_scl_path_prefix') %>/etc/mcollective/facts.yaml
+<% if scope.lookupvar('::openshift_origin::ose_version') != "" -%>
+plugin.activemq.max_reconnect_attempts = 0
+plugin.activemq.initial_reconnect_delay = 0.1
+plugin.activemq.max_reconnect_delay = 4.0
+plugin.activemq.heartbeat_interval = 30
+plugin.activemq.max_hbread_fails = 2
+plugin.activemq.max_hbrlck_fails = 2
+<% end -%>
+
