@@ -203,7 +203,7 @@ ALLOW_REGION_SELECTION="<%= scope.lookupvar('::openshift_origin::conf_broker_all
 USE_PREDICTABLE_GEAR_UUIDS="<%= scope.lookupvar('::openshift_origin::conf_broker_use_predictable_gear_uuids') %>"
 <% if scope.lookupvar('::openshift_origin::conf_broker_use_predictable_gear_uuids') == true %>
 # Gear UUIDs that are too large to fit in 32 char limit will fall back to 24­hex chars.
-# Reject app creation if domain + app name larger 
+# Reject app creation if domain + app name larger
 # (set to 26 to leave 2 chars for hyphens and 4 chars for up to 9999 gears.)
 LIMIT_APP_NAME_CHARS=26
 <% end %>
