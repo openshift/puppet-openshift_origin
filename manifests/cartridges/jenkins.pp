@@ -13,7 +13,7 @@
 #  limitations under the License.
 #
 class openshift_origin::cartridges::jenkins {
-  package { 'jenkins':
+  package { ['jenkins','wget'] :
     ensure  => present,
     require => Class['openshift_origin::install_method'],
   }
